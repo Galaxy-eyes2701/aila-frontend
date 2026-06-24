@@ -5,6 +5,8 @@ import AdminLogin          from '../pages/AdminLogin/AdminLogin';
 import ExpertLogin         from '../pages/ExpertLogin/ExpertLogin';
 import ExpertProfile       from '../pages/ExpertProfile/ExpertProfile';
 import Notifications       from '../pages/Notifications/Notifications';
+import CourseList          from '../pages/Courses/CourseList';
+import CourseDetail        from '../pages/Courses/CourseDetail';
 import PageNotFound        from '../pages/PageNotFound';
 import AdminProtectedRoute from './AdminProtectedRoute';
 import ExpertProtectedRoute from './ExpertProtectedRoute';
@@ -52,9 +54,11 @@ const router = createBrowserRouter([
     path: '/',
     element: <MainLayout />,
     children: [
-      { index: true, element: <Navigate to="/expert/login" replace /> },
-      { path: 'notifications', element: <Notifications /> },
-      { path: '*', element: <PageNotFound /> },
+      { index: true,               element: <Navigate to="/" replace /> },
+      { path: 'courses',           element: <CourseList /> },
+      { path: 'courses/:id',       element: <CourseDetail /> },
+      { path: 'notifications',     element: <Notifications /> },
+      { path: '*',                 element: <PageNotFound /> },
     ],
   },
 ]);

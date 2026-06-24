@@ -5,7 +5,7 @@ import api from '../../utils/api';
 import styles from './Header.module.css';
 
 const NAV_LINKS = [
-  { label: 'Khóa học',              href: '/' },
+  { label: 'Khóa học',              href: '/courses' },
   { label: 'Thực hành viết prompt', href: '/' },
   { label: 'Hướng dẫn',            href: '/' },
   { label: 'Bài viết',             href: '/' },
