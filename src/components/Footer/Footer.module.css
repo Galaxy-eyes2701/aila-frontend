@@ -1,0 +1,22 @@
+.footer {
+  background: var(--text);
+  color: rgba(255,255,255,.55);
+  padding: 24px 0;
+  margin-top: auto;
+}
+
+.footerContent {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.brand {
+  font-weight: 700;
+  color: #fff;
+  font-size: 15px;
+}
+
+.copy { font-size: 13px; }

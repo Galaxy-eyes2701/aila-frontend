@@ -1,0 +1,144 @@
+.authPage {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  background: #f7f3eb;
+}
+
+.authCard {
+  max-width: 420px;
+  width: 100%;
+  background: #fff;
+  border-radius: 20px;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.08);
+  padding: 34px;
+}
+
+.authModalHeader h2 {
+  margin-bottom: 10px;
+  font-size: 28px;
+  color: #1a1d2e;
+}
+
+.authModalHeader p {
+  margin-bottom: 26px;
+  color: #5d6475;
+  line-height: 1.7;
+  font-size: 14px;
+}
+
+/* ── FORM ── */
+.authForm {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.inputGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.inputGroup label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #1a1d2e;
+}
+
+.inputWrapper {
+  position: relative;
+}
+
+.inputWrapper i {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #9ca3af;
+  font-size: 14px;
+  pointer-events: none;
+}
+
+.inputWrapper input {
+  width: 100%;
+  padding: 12px 14px 12px 40px;
+  border: 1.5px solid #e8e4da;
+  border-radius: 10px;
+  font-size: 14px;
+  color: #1a1d2e;
+  background: #fafafa;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.inputWrapper input:focus {
+  border-color: #4f6ef7;
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(79, 110, 247, 0.12);
+}
+
+.inputWrapper input::placeholder {
+  color: #b0b5c0;
+}
+
+/* ── BUTTON ── */
+.btnPrimary {
+  width: 100%;
+  padding: 13px;
+  border-radius: 10px;
+  background: #4f6ef7;
+  color: #fff;
+  font-size: 15px;
+  font-weight: 700;
+  border: none;
+  cursor: pointer;
+  margin-top: 4px;
+  transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  /* btn-glow effect */
+  box-shadow: 0 4px 18px rgba(79, 110, 247, 0.35);
+}
+
+.btnPrimary:hover:not(:disabled) {
+  background: #3a56d4;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(79, 110, 247, 0.45);
+}
+
+.btnPrimary:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+/* ── ERROR ── */
+.errorMsg {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 11px 14px;
+  border-radius: 8px;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #dc2626;
+  font-size: 13px;
+}
+
+/* ── SPINNER ── */
+.spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.4);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
