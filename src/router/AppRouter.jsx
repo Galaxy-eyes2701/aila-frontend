@@ -5,6 +5,7 @@ import AdminLogin          from '../pages/AdminLogin/AdminLogin';
 import ExpertLogin         from '../pages/ExpertLogin/ExpertLogin';
 import ExpertProfile       from '../pages/ExpertProfile/ExpertProfile';
 import Notifications       from '../pages/Notifications/Notifications';
+import BlogDetail          from '../pages/BlogDetail/BlogDetail';
 import PageNotFound        from '../pages/PageNotFound';
 import AdminProtectedRoute from './AdminProtectedRoute';
 import ExpertProtectedRoute from './ExpertProtectedRoute';
@@ -54,6 +55,7 @@ const router = createBrowserRouter([
     children: [
       { index: true, element: <Navigate to="/expert/login" replace /> },
       { path: 'notifications', element: <Notifications /> },
+      { path: 'blogs/:id',     element: <BlogDetail /> },
       { path: '*', element: <PageNotFound /> },
     ],
   },
