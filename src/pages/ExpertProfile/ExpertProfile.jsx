@@ -1,20 +1,17 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import api from '../../utils/api';
-import useAuth from '../../hooks/useAuth';
 import styles from './ExpertProfile.module.css';
 
-/* ── Skeleton khi đang load ──────────────────────────────────────────────── */
+/* ── Skeleton ─────────────────────────────────────────────────────────────── */
 function ProfileSkeleton() {
   return (
     <div className={styles.layout}>
-      {/* Left skeleton */}
       <div className={styles.avatarCard}>
         <div className={`${styles.skeletonBlock} ${styles.skeletonAvatar}`} />
         <div className={`${styles.skeletonBlock} ${styles.skeletonText}`} style={{ width: '70%', margin: '0 auto 8px' }} />
         <div className={`${styles.skeletonBlock} ${styles.skeletonText}`} style={{ width: '50%', margin: '0 auto' }} />
       </div>
-      {/* Right skeleton */}
       <div className={styles.infoCard}>
         <div className={styles.infoCardHeader}>
           <div className={`${styles.skeletonBlock} ${styles.skeletonText}`} style={{ width: 160, height: 18 }} />
@@ -29,44 +26,234 @@ function ProfileSkeleton() {
   );
 }
 
-/* ── Main component ──────────────────────────────────────────────────────── */
+/* ── Toast ────────────────────────────────────────────────────────────────── */
+function Toast({ message, type, onClose }) {
+  useEffect(() => {
+    const t = setTimeout(onClose, 3000);
+    return () => clearTimeout(t);
+  }, [onClose]);
+
+  return (
+    <div className={`${styles.toast} ${styles[type]}`}>
+      <i className={`fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'}`} />
+      {message}
+    </div>
+  );
+}
+
+/* ── Edit Modal ───────────────────────────────────────────────────────────── */
+function EditModal({ profile, onClose, onSaved }) {
+  const [form, setForm]         = useState({
+    fullName:          profile.fullName         ?? '',
+    avatarUrl:         profile.avatarUrl         ?? '',
+    bio:               profile.bio               ?? '',
+    specialty:         profile.specialty         ?? '',
+    yearsOfExperience: profile.yearsOfExperience ?? 0,
+  });
+  const [saving, setSaving]     = useState(false);
+  const [modalError, setModalError] = useState('');
+
+  const handleChange = (e) => {
+    setModalError('');
+    const { name, value } = e.target;
+    setForm((prev) => ({
+      ...prev,
+      [name]: name === 'yearsOfExperience' ? Number(value) : value,
+    }));
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!form.fullName.trim()) {
+      setModalError('Họ và tên không được để trống.');
+      return;
+    }
+
+    setSaving(true);
+    setModalError('');
+    try {
+      const res = await api.put('/experts/profile', {
+        fullName:          form.fullName.trim(),
+        avatarUrl:         form.avatarUrl.trim() || null,
+        bio:               form.bio.trim()       || null,
+        specialty:         form.specialty.trim() || null,
+        yearsOfExperience: form.yearsOfExperience,
+      });
+
+      if (res.data.success) {
+        onSaved();       // đóng modal + reload profile
+      } else {
+        setModalError(res.data.errorMessage || 'Cập nhật thất bại.');
+      }
+    } catch (err) {
+      setModalError(
+        err.response?.data?.errorMessage || 'Lỗi kết nối. Vui lòng thử lại.'
+      );
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  // Đóng khi click overlay
+  const handleOverlayClick = (e) => {
+    if (e.target === e.currentTarget) onClose();
+  };
+
+  return (
+    <div className={styles.modalOverlay} onClick={handleOverlayClick}>
+      <div className={styles.modal}>
+        {/* Header */}
+        <div className={styles.modalHeader}>
+          <div className={styles.modalTitle}>
+            <i className="fas fa-user-edit" />
+            Chỉnh sửa hồ sơ
+          </div>
+          <button className={styles.modalClose} onClick={onClose} aria-label="Đóng">
+            <i className="fas fa-times" />
+          </button>
+        </div>
+
+        {/* Body */}
+        <form onSubmit={handleSubmit}>
+          <div className={styles.modalBody}>
+
+            {/* Họ tên + Avatar URL */}
+            <div className={styles.formGroup}>
+              <label className={styles.formLabel}>
+                <i className="fas fa-user" /> Họ và tên *
+              </label>
+              <input
+                name="fullName"
+                className={styles.formInput}
+                value={form.fullName}
+                onChange={handleChange}
+                placeholder="Nguyễn Văn A"
+                autoFocus
+              />
+            </div>
+
+            <div className={styles.formGroup}>
+              <label className={styles.formLabel}>
+                <i className="fas fa-image" /> URL ảnh đại diện
+              </label>
+              <input
+                name="avatarUrl"
+                className={styles.formInput}
+                value={form.avatarUrl}
+                onChange={handleChange}
+                placeholder="https://example.com/avatar.jpg"
+              />
+            </div>
+
+            {/* Chuyên môn + Số năm KN */}
+            <div className={styles.formRow}>
+              <div className={styles.formGroup}>
+                <label className={styles.formLabel}>
+                  <i className="fas fa-star" /> Chuyên môn
+                </label>
+                <input
+                  name="specialty"
+                  className={styles.formInput}
+                  value={form.specialty}
+                  onChange={handleChange}
+                  placeholder="Machine Learning, NLP,..."
+                />
+              </div>
+              <div className={styles.formGroup}>
+                <label className={styles.formLabel}>
+                  <i className="fas fa-briefcase" /> Số năm kinh nghiệm
+                </label>
+                <input
+                  name="yearsOfExperience"
+                  type="number"
+                  min="0"
+                  max="50"
+                  className={styles.formInput}
+                  value={form.yearsOfExperience}
+                  onChange={handleChange}
+                />
+              </div>
+            </div>
+
+            {/* Bio */}
+            <div className={styles.formGroup}>
+              <label className={styles.formLabel}>
+                <i className="fas fa-align-left" /> Giới thiệu bản thân
+              </label>
+              <textarea
+                name="bio"
+                className={styles.formTextarea}
+                value={form.bio}
+                onChange={handleChange}
+                placeholder="Mô tả ngắn về bản thân, kinh nghiệm, thành tích..."
+              />
+            </div>
+
+            {/* Error */}
+            {modalError && (
+              <div className={styles.modalError}>
+                <i className="fas fa-exclamation-circle" />
+                {modalError}
+              </div>
+            )}
+          </div>
+
+          {/* Footer */}
+          <div className={styles.modalFooter}>
+            <button type="button" className={styles.btnCancel} onClick={onClose}>
+              Huỷ
+            </button>
+            <button type="submit" className={styles.btnSave} disabled={saving}>
+              {saving
+                ? <><span className={styles.saveSpinner} /> Đang lưu...</>
+                : <><i className="fas fa-save" /> Lưu thay đổi</>}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
+
+/* ── Main Page ────────────────────────────────────────────────────────────── */
 export default function ExpertProfile() {
-  const navigate            = useNavigate();
-  const { user }            = useAuth();
+  const navigate              = useNavigate();
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError]     = useState('');
+  const [showEdit, setShowEdit] = useState(false);
+  const [toast, setToast]       = useState(null); // { message, type }
 
-  useEffect(() => {
-    // Nếu chưa đăng nhập → redirect về login
+  const fetchProfile = useCallback(async () => {
     if (!localStorage.getItem('accessToken')) {
       navigate('/expert/login');
       return;
     }
-
-    const fetchProfile = async () => {
-      try {
-        const res = await api.get('/experts/me/profile');
-        if (res.data.success) {
-          setProfile(res.data.data);
-        } else {
-          setError(res.data.errorMessage || 'Không thể tải thông tin profile.');
-        }
-      } catch (err) {
-        if (err.response?.status === 401) {
-          navigate('/expert/login');
-        } else if (err.response?.status === 404) {
-          setError('Không tìm thấy thông tin Expert. Vui lòng liên hệ quản trị viên.');
-        } else {
-          setError('Lỗi kết nối máy chủ. Vui lòng thử lại sau.');
-        }
-      } finally {
-        setLoading(false);
+    setLoading(true);
+    try {
+      const res = await api.get('/experts/me/profile');
+      if (res.data.success) {
+        setProfile(res.data.data);
+      } else {
+        setError(res.data.errorMessage || 'Không thể tải thông tin profile.');
       }
-    };
-
-    fetchProfile();
+    } catch (err) {
+      if (err.response?.status === 401) navigate('/expert/login');
+      else if (err.response?.status === 404)
+        setError('Không tìm thấy thông tin Expert.');
+      else setError('Lỗi kết nối máy chủ. Vui lòng thử lại sau.');
+    } finally {
+      setLoading(false);
+    }
   }, [navigate]);
+
+  useEffect(() => { fetchProfile(); }, [fetchProfile]);
+
+  const handleSaved = () => {
+    setShowEdit(false);
+    setToast({ message: 'Cập nhật hồ sơ thành công!', type: 'success' });
+    fetchProfile(); // reload dữ liệu mới
+  };
 
   return (
     <div className={styles.page}>
@@ -93,17 +280,18 @@ export default function ExpertProfile() {
           </div>
         )}
 
-        {/* Profile loaded */}
+        {/* Profile */}
         {!loading && !error && profile && (
           <div className={styles.layout}>
 
-            {/* ── LEFT: Avatar card ── */}
+            {/* ── LEFT ── */}
             <div className={styles.avatarCard}>
               <div className={styles.avatarWrap}>
                 <img
                   className={styles.avatar}
                   src={profile.avatarUrl || 'https://i.pravatar.cc/120'}
                   alt={profile.fullName}
+                  onError={(e) => { e.target.src = 'https://i.pravatar.cc/120'; }}
                 />
                 <div className={styles.avatarBadge}>
                   <i className="fas fa-check" />
@@ -113,8 +301,7 @@ export default function ExpertProfile() {
               <div className={styles.fullName}>{profile.fullName}</div>
 
               <div className={styles.rolePill}>
-                <i className="fas fa-chalkboard-teacher" />
-                Expert
+                <i className="fas fa-chalkboard-teacher" /> Expert
               </div>
 
               <div className={styles.emailRow}>
@@ -138,47 +325,41 @@ export default function ExpertProfile() {
               </div>
             </div>
 
-            {/* ── RIGHT: Detail card ── */}
+            {/* ── RIGHT ── */}
             <div className={styles.infoCard}>
               <div className={styles.infoCardHeader}>
                 <div className={styles.infoCardTitle}>
-                  <i className="fas fa-id-card" />
-                  Thông tin chi tiết
+                  <i className="fas fa-id-card" /> Thông tin chi tiết
                 </div>
+                {/* Nút Edit */}
+                <button
+                  className={styles.editBtn}
+                  onClick={() => setShowEdit(true)}
+                >
+                  <i className="fas fa-pen" /> Chỉnh sửa
+                </button>
               </div>
 
               <div className={styles.fieldGrid}>
-                {/* Full name */}
                 <div className={styles.field}>
-                  <div className={styles.fieldLabel}>
-                    <i className="fas fa-user" /> Họ và tên
-                  </div>
+                  <div className={styles.fieldLabel}><i className="fas fa-user" /> Họ và tên</div>
                   <div className={styles.fieldValue}>{profile.fullName}</div>
                 </div>
 
-                {/* Email */}
                 <div className={styles.field}>
-                  <div className={styles.fieldLabel}>
-                    <i className="fas fa-envelope" /> Email
-                  </div>
+                  <div className={styles.fieldLabel}><i className="fas fa-envelope" /> Email</div>
                   <div className={styles.fieldValue}>{profile.email}</div>
                 </div>
 
-                {/* Specialty */}
                 <div className={styles.field}>
-                  <div className={styles.fieldLabel}>
-                    <i className="fas fa-star" /> Chuyên môn
-                  </div>
+                  <div className={styles.fieldLabel}><i className="fas fa-star" /> Chuyên môn</div>
                   <div className={`${styles.fieldValue} ${!profile.specialty ? styles.empty : ''}`}>
                     {profile.specialty || 'Chưa cập nhật'}
                   </div>
                 </div>
 
-                {/* Years of experience */}
                 <div className={styles.field}>
-                  <div className={styles.fieldLabel}>
-                    <i className="fas fa-briefcase" /> Kinh nghiệm
-                  </div>
+                  <div className={styles.fieldLabel}><i className="fas fa-briefcase" /> Kinh nghiệm</div>
                   <div className={styles.fieldValue}>
                     {profile.yearsOfExperience > 0
                       ? `${profile.yearsOfExperience} năm kinh nghiệm`
@@ -186,21 +367,35 @@ export default function ExpertProfile() {
                   </div>
                 </div>
 
-                {/* Bio — full width */}
                 <div className={styles.fieldFull}>
-                  <div className={styles.fieldLabel}>
-                    <i className="fas fa-align-left" /> Giới thiệu bản thân
-                  </div>
+                  <div className={styles.fieldLabel}><i className="fas fa-align-left" /> Giới thiệu bản thân</div>
                   {profile.bio
                     ? <p className={styles.bioText}>{profile.bio}</p>
                     : <p className={`${styles.fieldValue} ${styles.empty}`}>Chưa có giới thiệu.</p>}
                 </div>
               </div>
             </div>
-
           </div>
         )}
       </div>
+
+      {/* Edit Modal */}
+      {showEdit && profile && (
+        <EditModal
+          profile={profile}
+          onClose={() => setShowEdit(false)}
+          onSaved={handleSaved}
+        />
+      )}
+
+      {/* Toast */}
+      {toast && (
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          onClose={() => setToast(null)}
+        />
+      )}
     </div>
   );
 }

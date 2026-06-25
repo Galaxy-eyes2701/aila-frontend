@@ -9,7 +9,7 @@ const ExpertProtectedRoute = ({ children }) => {
   const role  = localStorage.getItem('role');
 
   if (!token || role !== 'Expert') {
-    return <Navigate to="/expert/login" replace />;
+    return <Navigate to="/" replace />;
   }
 
   return children;

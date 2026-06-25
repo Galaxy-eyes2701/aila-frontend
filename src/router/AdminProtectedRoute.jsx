@@ -4,7 +4,7 @@ const AdminProtectedRoute = ({ children }) => {
   const isAdminLoggedIn = localStorage.getItem('adminLoggedIn') === 'true';
 
   if (!isAdminLoggedIn) {
-    return <Navigate to="/admin/login" replace />;
+    return <Navigate to="/" replace />;
   }
 
   return children;
