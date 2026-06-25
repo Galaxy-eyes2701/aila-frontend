@@ -8,6 +8,7 @@ import Notifications       from '../pages/Notifications/Notifications';
 import CourseList          from '../pages/Courses/CourseList';
 import CourseDetail        from '../pages/Courses/CourseDetail';
 import BlogDetail          from '../pages/BlogDetail/BlogDetail';
+import LearnerProfile      from '../pages/LearnerProfile/LearnerProfile';
 import PageNotFound        from '../pages/PageNotFound';
 import AdminProtectedRoute from './AdminProtectedRoute';
 import ExpertProtectedRoute from './ExpertProtectedRoute';
@@ -59,6 +60,7 @@ const router = createBrowserRouter([
       { path: 'courses',           element: <CourseList /> },
       { path: 'courses/:id',       element: <CourseDetail /> },
       { path: 'notifications',     element: <Notifications /> },
+      { path: 'profile',           element: <LearnerProfile /> },
       { path: '*',                 element: <PageNotFound /> },
       { path: 'blogs/:id',     element: <BlogDetail /> },
     ],
