@@ -12,6 +12,7 @@ import LearnerProfile      from '../pages/LearnerProfile/LearnerProfile';
 import PageNotFound        from '../pages/PageNotFound';
 import AdminProtectedRoute from './AdminProtectedRoute';
 import ExpertProtectedRoute from './ExpertProtectedRoute';
+import Home from '../pages/Home/Home';
 
 const router = createBrowserRouter([
 
@@ -56,7 +57,7 @@ const router = createBrowserRouter([
     path: '/',
     element: <MainLayout />,
     children: [
-      { index: true,               element: <Navigate to="/" replace /> },
+      { index: true,               element: <Home /> },
       { path: 'courses',           element: <CourseList /> },
       { path: 'courses/:id',       element: <CourseDetail /> },
       { path: 'notifications',     element: <Notifications /> },

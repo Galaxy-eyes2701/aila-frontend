@@ -27,7 +27,7 @@ body {
   margin: 0;
   min-height: 100vh;
   display: block; /* override Vite default flex */
-  background: #f7f3eb;
+  background: #e8e9ff;
 }
 
 #root {

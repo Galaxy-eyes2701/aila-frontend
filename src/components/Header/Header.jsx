@@ -6,14 +6,13 @@ import styles from './Header.module.css';
 
 const NAV_LINKS = [
   { label: 'Khóa học',              href: '/courses' },
-  { label: 'Thực hành viết prompt', href: '/' },
   { label: 'Hướng dẫn',            href: '/' },
   { label: 'Bài viết',             href: '/' },
 ];
 
 const DEFAULT_AVATAR = 'https://i.pravatar.cc/80';
 
-export default function Header() {
+export default function Header({ onLoginClick }) {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const [avatarUrl, setAvatarUrl] = useState(DEFAULT_AVATAR);
@@ -49,7 +48,7 @@ export default function Header() {
   const handleLogout = () => {
     logout();
     setAvatarUrl(DEFAULT_AVATAR);
-    navigate('/expert/login');
+    navigate('/home');
   };
 
   return (
@@ -111,9 +110,9 @@ export default function Header() {
               </div>
             </>
           ) : (
-            <Link to="/expert/login" className={styles.btnLogin}>
+            <button className={styles.btnLogin} onClick={onLoginClick}>
               Đăng nhập
-            </Link>
+            </button>
           )}
         </div>
       </div>

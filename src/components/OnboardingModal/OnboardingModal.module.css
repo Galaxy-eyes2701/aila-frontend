@@ -1,0 +1,264 @@
+/* ── OVERLAY ── */
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.55);
+  z-index: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  backdrop-filter: blur(6px);
+  animation: fadeIn .2s ease;
+}
+
+@keyframes fadeIn { from{opacity:0} to{opacity:1} }
+
+/* ── MODAL ── */
+.modal {
+  background: var(--bg-card);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  width: 100%;
+  max-width: 540px;
+  max-height: 92vh;
+  overflow-y: auto;
+  animation: slideUp .25s ease;
+}
+
+@keyframes slideUp {
+  from { opacity:0; transform: translateY(20px) scale(.97); }
+  to   { opacity:1; transform: translateY(0) scale(1); }
+}
+
+/* ── PROGRESS BAR ── */
+.progressBar {
+  height: 4px;
+  background: var(--border);
+  border-radius: 2px;
+  margin: 0 32px;
+  margin-top: 24px;
+  overflow: hidden;
+}
+
+.progressFill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--primary) 0%, #818cf8 100%);
+  border-radius: 2px;
+  transition: width .4s ease;
+}
+
+/* ── STEP INDICATOR ── */
+.stepIndicator {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  padding: 16px 32px 0;
+}
+
+.stepDot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--border);
+  transition: all .3s ease;
+}
+
+.stepDot.active { background: var(--primary); transform: scale(1.3); }
+.stepDot.done   { background: #10b981; }
+
+/* ── HEADER ── */
+.header { padding: 20px 32px 8px; text-align: center; }
+
+.headerIcon {
+  font-size: 40px;
+  margin-bottom: 12px;
+}
+
+.header h2 {
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--text);
+  margin-bottom: 6px;
+}
+
+.header p { font-size: 14px; color: var(--text-muted); line-height: 1.6; }
+
+/* ── BODY ── */
+.body { padding: 20px 32px; }
+
+/* ── OPTION GRID ── */
+.optionGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+@media (max-width: 500px) { .optionGrid { grid-template-columns: 1fr; } }
+
+.optionCard {
+  padding: 16px 14px;
+  border-radius: var(--radius);
+  border: 2px solid var(--border);
+  cursor: pointer;
+  transition: all var(--transition);
+  text-align: center;
+  background: var(--bg-card);
+}
+
+.optionCard:hover { border-color: var(--primary); background: var(--primary-light); }
+
+.optionCard.selected {
+  border-color: var(--primary);
+  background: var(--primary-light);
+  box-shadow: 0 0 0 3px rgba(79,110,247,.15);
+}
+
+.optionIcon { font-size: 24px; margin-bottom: 8px; }
+
+.optionLabel {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+/* ── KNOWLEDGE LEVEL ── */
+.levelGrid { display: flex; flex-direction: column; gap: 12px; }
+
+.levelCard {
+  padding: 16px 18px;
+  border-radius: var(--radius);
+  border: 2px solid var(--border);
+  cursor: pointer;
+  transition: all var(--transition);
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: var(--bg-card);
+}
+
+.levelCard:hover { border-color: var(--primary); background: var(--primary-light); }
+.levelCard.selected { border-color: var(--primary); background: var(--primary-light); }
+
+.levelIcon { font-size: 22px; flex-shrink: 0; }
+
+.levelInfo { flex: 1; }
+.levelInfo strong { display: block; font-size: 14px; font-weight: 700; color: var(--text); }
+.levelInfo span { font-size: 12px; color: var(--text-muted); }
+
+/* ── TAGS (Learning Goals) ── */
+.tagGrid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.tagChip {
+  padding: 8px 16px;
+  border-radius: 999px;
+  border: 1.5px solid var(--border);
+  background: var(--bg-card);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all var(--transition);
+}
+
+.tagChip:hover { border-color: var(--primary); color: var(--primary); }
+.tagChip.selected {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: #fff;
+}
+
+.tagHint { font-size: 12px; color: var(--text-muted); margin-bottom: 14px; }
+
+/* ── FOOTER ── */
+.footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 32px 24px;
+  border-top: 1px solid var(--border);
+  gap: 12px;
+}
+
+.btnSkip {
+  background: none; border: none;
+  color: var(--text-muted); font-size: 13px;
+  cursor: pointer; padding: 0;
+}
+
+.btnSkip:hover { color: var(--text); text-decoration: underline; }
+
+.btnNext {
+  padding: 11px 28px;
+  border-radius: var(--radius-sm);
+  background: var(--primary);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 700;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  transition: background var(--transition), transform var(--transition);
+  box-shadow: 0 4px 14px rgba(79,110,247,.3);
+}
+
+.btnNext:hover:not(:disabled) {
+  background: var(--primary-dark);
+  transform: translateY(-1px);
+}
+
+.btnNext:disabled { opacity: .6; cursor: not-allowed; }
+
+/* ── SPINNER ── */
+.spinner {
+  width: 16px; height: 16px;
+  border: 2px solid rgba(255,255,255,.4);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin .7s linear infinite;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── ERROR ── */
+.error {
+  display: flex; align-items: center; gap: 8px;
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+  background: #fef2f2; border: 1px solid #fecaca;
+  color: #dc2626; font-size: 13px;
+  margin-top: 12px;
+}
+
+/* ── SUCCESS STEP ── */
+.successBody {
+  padding: 36px 32px;
+  text-align: center;
+}
+
+.successIcon { font-size: 56px; margin-bottom: 16px; }
+
+.successBody h3 {
+  font-size: 22px; font-weight: 800;
+  color: var(--text); margin-bottom: 8px;
+}
+
+.successBody p { font-size: 14px; color: var(--text-muted); line-height: 1.7; }
+
+.btnStart {
+  margin-top: 24px;
+  padding: 12px 32px;
+  border-radius: var(--radius-sm);
+  background: var(--primary);
+  color: #fff; font-size: 15px; font-weight: 700;
+  border: none; cursor: pointer;
+  box-shadow: 0 4px 18px rgba(79,110,247,.35);
+  transition: background var(--transition), transform var(--transition);
+}
+
+.btnStart:hover { background: var(--primary-dark); transform: translateY(-1px); }
