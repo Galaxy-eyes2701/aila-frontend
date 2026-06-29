@@ -48,7 +48,7 @@ export default function Header({ onLoginClick }) {
   const handleLogout = () => {
     logout();
     setAvatarUrl(DEFAULT_AVATAR);
-    navigate('/home');
+    navigate('/');
   };
 
   return (

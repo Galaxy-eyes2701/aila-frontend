@@ -23,7 +23,7 @@ export default function RegisterModal({ onClose, onSwitchToLogin, onRegisterSucc
 
     setLoading(true); setError('');
     try {
-      const res = await api.post('/auth/learner/register', {
+      const res = await api.post('/auth/register', {
         fullName: form.fullName.trim(),
         email:    form.email.trim().toLowerCase(),
         password: form.password,

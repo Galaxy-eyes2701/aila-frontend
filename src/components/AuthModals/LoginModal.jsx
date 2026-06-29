@@ -28,7 +28,7 @@ export default function LoginModal({ onClose, onSwitchToRegister, onLoginSuccess
     }
     setLoading(true); setError('');
     try {
-      const res = await api.post('/auth/learner/login', {
+      const res = await api.post('/learner/login', {
         email:    form.email.trim().toLowerCase(),
         password: form.password,
       });
