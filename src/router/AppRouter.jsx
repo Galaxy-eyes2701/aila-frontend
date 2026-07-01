@@ -1,69 +1,80 @@
-import { createBrowserRouter, RouterProvider, Navigate } from 'react-router-dom';
-import MainLayout           from '../layout/MainLayout';
-import ExpertLayout         from '../layout/ExpertLayout';
-import AdminLogin           from '../pages/AdminLogin/AdminLogin';
-import ExpertLogin          from '../pages/ExpertLogin/ExpertLogin';
-import ExpertProfile        from '../pages/ExpertProfile/ExpertProfile';
-import Notifications        from '../pages/Notifications/Notifications';
-import CourseList           from '../pages/Courses/CourseList';
-import CourseDetail         from '../pages/Courses/CourseDetail';
-import BlogDetail           from '../pages/BlogDetail/BlogDetail';
-import LearnerProfile       from '../pages/LearnerProfile/LearnerProfile';
-import PageNotFound         from '../pages/PageNotFound';
-import Home                 from '../pages/Home/Home';
-import AdminProtectedRoute  from './AdminProtectedRoute';
-import ExpertProtectedRoute from './ExpertProtectedRoute';
-import LearnerProtectedRoute from './LearnerProtectedRoute';
+import {
+  createBrowserRouter,
+  RouterProvider,
+  Navigate,
+} from "react-router-dom";
+import MainLayout from "../layout/MainLayout";
+import ExpertLayout from "../layout/ExpertLayout";
+import AdminLogin from "../pages/AdminLogin/AdminLogin";
+import ExpertLogin from "../pages/ExpertLogin/ExpertLogin";
+import ExpertProfile from "../pages/ExpertProfile/ExpertProfile";
+import Notifications from "../pages/Notifications/Notifications";
+import CourseList from "../pages/Courses/CourseList";
+import CourseDetail from "../pages/Courses/CourseDetail";
+import BlogDetail from "../pages/BlogDetail/BlogDetail";
+import LearnerProfile from "../pages/LearnerProfile/LearnerProfile";
+import PageNotFound from "../pages/PageNotFound";
+import Home from "../pages/Home/Home";
+import AdminProtectedRoute from "./AdminProtectedRoute";
+import ExpertProtectedRoute from "./ExpertProtectedRoute";
+import LearnerProtectedRoute from "./LearnerProtectedRoute";
+import LearningView from "../pages/LearningView/LearningView";
 
 const router = createBrowserRouter([
-
   // ── Auth pages (không có Header) ─────────────────────────────
-  { path: '/admin/login',  element: <AdminLogin /> },
-  { path: '/expert/login', element: <ExpertLogin /> },
+  { path: "/admin/login", element: <AdminLogin /> },
+  { path: "/expert/login", element: <ExpertLogin /> },
 
   // ── Admin ─────────────────────────────────────────────────────
   {
-    path: '/admin',
+    path: "/admin",
     element: (
       <AdminProtectedRoute>
-        <div style={{ minHeight: '100vh', background: '#f7f3eb' }} />
+        <div style={{ minHeight: "100vh", background: "#f7f3eb" }} />
       </AdminProtectedRoute>
     ),
     children: [
       { index: true, element: <Navigate to="/admin/dashboard" replace /> },
-      { path: 'dashboard', element: <div style={{ padding: 48 }}><h2>Admin Dashboard</h2></div> },
+      {
+        path: "dashboard",
+        element: (
+          <div style={{ padding: 48 }}>
+            <h2>Admin Dashboard</h2>
+          </div>
+        ),
+      },
     ],
   },
 
   // ── Expert ────────────────────────────────────────────────────
   {
-    path: '/expert',
+    path: "/expert",
     element: (
       <ExpertProtectedRoute>
         <ExpertLayout />
       </ExpertProtectedRoute>
     ),
     children: [
-      { index: true,          element: <Navigate to="/expert/profile" replace /> },
-      { path: 'profile',       element: <ExpertProfile /> },
-      { path: 'notifications', element: <Notifications /> },
+      { index: true, element: <Navigate to="/expert/profile" replace /> },
+      { path: "profile", element: <ExpertProfile /> },
+      { path: "notifications", element: <Notifications /> },
     ],
   },
 
   // ── Public + Learner (dùng chung MainLayout) ──────────────────
   {
-    path: '/',
+    path: "/",
     element: <MainLayout />,
     children: [
       // ── PUBLIC: Guest + Learner đều xem được ──
-      { index: true,         element: <Home /> },
-      { path: 'courses',     element: <CourseList /> },
-      { path: 'courses/:id', element: <CourseDetail /> },
-      { path: 'blogs/:id',   element: <BlogDetail /> },
+      { index: true, element: <Home /> },
+      { path: "courses", element: <CourseList /> },
+      { path: "courses/:id", element: <CourseDetail /> },
+      { path: "blogs/:id", element: <BlogDetail /> },
 
       // ── PROTECTED: Chỉ Learner đã đăng nhập ──
       {
-        path: 'profile',
+        path: "profile",
         element: (
           <LearnerProtectedRoute>
             <LearnerProfile />
@@ -71,15 +82,23 @@ const router = createBrowserRouter([
         ),
       },
       {
-        path: 'notifications',
+        path: "notifications",
         element: (
           <LearnerProtectedRoute>
             <Notifications />
           </LearnerProtectedRoute>
         ),
       },
+      {
+        path: "learning/:courseId",
+        element: (
+          <LearnerProtectedRoute>
+            <LearningView />
+          </LearnerProtectedRoute>
+        ),
+      },
 
-      { path: '*', element: <PageNotFound /> },
+      { path: "*", element: <PageNotFound /> },
     ],
   },
 ]);
