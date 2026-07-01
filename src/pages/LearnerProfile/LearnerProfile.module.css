@@ -63,6 +63,29 @@
   position: relative;
   margin-top: -48px;
   flex-shrink: 0;
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+  border-radius: 50%;
+}
+
+.avatarHoverOverlay {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, .45);
+  color: #fff;
+  font-size: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity .15s;
+}
+
+.avatarWrap:hover .avatarHoverOverlay {
+  opacity: 1;
 }
 
 .avatarImg {
@@ -345,15 +368,6 @@ select.fieldBox { cursor: pointer; }
 }
 
 .fieldEmpty { color: #9ca3af; font-style: italic; font-size: 13.5px; }
-
-.urlText {
-  font-size: 13px;
-  color: #1a5cb8;
-  word-break: break-all;
-  text-overflow: ellipsis;
-  overflow: hidden;
-  white-space: nowrap;
-}
 
 /* Verified tag inside email box */
 .verifiedTag {
@@ -767,4 +781,89 @@ select.fieldBox { cursor: pointer; }
   font-size: 12px;
   font-weight: 600;
   color: #1a5cb8;
+}
+
+/* ── AVATAR MODAL ── */
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, .45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+  padding: 20px;
+  backdrop-filter: blur(4px);
+}
+
+.avatarModal {
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0,0,0,.2);
+  width: 100%;
+  max-width: 360px;
+  animation: modalIn .2s ease;
+}
+
+@keyframes modalIn {
+  from { opacity: 0; transform: translateY(-16px) scale(.97); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.modalHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 24px;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.avatarModalBody {
+  padding: 28px 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.avatarPreviewWrap {
+  position: relative;
+  width: 160px;
+  height: 160px;
+}
+
+.avatarPreviewImg {
+  width: 160px;
+  height: 160px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 4px solid #f3f4f6;
+}
+
+.avatarPreviewInitials {
+  width: 160px;
+  height: 160px;
+  border-radius: 50%;
+  border: 4px solid #f3f4f6;
+  background: #1a5cb8;
+  color: #fff;
+  font-size: 48px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  letter-spacing: 1px;
+  user-select: none;
+}
+
+.avatarLoadingOverlay {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, .5);
+  color: #fff;
+  font-size: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }

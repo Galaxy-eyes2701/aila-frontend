@@ -1,7 +1,10 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import api from '../../utils/api';
 import styles from './LearnerProfile.module.css';
+
+const AVATAR_ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
+const AVATAR_MAX_SIZE = 5 * 1024 * 1024;
 
 /* ── Helpers ── */
 const LEARNER_TYPE_LABELS = {
@@ -61,11 +64,16 @@ export default function LearnerProfile() {
 
   const [isEditing, setIsEditing] = useState(false);
   const [form, setForm] = useState({
-    fullName: '', avatarUrl: '', learnerType: '', knowledgeLevel: '', learningGoals: [],
+    fullName: '', learnerType: '', knowledgeLevel: '', learningGoals: [],
   });
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState('');
   const [saveSuccess, setSaveSuccess] = useState(false);
+
+  const [showAvatarModal, setShowAvatarModal] = useState(false);
+  const [avatarUploading, setAvatarUploading] = useState(false);
+  const [avatarError, setAvatarError] = useState('');
+  const avatarInputRef = useRef(null);
 
   const [showPwForm, setShowPwForm] = useState(false);
   const [pwForm, setPwForm] = useState({ currentPassword: '', newPassword: '', confirmPassword: '' });
@@ -101,7 +109,6 @@ export default function LearnerProfile() {
   const handleEditStart = () => {
     setForm({
       fullName: profile.fullName || '',
-      avatarUrl: profile.avatarUrl || '',
       learnerType: profile.learner.learnerType || '',
       knowledgeLevel: profile.learner.knowledgeLevel || '',
       learningGoals: profile.learner.learningGoals.map(g => g.id),
@@ -109,6 +116,49 @@ export default function LearnerProfile() {
     setSaveError('');
     setSaveSuccess(false);
     setIsEditing(true);
+  };
+
+  const openAvatarModal = () => {
+    setAvatarError('');
+    setShowAvatarModal(true);
+  };
+
+  const closeAvatarModal = () => {
+    if (avatarUploading) return;
+    setShowAvatarModal(false);
+    setAvatarError('');
+  };
+
+  const handleAvatarFileChange = async (e) => {
+    const file = e.target.files?.[0];
+    e.target.value = '';
+    if (!file) return;
+
+    if (!AVATAR_ALLOWED_TYPES.includes(file.type)) {
+      setAvatarError('Định dạng ảnh không hợp lệ. Chỉ chấp nhận JPEG, PNG hoặc WEBP.');
+      return;
+    }
+    if (file.size > AVATAR_MAX_SIZE) {
+      setAvatarError('Dung lượng ảnh vượt quá 5MB.');
+      return;
+    }
+
+    setAvatarError('');
+    setAvatarUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      const res = await api.post('/profile/avatar', formData);
+      if (res.data.success) {
+        setProfile(prev => ({ ...prev, avatarUrl: res.data.data.avatarUrl }));
+      } else {
+        setAvatarError(res.data.errorMessage || 'Cập nhật ảnh đại diện thất bại.');
+      }
+    } catch (err) {
+      setAvatarError(err.response?.data?.errorMessage || 'Lỗi kết nối máy chủ. Vui lòng thử lại.');
+    } finally {
+      setAvatarUploading(false);
+    }
   };
 
   const toggleGoal = (tagId) =>
@@ -125,7 +175,7 @@ export default function LearnerProfile() {
     try {
       const res = await api.put('/learner/profile', {
         fullName: form.fullName.trim(),
-        avatarUrl: form.avatarUrl.trim() || null,
+        avatarUrl: profile.avatarUrl || null,
         learnerType: form.learnerType || null,
         knowledgeLevel: form.knowledgeLevel || null,
         learningGoals: form.learningGoals,
@@ -134,7 +184,6 @@ export default function LearnerProfile() {
         setProfile(prev => ({
           ...prev,
           fullName: form.fullName.trim(),
-          avatarUrl: form.avatarUrl.trim() || null,
           learner: {
             ...prev.learner,
             learnerType: form.learnerType || null,
@@ -236,13 +285,21 @@ export default function LearnerProfile() {
             <div className={styles.profileCard}>
               <div className={styles.banner} />
               <div className={styles.headerRow}>
-                <div className={styles.avatarWrap}>
+                <button
+                  type="button"
+                  className={styles.avatarWrap}
+                  onClick={openAvatarModal}
+                  aria-label="Xem hoặc đổi ảnh đại diện"
+                >
                   {profile.avatarUrl
                     ? <img className={styles.avatarImg} src={profile.avatarUrl} alt={profile.fullName} />
                     : <div className={styles.avatarInitials}>{getInitials(profile.fullName)}</div>
                   }
                   <div className={styles.avatarOnline} />
-                </div>
+                  <div className={styles.avatarHoverOverlay}>
+                    <i className="fas fa-camera" />
+                  </div>
+                </button>
                 <div className={styles.headerInfo}>
                   <h1 className={styles.headerName}>{profile.fullName}</h1>
                   <div className={styles.headerMeta}>
@@ -316,19 +373,11 @@ export default function LearnerProfile() {
                       </div>
 
                       <div className={styles.fieldRow}>
-                        <div className={styles.fieldItem}>
+                        <div className={styles.fieldItemFull}>
                           <label className={styles.fieldLabel}>TRÌNH ĐỘ KIẾN THỨC</label>
                           <div className={styles.fieldBox}>
                             {profile.learner.knowledgeLevel
                               ? KNOWLEDGE_LEVEL_LABELS[profile.learner.knowledgeLevel]
-                              : <span className={styles.fieldEmpty}>Chưa cập nhật</span>}
-                          </div>
-                        </div>
-                        <div className={styles.fieldItem}>
-                          <label className={styles.fieldLabel}>ẢNH ĐẠI DIỆN (URL)</label>
-                          <div className={styles.fieldBox}>
-                            {profile.avatarUrl
-                              ? <span className={styles.urlText}>{profile.avatarUrl}</span>
                               : <span className={styles.fieldEmpty}>Chưa cập nhật</span>}
                           </div>
                         </div>
@@ -386,7 +435,7 @@ export default function LearnerProfile() {
                       </div>
 
                       <div className={styles.fieldRow}>
-                        <div className={styles.fieldItem}>
+                        <div className={styles.fieldItemFull}>
                           <label className={styles.fieldLabel}>TRÌNH ĐỘ KIẾN THỨC</label>
                           <select
                             className={styles.fieldBox}
@@ -398,15 +447,6 @@ export default function LearnerProfile() {
                               <option key={v} value={v}>{l}</option>
                             ))}
                           </select>
-                        </div>
-                        <div className={styles.fieldItem}>
-                          <label className={styles.fieldLabel}>ẢNH ĐẠI DIỆN (URL)</label>
-                          <input
-                            className={styles.fieldBox}
-                            placeholder="https://..."
-                            value={form.avatarUrl}
-                            onChange={e => setForm(f => ({ ...f, avatarUrl: e.target.value }))}
-                          />
                         </div>
                       </div>
 
@@ -601,6 +641,64 @@ export default function LearnerProfile() {
                       </div>
                     </div>
                   ))}
+                </div>
+              </div>
+            )}
+
+            {showAvatarModal && (
+              <div className={styles.modalOverlay} onClick={closeAvatarModal}>
+                <div className={styles.avatarModal} onClick={e => e.stopPropagation()}>
+                  <div className={styles.modalHeader}>
+                    <span className={styles.cardTitle}>
+                      <i className="fas fa-image" /> Ảnh đại diện
+                    </span>
+                    <button className={styles.iconBtn} onClick={closeAvatarModal} aria-label="Đóng" disabled={avatarUploading}>
+                      <i className="fas fa-times" />
+                    </button>
+                  </div>
+
+                  <div className={styles.avatarModalBody}>
+                    <div className={styles.avatarPreviewWrap}>
+                      {profile.avatarUrl
+                        ? <img className={styles.avatarPreviewImg} src={profile.avatarUrl} alt={profile.fullName} />
+                        : <div className={styles.avatarPreviewInitials}>{getInitials(profile.fullName)}</div>
+                      }
+                      {avatarUploading && (
+                        <div className={styles.avatarLoadingOverlay}>
+                          <i className="fas fa-spinner fa-spin" />
+                        </div>
+                      )}
+                    </div>
+
+                    {avatarError && (
+                      <div className={styles.formError}>
+                        <i className="fas fa-exclamation-circle" /> {avatarError}
+                      </div>
+                    )}
+
+                    <input
+                      ref={avatarInputRef}
+                      type="file"
+                      accept="image/jpeg,image/png,image/webp"
+                      style={{ display: 'none' }}
+                      onChange={handleAvatarFileChange}
+                    />
+                  </div>
+
+                  <div className={styles.formActions} style={{ padding: '0 24px 24px' }}>
+                    <button className={styles.btnOutline} onClick={closeAvatarModal} disabled={avatarUploading}>
+                      Đóng
+                    </button>
+                    <button
+                      className={styles.btnPrimary}
+                      onClick={() => avatarInputRef.current?.click()}
+                      disabled={avatarUploading}
+                    >
+                      {avatarUploading
+                        ? <><i className="fas fa-spinner fa-spin" /> Đang tải lên...</>
+                        : <><i className="fas fa-camera" /> Đổi ảnh đại diện</>}
+                    </button>
+                  </div>
                 </div>
               </div>
             )}
