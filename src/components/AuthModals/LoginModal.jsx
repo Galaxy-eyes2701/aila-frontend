@@ -2,11 +2,14 @@ import { useState } from 'react';
 import api from '../../utils/api';
 import useAuth from '../../hooks/useAuth';
 import styles from './AuthModals.module.css';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 const PANELS = { LOGIN: 'login', FORGOT: 'forgot', RESET: 'reset' };
 
 export default function LoginModal({ onClose, onSwitchToRegister, onLoginSuccess }) {
   const { login } = useAuth();
+  const location = useLocation();
+  const navigate = useNavigate();
   const [panel, setPanel]         = useState(PANELS.LOGIN);
   const [form, setForm]           = useState({ email: '', password: '', forgotEmail: '' });
   const [showPwd, setShowPwd]     = useState(false);
@@ -36,6 +39,17 @@ export default function LoginModal({ onClose, onSwitchToRegister, onLoginSuccess
         const d = res.data.data;
         login(d.accessToken, { userId: d.userId, fullName: d.fullName, email: d.email, role: d.role });
         onLoginSuccess?.(d);
+        if (res.data.success) {
+      const d = res.data.data;
+      login(d.accessToken, { userId: d.userId, fullName: d.fullName, email: d.email, role: d.role });
+      onLoginSuccess?.(d);
+
+      // Redirect về trang cũ nếu bị chặn bởi LearnerProtectedRoute
+      const from = location.state?.from?.pathname;
+      if (from && from !== '/') {
+        navigate(from, { replace: true });
+      }
+    }
       } else {
         setError(res.data.errorMessage || 'Đăng nhập thất bại.');
       }

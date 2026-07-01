@@ -6,8 +6,8 @@ import styles from './Header.module.css';
 
 const NAV_LINKS = [
   { label: 'Khóa học',              href: '/courses' },
-  { label: 'Hướng dẫn',            href: '/' },
-  { label: 'Bài viết',             href: '/' },
+  { label: 'Hướng dẫn',            href: '*' },
+  { label: 'Bài viết',             href: '*' },
 ];
 
 const DEFAULT_AVATAR = 'https://i.pravatar.cc/80';
@@ -28,13 +28,12 @@ export default function Header({ onLoginClick }) {
       try {
         let url = DEFAULT_AVATAR;
 
-        if (user.role === 'Expert') {
-          const res = await api.get('/experts/me/profile');
+        if (user.role === 'Learner') {
+          const res = await api.get('/profile/learner/me');
           if (res.data.success && res.data.data.avatarUrl) {
             url = res.data.data.avatarUrl;
           }
         }
-        // Có thể mở rộng thêm Learner, Admin ở đây nếu cần
 
         setAvatarUrl(url);
       } catch {
@@ -100,7 +99,7 @@ export default function Header({ onLoginClick }) {
                   onError={(e) => { e.target.src = DEFAULT_AVATAR; }} // fallback nếu ảnh lỗi
                 />
                 <div className={styles.userDropdown}>
-                  <Link to="/expert/profile">
+                  <Link to="/profile">
                     <i className="fas fa-user" /> Hồ sơ cá nhân
                   </Link>
                   <button className={styles.logoutBtn} onClick={handleLogout}>
