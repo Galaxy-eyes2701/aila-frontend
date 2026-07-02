@@ -2,9 +2,6 @@ import { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import api from '../../utils/api';
 import useAuth from '../../hooks/useAuth';
-import LoginModal from '../../components/AuthModals/LoginModal';
-import RegisterModal from '../../components/AuthModals/RegisterModal';
-import OnboardingModal from '../../components/OnboardingModal/OnboardingModal';
 import styles from './Home.module.css';
 import { useOutletContext } from 'react-router-dom';
 
@@ -47,9 +44,45 @@ function BlogSkeleton() {
 
 /* ── Main Component ─────────────────────────────────────────────────────── */
 export default function Home() {
-  const { openLogin, openRegister } = useOutletContext();
+  const { openLogin, openRegister, openOnboarding } = useOutletContext();
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, login } = useAuth();
+  const googleLoginChecked = useRef(false);
+
+    useEffect(() => {
+      const hash = window.location.hash.substring(1);
+      if (!hash.includes('accessToken')) return;
+
+      const params = new URLSearchParams(hash);
+      const accessToken = params.get('accessToken');
+      if (!accessToken) return;
+
+      try {
+        const payload = JSON.parse(atob(accessToken.split('.')[1]));
+        const userData = {
+          userId:   payload.nameid      || payload.sub || '',
+          fullName: payload.unique_name || payload.name || '',
+          email:    payload.email       || '',
+          role:     payload.role        || 'Learner',
+        };
+
+        login(accessToken, userData);
+        window.history.replaceState(null, '', '/');
+
+        googleLoginChecked.current = true;
+
+        if (userData.role === 'Learner') {
+          api.get('/learner/onboarding', {
+            headers: { Authorization: `Bearer ${accessToken}` }
+          }).then(res => {
+            if (res.data.success && !res.data.data?.hasCompletedOnboarding) {
+              openOnboarding();
+            }
+          }).catch(() => {});
+        }
+
+      } catch { }
+    }, []);
 
 
   // ── Data ──
@@ -82,31 +115,29 @@ export default function Home() {
     }).catch(() => {}).finally(() => setCLoading(false));
 
     // Top 2 blogs
-    api.get('/blogs?pageSize=2').then(r => {
-      const d = r.data;
-      const items = d?.data?.items ?? d?.data ?? [];
-      setBlogs(items.slice(0, 2));
-    }).catch(() => {}).finally(() => setBLoading(false));
+    api.get('/blogs/top?count=2').then(r => {
+    const d = r.data;
+    if (d.success) setBlogs(d.data ?? []);
+  }).catch(() => {}).finally(() => setBLoading(false));
   }, []);
 
   /* ── Kiểm tra onboarding sau khi đăng nhập ── */
-  useEffect(() => {
-    if (!user || user.role !== 'Learner') return;
-    const checkOnboarding = async () => {
-      try {
-        const res = await api.get('/profile/learner/me');
-        if (res.data.success) {
-          const hasCompleted = res.data.data?.learner?.hasCompletedOnboarding;
-          if (!hasCompleted) setModal('onboarding');
-        }
-      } catch { /* bỏ qua */ }
-    };
-    checkOnboarding();
-  }, [user]);
+    useEffect(() => {
+      if (!user || user.role !== 'Learner') return;
+      if (googleLoginChecked.current) return; 
+
+      const checkOnboarding = async () => {
+        try {
+          const res = await api.get('/learner/onboarding');
+          if (res.data.success && !res.data.data?.hasCompletedOnboarding) {
+            openOnboarding();
+          }
+        } catch { }
+      };
+      checkOnboarding();
+    }, [user]);
 
   /* ── Handlers ── */
-  const closeModal   = () => setModal(null);
-
   const handleCategoryClick = (categoryId) => {
     navigate(`/courses?categoryId=${categoryId}`);
   };
@@ -263,22 +294,22 @@ export default function Home() {
               : blogs.length === 0
                 ? <p style={{ color: 'var(--text-muted)', fontSize: 14 }}>Chưa có bài viết nào.</p>
                 : blogs.map(blog => (
-                    <Link to={`/blogs/${blog.id}`} key={blog.id} className={styles.blogCard}>
-                      {blog.thumbnailUrl && (
-                        <div className={styles.blogThumbnail}>
-                          <img src={blog.thumbnailUrl} alt={blog.title} />
-                        </div>
-                      )}
-                      <div className={styles.blogBody}>
-                        <div className={styles.blogMeta}>Bài viết nổi bật</div>
-                        <div className={styles.blogTitle}>{blog.title}</div>
-                        <div className={styles.blogExcerpt}>{blog.excerpt ?? blog.description}</div>
-                        <span className={styles.blogReadMore}>
-                          Xem chi tiết <i className="fas fa-arrow-right" />
-                        </span>
+                  <Link to={`/blogs/${blog.id}`} key={blog.id} className={styles.blogCard}>
+                    {blog.thumbnailUrl && (
+                      <div className={styles.blogThumbnail}>
+                        <img src={blog.thumbnailUrl} alt={blog.title} />
                       </div>
-                    </Link>
-                  ))}
+                    )}
+                    <div className={styles.blogBody}>
+                      <div className={styles.blogMeta}>Bài viết nổi bật</div>
+                      <div className={styles.blogTitle}>{blog.title}</div>
+                      {/* Bỏ blogExcerpt vì TopBlogResponse không có field này */}
+                      <span className={styles.blogReadMore}>
+                        Xem chi tiết <i className="fas fa-arrow-right" />
+                      </span>
+                    </div>
+                  </Link>
+                ))}
           </div>
         </section>
 

@@ -68,7 +68,7 @@ export default function OnboardingModal({ onClose, onComplete }) {
 
   const progress = (step / TOTAL_STEPS) * 100;
 
-  /* ── SUBMIT cuối ── */
+    /* ── SUBMIT cuối ── */
   const handleSubmit = async () => {
     if (selectedTags.length === 0) {
       setError('Vui lòng chọn ít nhất một lĩnh vực quan tâm.');
@@ -76,20 +76,19 @@ export default function OnboardingModal({ onClose, onComplete }) {
     }
     setLoading(true); setError('');
     try {
-      const res = await api.put('/learner/profile', {
-        fullName:          undefined, // giữ nguyên tên cũ
-        avatarUrl:         undefined,
-        learnerType:       learnerType   || null,
-        knowledgeLevel:    knowledgeLevel || null,
-        learningGoals:     selectedTags,
+      const res = await api.put('/learner/onboarding', {
+        learnerType:    learnerType,
+        knowledgeLevel: knowledgeLevel,
+        tagIds:         selectedTags,   
       });
       if (res.data.success) {
-        setStep(4); // success screen
+        setStep(4);
       } else {
         setError(res.data.errorMessage || 'Có lỗi xảy ra, vui lòng thử lại.');
       }
-    } catch {
-      setError('Lỗi kết nối. Vui lòng thử lại.');
+    } catch (err) {
+      const msg = err.response?.data?.errorMessage;
+      setError(msg || 'Lỗi kết nối. Vui lòng thử lại.');
     } finally {
       setLoading(false);
     }

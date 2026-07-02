@@ -15,8 +15,8 @@ const MainLayout = () => {
   const handleLoginSuccess = async () => {
     closeModal();
     try {
-      const res = await api.get('/profile/learner/me');
-      if (res.data.success && !res.data.data?.learner?.hasCompletedOnboarding) {
+      const res = await api.get('/learner/onboarding');
+      if (res.data.success && !res.data.data?.hasCompletedOnboarding) {
         setModal('onboarding');
       }
     } catch { }
@@ -30,6 +30,7 @@ const MainLayout = () => {
         <Outlet context={{
           openLogin:    () => setModal('login'),
           openRegister: () => setModal('register'),
+          openOnboarding: () => setModal('onboarding'),
         }} />
       </main>
 

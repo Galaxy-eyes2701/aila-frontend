@@ -7,7 +7,7 @@ import styles from './Header.module.css';
 const NAV_LINKS = [
   { label: 'Khóa học',              href: '/courses' },
   { label: 'Hướng dẫn',            href: '*' },
-  { label: 'Bài viết',             href: '*' },
+  { label: 'Bài viết',             href: '/blogs' },
 ];
 
 const DEFAULT_AVATAR = 'https://i.pravatar.cc/80';
@@ -16,6 +16,8 @@ export default function Header({ onLoginClick }) {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const [avatarUrl, setAvatarUrl] = useState(DEFAULT_AVATAR);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [recentNotifications, setRecentNotifications] = useState([]);
 
   // Khi user đăng nhập → gọi API lấy avatar theo role
   useEffect(() => {
@@ -43,6 +45,27 @@ export default function Header({ onLoginClick }) {
 
     fetchAvatar();
   }, [user]);
+
+    useEffect(() => {
+      if (!user) {
+        setUnreadCount(0);
+        setRecentNotifications([]);
+        return;
+      }
+
+      const fetchNotifications = async () => {
+        try {
+          const res = await api.get('/notifications');
+          if (res.data.success) {
+            const all = res.data.data ?? [];
+            setRecentNotifications(all.slice(0, 3));
+            setUnreadCount(all.filter(n => !n.isRead).length);
+          }
+        } catch { }
+      };
+
+      fetchNotifications();
+    }, [user]);
 
   const handleLogout = () => {
     logout();
@@ -76,14 +99,26 @@ export default function Header({ onLoginClick }) {
                   aria-label="Thông báo"
                 >
                   <i className="fas fa-bell" />
-                  <span className={styles.bellBadge}>!</span>
+                  {unreadCount > 0 && (
+                    <span className={styles.bellBadge}>{unreadCount}</span>
+                  )}
                 </button>
                 <div className={styles.noticeDropdown}>
                   <div className={styles.noticeDropdownHeader}>🔔 Thông báo mới</div>
-                  <div className={styles.noticeDropdownItem}>
-                    <strong>Chào mừng trở lại!</strong>
-                    Bạn đã đăng nhập thành công.
-                  </div>
+
+                  {recentNotifications.length === 0 ? (
+                    <div className={styles.noticeDropdownItem}>
+                      Chưa có thông báo nào.
+                    </div>
+                  ) : (
+                    recentNotifications.map(n => (
+                      <div key={n.id} className={styles.noticeDropdownItem}>
+                        <strong>{n.title}</strong>
+                        {n.body}
+                      </div>
+                    ))
+                  )}
+
                   <Link to="/notifications" className={styles.noticeDropdownFooter}>
                     Xem tất cả thông báo →
                   </Link>

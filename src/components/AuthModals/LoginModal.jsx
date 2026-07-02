@@ -22,7 +22,7 @@ export default function LoginModal({ onClose, onSwitchToRegister, onLoginSuccess
     setForm(p => ({ ...p, [e.target.name]: e.target.value }));
   };
 
-  /* ── LOGIN ── */
+    /* ── LOGIN ── */
   const handleLogin = async (e) => {
     e.preventDefault();
     if (!form.email.trim() || !form.password.trim()) {
@@ -31,7 +31,7 @@ export default function LoginModal({ onClose, onSwitchToRegister, onLoginSuccess
     }
     setLoading(true); setError('');
     try {
-      const res = await api.post('/learner/login', {
+      const res = await api.post('/learner/login', {  // ← đúng endpoint
         email:    form.email.trim().toLowerCase(),
         password: form.password,
       });
@@ -39,17 +39,11 @@ export default function LoginModal({ onClose, onSwitchToRegister, onLoginSuccess
         const d = res.data.data;
         login(d.accessToken, { userId: d.userId, fullName: d.fullName, email: d.email, role: d.role });
         onLoginSuccess?.(d);
-        if (res.data.success) {
-      const d = res.data.data;
-      login(d.accessToken, { userId: d.userId, fullName: d.fullName, email: d.email, role: d.role });
-      onLoginSuccess?.(d);
 
-      // Redirect về trang cũ nếu bị chặn bởi LearnerProtectedRoute
-      const from = location.state?.from?.pathname;
-      if (from && from !== '/') {
-        navigate(from, { replace: true });
-      }
-    }
+        const from = location.state?.from?.pathname;
+        if (from && from !== '/') {
+          navigate(from, { replace: true });
+        }
       } else {
         setError(res.data.errorMessage || 'Đăng nhập thất bại.');
       }
@@ -62,8 +56,16 @@ export default function LoginModal({ onClose, onSwitchToRegister, onLoginSuccess
 
   /* ── GOOGLE LOGIN ── */
   const handleGoogle = async () => {
-    // Redirect sang Google OAuth — backend xử lý callback
-    window.location.href = 'https://localhost:7124/api/auth/learner/google';
+    try {
+      // Gọi backend lấy Google auth URL thay vì hardcode
+      const returnUrl = window.location.origin;
+      const res = await api.get(`/auth/google/url?returnUrl=${encodeURIComponent(returnUrl)}`);
+      if (res.data?.authorizationUrl) {
+        window.location.href = res.data.authorizationUrl;
+      }
+    } catch {
+      setError('Không thể kết nối Google. Vui lòng thử lại.');
+    }
   };
 
   /* ── FORGOT PASSWORD ── */

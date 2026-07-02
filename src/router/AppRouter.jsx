@@ -19,11 +19,14 @@ import AdminProtectedRoute from "./AdminProtectedRoute";
 import ExpertProtectedRoute from "./ExpertProtectedRoute";
 import LearnerProtectedRoute from "./LearnerProtectedRoute";
 import LearningView from "../pages/LearningView/LearningView";
+import GoogleCallback from '../pages/GoogleCallback/GoogleCallback';
+import BlogList from '../pages/BlogList/BlogList';
 
 const router = createBrowserRouter([
   // ── Auth pages (không có Header) ─────────────────────────────
   { path: "/admin/login", element: <AdminLogin /> },
   { path: "/expert/login", element: <ExpertLogin /> },
+  { path: '/auth/google/callback', element: <GoogleCallback /> },
 
   // ── Admin ─────────────────────────────────────────────────────
   {
@@ -71,6 +74,7 @@ const router = createBrowserRouter([
       { path: "courses", element: <CourseList /> },
       { path: "courses/:id", element: <CourseDetail /> },
       { path: "blogs/:id", element: <BlogDetail /> },
+      { path: 'blogs', element: <BlogList /> },
 
       // ── PROTECTED: Chỉ Learner đã đăng nhập ──
       {
@@ -100,6 +104,7 @@ const router = createBrowserRouter([
 
       { path: "*", element: <PageNotFound /> },
     ],
+    
   },
 ]);
 
