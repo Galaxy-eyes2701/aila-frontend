@@ -2,6 +2,8 @@ import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import api from '../../utils/api';
 import useAuth from '../../hooks/useAuth';
+import LoginModal    from '../../components/AuthModals/LoginModal';
+import RegisterModal from '../../components/AuthModals/RegisterModal';
 import styles from './CourseDetail.module.css';
 
 const LEVEL_LABELS = {
@@ -54,13 +56,20 @@ export default function CourseDetail() {
   const { user } = useAuth();
   const sidebarRef = useRef(null);
 
-  const [course,    setCourse]    = useState(null);
-  const [loading,   setLoading]   = useState(true);
-  const [enrolling, setEnrolling] = useState(false);
-  const [enrolled,  setEnrolled]  = useState(false);
-  const [error,     setError]     = useState('');
-  const [stickyVisible, setStickyVisible] = useState(false);
+  const [course,           setCourse]           = useState(null);
+  const [loading,          setLoading]          = useState(true);
+  const [enrolling,        setEnrolling]        = useState(false);
+  const [error,            setError]            = useState('');
+  const [stickyVisible,    setStickyVisible]    = useState(false);
 
+  // null = đang check API, true = đã enroll, false = chưa enroll
+  const [enrolled,         setEnrolled]         = useState(false);
+  const [learningProgress, setLearningProgress] = useState(null);
+
+  // Auth modal: null | 'login' | 'register'
+  const [authModal, setAuthModal] = useState(null);
+
+  // Load course detail
   useEffect(() => {
     setLoading(true);
     setError('');
@@ -73,7 +82,36 @@ export default function CourseDetail() {
       .finally(() => setLoading(false));
   }, [id]);
 
-  // Sticky tabs — show after hero scrolls past
+  // Kiểm tra enrollment từ DB qua endpoint riêng
+  useEffect(() => {
+    if (!user || user.role !== 'Learner') {
+      setEnrolled(false);
+      setLearningProgress(null);
+      return;
+    }
+    // Đặt null để hiện spinner trong lúc check
+    setEnrolled(null);
+    api.get(`/courses/${id}/enrollment`)
+      .then(res => {
+        if (res.data.success && res.data.data?.isEnrolled) {
+          setEnrolled(true);
+          // Lấy thêm progress nếu đã enrolled
+          return api.get(`/courses/${id}/learning-view`)
+            .then(lv => {
+              if (lv.data.success) setLearningProgress(lv.data.data?.progress ?? null);
+            })
+            .catch(() => {});
+        } else {
+          setEnrolled(false);
+        }
+      })
+      .catch(() => {
+        setEnrolled(false);
+        setLearningProgress(null);
+      });
+  }, [user, id]);
+
+  // Sticky tabs
   useEffect(() => {
     const onScroll = () => setStickyVisible(window.scrollY > 300);
     window.addEventListener('scroll', onScroll, { passive: true });
@@ -81,20 +119,69 @@ export default function CourseDetail() {
   }, []);
 
   const handleEnroll = async () => {
-    if (!user) {
-      navigate('/expert/login');
-      return;
-    }
+    if (!user) { setAuthModal('login'); return; }
     setEnrolling(true);
     try {
       const res = await api.post(`/courses/${id}/enroll`);
-      if (res.data.success) setEnrolled(true);
+      if (res.data.success) {
+        setEnrolled(true);
+        // Lấy luôn progress sau khi enroll
+        const lv = await api.get(`/courses/${id}/learning-view`);
+        if (lv.data.success) setLearningProgress(lv.data.data?.progress ?? null);
+      }
     } catch (err) {
-      const msg = err.response?.data?.errorMessage ?? 'Đăng ký thất bại. Vui lòng thử lại.';
-      alert(msg);
+      const status = err.response?.status;
+      const msg    = err.response?.data?.errorMessage;
+      if (status === 401) { setAuthModal('login'); return; }
+      if (status === 403) {
+        alert('Chức năng này chỉ dành cho học viên. Vui lòng đăng nhập bằng tài khoản học viên.');
+        return;
+      }
+      alert(msg ?? 'Đăng ký thất bại. Vui lòng thử lại.');
     } finally {
       setEnrolling(false);
     }
+  };
+
+  const handleGoToLearning = () => navigate(`/learning/${id}`);
+
+  // Render nút action tùy trạng thái enrollment
+  const renderAction = (size = 'normal') => {
+    const sm = size === 'small';
+
+    // Đang check enrollment — skeleton nhỏ
+    if (enrolled === null) {
+      return (
+        <div className={sm ? styles.btnEnrollSm : styles.btnEnroll}
+          style={{ opacity: 0.5, pointerEvents: 'none', display: 'flex', justifyContent: 'center' }}>
+          <span className={styles.spinner} />
+        </div>
+      );
+    }
+
+    if (enrolled) {
+      const label = (learningProgress?.percent ?? 0) > 0
+        ? `Tiếp tục học (${Math.round(learningProgress.percent)}%)`
+        : 'Bắt đầu học';
+      const icon = (learningProgress?.percent ?? 0) > 0 ? 'fa-play' : 'fa-graduation-cap';
+      return (
+        <button className={sm ? styles.btnLearnSm : styles.btnLearn} onClick={handleGoToLearning}>
+          <i className={`fas ${icon}`} /> {label}
+        </button>
+      );
+    }
+
+    return (
+      <button
+        className={sm ? styles.btnEnrollSm : styles.btnEnroll}
+        onClick={handleEnroll}
+        disabled={enrolling}
+      >
+        {enrolling
+          ? <><span className={styles.spinner} /> Đang xử lý...</>
+          : <><i className="fas fa-graduation-cap" /> Đăng ký học ngay</>}
+      </button>
+    );
   };
 
   if (loading) {
@@ -118,7 +205,8 @@ export default function CourseDetail() {
     );
   }
 
-  const totalMaterials = course.modules.reduce((s, m) => s + m.materials.length, 0);
+  const totalMaterials  = course.modules.reduce((s, m) => s + m.materials.length, 0);
+  const progressPercent = learningProgress ? Math.round(learningProgress.percent) : 0;
 
   return (
     <div className={styles.page}>
@@ -126,16 +214,15 @@ export default function CourseDetail() {
       {/* ── STICKY SECONDARY TABS ─────────────────────────── */}
       <div className={`${styles.stickyTabs} ${stickyVisible ? styles.stickyVisible : ''}`}>
         <div className={styles.stickyTabsInner}>
-          <a href="#learn"       className={styles.stickyTab}>Học gì</a>
-          <a href="#curriculum"  className={styles.stickyTab}>Nội dung</a>
-          <a href="#instructor"  className={styles.stickyTab}>Giảng viên</a>
+          <a href="#learn"      className={styles.stickyTab}>Học gì</a>
+          <a href="#curriculum" className={styles.stickyTab}>Nội dung</a>
+          <a href="#instructor" className={styles.stickyTab}>Giảng viên</a>
         </div>
       </div>
 
       {/* ── HERO ──────────────────────────────────────────── */}
       <section className={styles.hero} id="hero">
         <div className={styles.heroInner}>
-          {/* Breadcrumb */}
           <nav className={styles.breadcrumb} aria-label="breadcrumb">
             <Link to="/courses">Trang chủ</Link>
             <span className={styles.bcSep}>›</span>
@@ -145,34 +232,18 @@ export default function CourseDetail() {
           </nav>
 
           <h1 className={styles.heroTitle}>{course.name}</h1>
-          {course.description && (
-            <p className={styles.heroSubtitle}>{course.description}</p>
-          )}
+          {course.description && <p className={styles.heroSubtitle}>{course.description}</p>}
 
           <div className={styles.heroAuthor}>
             Tạo bởi{' '}
-            <a href="#instructor" className={styles.heroAuthorLink}>
-              {course.author?.fullName}
-            </a>
+            <a href="#instructor" className={styles.heroAuthorLink}>{course.author?.fullName}</a>
           </div>
 
           <div className={styles.metaRow}>
-            <span className={styles.metaItem}>
-              <i className="fas fa-layer-group" />
-              {LEVEL_LABELS[course.level] ?? course.level}
-            </span>
-            <span className={styles.metaItem}>
-              <i className="fas fa-clock" />
-              {course.durationHours}h học
-            </span>
-            <span className={styles.metaItem}>
-              <i className="fas fa-book-open" />
-              {course.totalModules} module · {course.totalMaterials} bài học
-            </span>
-            <span className={styles.metaItem}>
-              <i className="fas fa-tag" />
-              {course.category?.name}
-            </span>
+            <span className={styles.metaItem}><i className="fas fa-layer-group" />{LEVEL_LABELS[course.level] ?? course.level}</span>
+            <span className={styles.metaItem}><i className="fas fa-clock" />{course.durationHours}h học</span>
+            <span className={styles.metaItem}><i className="fas fa-book-open" />{course.totalModules} module · {course.totalMaterials} bài học</span>
+            <span className={styles.metaItem}><i className="fas fa-tag" />{course.category?.name}</span>
           </div>
         </div>
       </section>
@@ -190,8 +261,7 @@ export default function CourseDetail() {
               {course.tags?.length > 0 ? (
                 course.tags.map(tag => (
                   <div key={tag.id} className={styles.learnItem}>
-                    <i className="fas fa-check" />
-                    <span>{tag.name}</span>
+                    <i className="fas fa-check" /><span>{tag.name}</span>
                   </div>
                 ))
               ) : (
@@ -230,7 +300,6 @@ export default function CourseDetail() {
                 {course.totalModules} module · {totalMaterials} bài học · {course.durationHours}h
               </span>
             </div>
-
             {course.modules.length > 0 ? (
               <div className={styles.moduleAccordion}>
                 {course.modules.map((mod, i) => (
@@ -263,9 +332,7 @@ export default function CourseDetail() {
                     </span>
                   )}
                 </div>
-                {course.author?.bio && (
-                  <p className={styles.instructorBio}>{course.author.bio}</p>
-                )}
+                {course.author?.bio && <p className={styles.instructorBio}>{course.author.bio}</p>}
               </div>
             </div>
           </section>
@@ -275,7 +342,6 @@ export default function CourseDetail() {
         {/* ══ SIDEBAR ══ */}
         <aside className={styles.sidebarCol} ref={sidebarRef}>
           <div className={styles.enrollCard}>
-            {/* Thumbnail */}
             <div className={styles.thumbWrap}>
               <div className={styles.thumbWrapInner}>
                 <img
@@ -290,26 +356,23 @@ export default function CourseDetail() {
             </div>
 
             <div className={styles.enrollBody}>
-              {/* Price placeholder — free for now */}
               <div className={styles.priceRow}>
                 <span className={styles.priceFree}>Miễn phí</span>
               </div>
 
-              {enrolled ? (
-                <div className={styles.enrolledMsg}>
-                  <i className="fas fa-check-circle" /> Đã đăng ký thành công!
+              {/* Progress bar — chỉ hiện khi đã enrolled và có tiến độ */}
+              {enrolled && learningProgress && learningProgress.totalMaterials > 0 && (
+                <div className={styles.progressWrap}>
+                  <div className={styles.progressBar}>
+                    <div className={styles.progressFill} style={{ width: `${progressPercent}%` }} />
+                  </div>
+                  <span className={styles.progressLabel}>
+                    {progressPercent}% hoàn thành · {learningProgress.completedMaterials}/{learningProgress.totalMaterials} bài
+                  </span>
                 </div>
-              ) : (
-                <button
-                  className={styles.btnEnroll}
-                  onClick={handleEnroll}
-                  disabled={enrolling}
-                >
-                  {enrolling
-                    ? <><span className={styles.spinner} /> Đang xử lý...</>
-                    : <><i className="fas fa-graduation-cap" /> Đăng ký học ngay</>}
-                </button>
               )}
+
+              {renderAction('normal')}
 
               <ul className={styles.includesList}>
                 <li><i className="fas fa-clock" /> {course.durationHours}h nội dung học</li>
@@ -321,7 +384,7 @@ export default function CourseDetail() {
             </div>
           </div>
 
-          {/* Related info */}
+          {/* Info card */}
           <div className={styles.infoCard}>
             <h3>Thông tin khóa học</h3>
             <ul className={styles.infoList}>
@@ -350,14 +413,24 @@ export default function CourseDetail() {
           <span className={styles.priceFree}>Miễn phí</span>
           <span className={styles.enrollBarTitle}>{course.name}</span>
         </div>
-        {enrolled ? (
-          <span className={styles.enrolledMsgSm}><i className="fas fa-check" /> Đã đăng ký</span>
-        ) : (
-          <button className={styles.btnEnrollSm} onClick={handleEnroll} disabled={enrolling}>
-            {enrolling ? 'Đang xử lý...' : 'Đăng ký'}
-          </button>
-        )}
+        {renderAction('small')}
       </div>
+
+      {/* ── AUTH MODALS ─────────────────────────────────────── */}
+      {authModal === 'login' && (
+        <LoginModal
+          onClose={() => setAuthModal(null)}
+          onSwitchToRegister={() => setAuthModal('register')}
+          onLoginSuccess={() => setAuthModal(null)}
+        />
+      )}
+      {authModal === 'register' && (
+        <RegisterModal
+          onClose={() => setAuthModal(null)}
+          onSwitchToLogin={() => setAuthModal('login')}
+          onRegisterSuccess={() => setAuthModal(null)}
+        />
+      )}
     </div>
   );
 }

@@ -500,6 +500,57 @@
 
 .btnEnroll:disabled { opacity: 0.65; cursor: not-allowed; }
 
+/* ── LEARN BUTTON ─────────────────────────────────────────────────── */
+.btnLearn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 14px;
+  background: #1db954;
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.15s;
+  margin-bottom: 16px;
+}
+
+.btnLearn:hover {
+  background: #15a046;
+  transform: translateY(-1px);
+}
+
+/* ── PROGRESS BAR ──────────────────────────────────────────────────── */
+.progressWrap {
+  margin-bottom: 14px;
+}
+
+.progressBar {
+  height: 6px;
+  background: #e5e7eb;
+  border-radius: 3px;
+  overflow: hidden;
+  margin-bottom: 6px;
+}
+
+.progressFill {
+  height: 100%;
+  background: #1db954;
+  border-radius: 3px;
+  transition: width 0.5s ease;
+}
+
+.progressLabel {
+  font-size: 0.72rem;
+  color: #6a6f73;
+  font-weight: 600;
+}
+
 .enrolledMsg {
   width: 100%;
   padding: 13px;
@@ -629,6 +680,25 @@
 
 .btnEnrollSm:hover:not(:disabled) { background: #003d99; }
 .btnEnrollSm:disabled { opacity: 0.65; cursor: not-allowed; }
+
+.btnLearnSm {
+  padding: 10px 20px;
+  background: #1db954;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.88rem;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background 0.15s;
+  white-space: nowrap;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.btnLearnSm:hover { background: #15a046; }
 
 .enrolledMsgSm {
   font-size: 0.82rem;
