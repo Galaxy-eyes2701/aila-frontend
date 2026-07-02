@@ -22,3 +22,7 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+FRONTEND_API.md
+CLAUDE.md
+.githistory
+spec-public-expert-profile-ui.md

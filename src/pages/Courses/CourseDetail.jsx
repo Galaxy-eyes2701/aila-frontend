@@ -151,9 +151,9 @@ export default function CourseDetail() {
 
           <div className={styles.heroAuthor}>
             Tạo bởi{' '}
-            <a href="#instructor" className={styles.heroAuthorLink}>
+            <Link to={`/experts/${course.author?.userId}`} className={styles.heroAuthorLink}>
               {course.author?.fullName}
-            </a>
+            </Link>
           </div>
 
           <div className={styles.metaRow}>
@@ -246,14 +246,18 @@ export default function CourseDetail() {
           <section className={styles.sectionCard} id="instructor">
             <h2 className={styles.sectionTitle}>Giảng viên</h2>
             <div className={styles.instructorCard}>
-              <img
-                src={course.author?.avatarUrl || DEFAULT_AVATAR}
-                alt={course.author?.fullName}
-                className={styles.instructorAvatar}
-                onError={e => { e.target.src = DEFAULT_AVATAR; }}
-              />
+              <Link to={`/experts/${course.author?.userId}`}>
+                <img
+                  src={course.author?.avatarUrl || DEFAULT_AVATAR}
+                  alt={course.author?.fullName}
+                  className={styles.instructorAvatar}
+                  onError={e => { e.target.src = DEFAULT_AVATAR; }}
+                />
+              </Link>
               <div className={styles.instructorInfo}>
-                <div className={styles.instructorName}>{course.author?.fullName}</div>
+                <Link to={`/experts/${course.author?.userId}`} className={styles.instructorName}>
+                  {course.author?.fullName}
+                </Link>
                 <div className={styles.instructorHeadline}>{course.author?.specialty}</div>
                 <div className={styles.instructorStats}>
                   {course.author?.yearsOfExperience > 0 && (
