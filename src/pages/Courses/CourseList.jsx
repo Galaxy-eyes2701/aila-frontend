@@ -115,7 +115,7 @@ export default function CourseList() {
       const res = await api.get('/courses', { params });
       if (res.data.success) {
         const data = res.data.data;
-        setTotal(data.totalCount ?? 0);
+        setTotal(data.totalItems ?? 0);
         if (page === 0) {
           setCourses(data.items ?? []);
         } else {
