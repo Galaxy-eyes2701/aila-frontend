@@ -311,31 +311,7 @@ export default function CourseDetail() {
             )}
           </section>
 
-          {/* INSTRUCTOR */}
-          <section className={styles.sectionCard} id="instructor">
-            <h2 className={styles.sectionTitle}>Giảng viên</h2>
-            <div className={styles.instructorCard}>
-              <img
-                src={course.author?.avatarUrl || DEFAULT_AVATAR}
-                alt={course.author?.fullName}
-                className={styles.instructorAvatar}
-                onError={e => { e.target.src = DEFAULT_AVATAR; }}
-              />
-              <div className={styles.instructorInfo}>
-                <div className={styles.instructorName}>{course.author?.fullName}</div>
-                <div className={styles.instructorHeadline}>{course.author?.specialty}</div>
-                <div className={styles.instructorStats}>
-                  {course.author?.yearsOfExperience > 0 && (
-                    <span className={styles.instructorStat}>
-                      <i className="fas fa-briefcase" />
-                      <strong>{course.author.yearsOfExperience}</strong> năm kinh nghiệm
-                    </span>
-                  )}
-                </div>
-                {course.author?.bio && <p className={styles.instructorBio}>{course.author.bio}</p>}
-              </div>
-            </div>
-          </section>
+       
 
         </div>
 
