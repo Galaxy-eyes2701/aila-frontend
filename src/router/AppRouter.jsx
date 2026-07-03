@@ -21,6 +21,7 @@ import LearnerProtectedRoute from "./LearnerProtectedRoute";
 import LearningView from "../pages/LearningView/LearningView";
 import GoogleCallback from '../pages/GoogleCallback/GoogleCallback';
 import BlogList from '../pages/BlogList/BlogList';
+import PublicExpertProfile from '../pages/PublicExpertProfile/PublicExpertProfile';
 
 const router = createBrowserRouter([
   // ── Auth pages (không có Header) ─────────────────────────────
@@ -73,6 +74,7 @@ const router = createBrowserRouter([
       { index: true, element: <Home /> },
       { path: "courses", element: <CourseList /> },
       { path: "courses/:id", element: <CourseDetail /> },
+      { path: "experts/:expertId", element: <PublicExpertProfile /> },
       { path: "blogs/:id", element: <BlogDetail /> },
       { path: 'blogs', element: <BlogList /> },
 

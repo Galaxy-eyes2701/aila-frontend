@@ -236,7 +236,9 @@ export default function CourseDetail() {
 
           <div className={styles.heroAuthor}>
             Tạo bởi{' '}
-            <a href="#instructor" className={styles.heroAuthorLink}>{course.author?.fullName}</a>
+            <Link to={`/experts/${course.author?.userId}`} className={styles.heroAuthorLink}>
+              {course.author?.fullName}
+            </Link>
           </div>
 
           <div className={styles.metaRow}>
@@ -311,7 +313,37 @@ export default function CourseDetail() {
             )}
           </section>
 
-       
+          {/* INSTRUCTOR */}
+          <section className={styles.sectionCard} id="instructor">
+            <h2 className={styles.sectionTitle}>Giảng viên</h2>
+            <div className={styles.instructorCard}>
+              <Link to={`/experts/${course.author?.userId}`}>
+                <img
+                  src={course.author?.avatarUrl || DEFAULT_AVATAR}
+                  alt={course.author?.fullName}
+                  className={styles.instructorAvatar}
+                  onError={e => { e.target.src = DEFAULT_AVATAR; }}
+                />
+              </Link>
+              <div className={styles.instructorInfo}>
+                <Link to={`/experts/${course.author?.userId}`} className={styles.instructorName}>
+                  {course.author?.fullName}
+                </Link>
+                <div className={styles.instructorHeadline}>{course.author?.specialty}</div>
+                <div className={styles.instructorStats}>
+                  {course.author?.yearsOfExperience > 0 && (
+                    <span className={styles.instructorStat}>
+                      <i className="fas fa-briefcase" />
+                      <strong>{course.author.yearsOfExperience}</strong> năm kinh nghiệm
+                    </span>
+                  )}
+                </div>
+                {course.author?.bio && (
+                  <p className={styles.instructorBio}>{course.author.bio}</p>
+                )}
+              </div>
+            </div>
+          </section>
 
         </div>
 
