@@ -65,6 +65,10 @@ export default function Header({ onLoginClick }) {
       };
 
       fetchNotifications();
+        window.addEventListener('notifications-updated', fetchNotifications);
+      return () => {
+        window.removeEventListener('notifications-updated', fetchNotifications);
+      };
     }, [user]);
 
   const handleLogout = () => {

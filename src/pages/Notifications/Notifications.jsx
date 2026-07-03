@@ -81,13 +81,26 @@ export default function Notifications() {
     fetchNotifications();
   }, []);
 
-  const markAllRead = () =>
-    setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })));
+    const markAllRead = async () => {
+    setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
+    try {
+      await api.patch('/notifications/read-all');
+      window.dispatchEvent(new CustomEvent('notifications-updated'));
+    } catch { }
+  };
 
-  const markOneRead = (id) =>
-    setNotifications((prev) =>
-      prev.map((n) => (n.id === id ? { ...n, isRead: true } : n))
+  const markOneRead = async (id) => {
+    const notification = notifications.find(n => n.id === id);
+    if (!notification || notification.isRead) return;
+
+    setNotifications(prev =>
+      prev.map(n => n.id === id ? { ...n, isRead: true } : n)
     );
+    try {
+      await api.patch(`/notifications/${id}/read`);
+      window.dispatchEvent(new CustomEvent('notifications-updated'));
+    } catch { }
+  };
 
     // Lọc theo filter
     const filtered =
