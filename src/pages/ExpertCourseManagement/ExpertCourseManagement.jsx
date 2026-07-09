@@ -246,7 +246,7 @@ function CourseFormModal({ mode, initialData, categories, tags, onClose, onSaved
 }
 
 /* ── Course Row Card ──────────────────────────────────────────────────────── */
-function CourseRow({ course, onEdit, onPublish, onUnpublish, onManageModules }) {
+function CourseRow({ course, onEdit, onPublish, onUnpublish }) {
   const isPublished = course.isPublished;
   const [busy, setBusy] = useState(false);
 
@@ -300,14 +300,6 @@ function CourseRow({ course, onEdit, onPublish, onUnpublish, onManageModules }) 
           title="Chỉnh sửa thông tin"
         >
           <i className="fas fa-pen" /> Sửa
-        </button>
-
-        <button
-          className={styles.actionBtn}
-          onClick={() => onManageModules(course.id)}
-          title="Quản lý module & bài học"
-        >
-          <i className="fas fa-list-ul" /> Module
         </button>
 
         {isPublished ? (
@@ -615,7 +607,6 @@ export default function ExpertCourseManagement() {
                 onEdit={handleEdit}
                 onPublish={handlePublish}
                 onUnpublish={handleUnpublish}
-                onManageModules={id => navigate(`/expert/courses/${id}/modules`)}
               />
             ))}
           </div>

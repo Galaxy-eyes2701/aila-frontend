@@ -40,7 +40,7 @@ export default function ExpertLogin() {
           email:    data.email,
           role:     data.role,
         });
-        navigate('/expert/profile');
+        navigate('/expert');
       } else {
         setError(res.data.errorMessage || 'Đăng nhập thất bại.');
       }
