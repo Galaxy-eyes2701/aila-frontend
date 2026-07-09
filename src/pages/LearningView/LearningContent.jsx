@@ -1,5 +1,9 @@
 // LearningContent.jsx
+import { useEffect, useState } from "react";
 import DOMPurify from "dompurify";
+import { useParams } from "react-router-dom";
+import QuizPanel from "./QuizPanel";
+import ReportCourseModal from "../Report/ReportCourseModal";
 import styles from "./LearningView.module.css";
 
 export default function LearningContent({
@@ -9,6 +13,16 @@ export default function LearningContent({
   hasNextLesson,
   onNextLesson,
 }) {
+  const { courseId } = useParams();
+  const [showReport, setShowReport] = useState(false);
+  const [reportToast, setReportToast] = useState(false);
+
+  useEffect(() => {
+    if (!reportToast) return undefined;
+    const id = setTimeout(() => setReportToast(false), 3000);
+    return () => clearTimeout(id);
+  }, [reportToast]);
+
   if (contentLoading) {
     return (
       <div className={styles.contentArea}>
@@ -110,6 +124,13 @@ export default function LearningContent({
                 </div>
               )}
             </div>
+          ) : /* ── 3. ĐỊNH DẠNG: QUIZ (Bài kiểm tra) ── */
+          type.includes("quiz") ? (
+            <QuizPanel
+              key={currentMaterial.id}
+              courseId={courseId}
+              materialId={currentMaterial.id}
+            />
           ) : (
             /* ── TRƯỜNG HỢP KHÁC ── */
             <div className={styles.noDetail}>
@@ -117,6 +138,17 @@ export default function LearningContent({
               tiết.
             </div>
           )}
+        </div>
+
+        {/* Nút báo cáo khóa học — hiển thị trước phần đánh dấu hoàn thành */}
+        <div className={styles.reportBar}>
+          <button
+            type="button"
+            className={styles.reportBtn}
+            onClick={() => setShowReport(true)}
+          >
+            <i className="fas fa-flag" /> Báo cáo khóa học
+          </button>
         </div>
 
         {/* Action Bar dưới học liệu */}
@@ -143,6 +175,25 @@ export default function LearningContent({
           </div>
         </div>
       </div>
+
+      {showReport && (
+        <ReportCourseModal
+          courseId={courseId}
+          courseName={currentMaterial.courseName}
+          onClose={() => setShowReport(false)}
+          onSuccess={() => {
+            setShowReport(false);
+            setReportToast(true);
+          }}
+        />
+      )}
+
+      {reportToast && (
+        <div className={styles.reportToast}>
+          <i className="fas fa-circle-check" /> Đã gửi báo cáo. Cảm ơn bạn đã
+          đóng góp!
+        </div>
+      )}
     </div>
   );
 }

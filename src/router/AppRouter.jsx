@@ -23,6 +23,9 @@ import LearningView from "../pages/LearningView/LearningView";
 import GoogleCallback from '../pages/GoogleCallback/GoogleCallback';
 import BlogList from '../pages/BlogList/BlogList';
 import PublicExpertProfile from '../pages/PublicExpertProfile/PublicExpertProfile';
+import QuizTakingPage from "../pages/Quiz/QuizTakingPage";
+import QuizResultPage from "../pages/Quiz/QuizResultPage";
+import QuizResultDetailPage from "../pages/Quiz/QuizResultDetailPage";
 
 const router = createBrowserRouter([
   // ── Auth pages (không có Header) ─────────────────────────────
@@ -102,6 +105,32 @@ const router = createBrowserRouter([
         element: (
           <LearnerProtectedRoute>
             <LearningView />
+          </LearnerProtectedRoute>
+        ),
+      },
+
+      // ── Quiz (UC-26 làm bài, UC-27 xem kết quả) ──
+      {
+        path: "courses/:courseId/materials/:materialId/quiz",
+        element: (
+          <LearnerProtectedRoute>
+            <QuizTakingPage />
+          </LearnerProtectedRoute>
+        ),
+      },
+      {
+        path: "courses/:courseId/materials/:materialId/quiz/result",
+        element: (
+          <LearnerProtectedRoute>
+            <QuizResultPage />
+          </LearnerProtectedRoute>
+        ),
+      },
+      {
+        path: "courses/:courseId/materials/:materialId/quiz/result/detail",
+        element: (
+          <LearnerProtectedRoute>
+            <QuizResultDetailPage />
           </LearnerProtectedRoute>
         ),
       },

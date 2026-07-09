@@ -425,3 +425,126 @@
   50% { opacity: 1; }
   100% { opacity: 0.6; }
 }
+/* ── Quiz CTA (học liệu loại Quiz) ─────────────────────────────────────── */
+.quizCta {
+  text-align: center;
+  padding: 48px 32px;
+  background: var(--bg-card);
+  border: 1px dashed var(--border);
+  border-radius: var(--radius);
+}
+.quizCtaIcon {
+  font-size: 48px;
+  color: var(--primary);
+  margin-bottom: 16px;
+}
+.quizCtaTitle {
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--text);
+  margin-bottom: 8px;
+}
+.quizCtaDesc {
+  font-size: 15px;
+  color: var(--text-muted);
+  line-height: 1.55;
+  max-width: 460px;
+  margin: 0 auto 24px;
+}
+.quizCtaActions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+.quizStartBtn,
+.quizResultBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 24px;
+  border-radius: var(--radius-sm);
+  font-weight: 700;
+  font-size: 15px;
+  transition: background var(--transition), border-color var(--transition);
+}
+.quizStartBtn { background: var(--primary); color: #fff; }
+.quizStartBtn:hover { background: var(--primary-dark); }
+.quizResultBtn {
+  background: transparent;
+  color: var(--text-muted);
+  border: 1.5px solid var(--border);
+}
+.quizResultBtn:hover { border-color: var(--primary); color: var(--primary); }
+
+/* ── Quiz đã có kết quả (điểm số + đạt/chưa đạt) ────────────────────────── */
+.quizScoreRow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  flex-wrap: wrap;
+  margin-bottom: 24px;
+}
+.quizScoreNum {
+  font-size: 40px;
+  font-weight: 900;
+  line-height: 1;
+  color: var(--text);
+}
+.quizScoreNum span {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-muted);
+}
+.quizPassBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 18px;
+  border-radius: 999px;
+  font-weight: 800;
+  font-size: 15px;
+}
+.quizPassBadgePass { background: #d7f0df; color: #1d7a3e; }
+.quizPassBadgeFail { background: #fbe0e0; color: #c62828; }
+
+/* ── Nút báo cáo khóa học (cuối mỗi học liệu) ───────────────────────────── */
+.reportBar {
+  display: flex;
+  justify-content: flex-start;
+  padding: 20px 0 4px;
+  margin-top: 16px;
+  border-top: 1px solid var(--border);
+}
+.reportBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 14px;
+  font-weight: 600;
+  padding: 8px 16px;
+  border-radius: var(--radius-sm);
+  transition: background var(--transition), color var(--transition);
+}
+.reportBtn:hover { background: #fdecec; color: #c62828; }
+
+.reportToast {
+  position: fixed;
+  bottom: 28px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #1d7a3e;
+  color: #fff;
+  padding: 14px 22px;
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow);
+  font-weight: 600;
+  font-size: 15px;
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
