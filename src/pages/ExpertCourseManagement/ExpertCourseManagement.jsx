@@ -206,9 +206,19 @@ function CourseFormModal({ mode, initialData, categories, tags, onClose, onSaved
             </div>
 
             {/* Tags */}
-            {tags.length > 0 && (
-              <div className={styles.formGroup}>
+            <div className={styles.formGroup}>
+              <div className={styles.tagLabelRow}>
                 <label className={styles.formLabel}><i className="fas fa-hashtag" /> Kỹ năng / Tags</label>
+                <Link
+                  to="/expert/tags"
+                  target="_blank"
+                  className={styles.tagCreateLink}
+                  title="Tạo tag mới (mở tab mới)"
+                >
+                  <i className="fas fa-plus" /> Tạo tag mới
+                </Link>
+              </div>
+              {tags.length > 0 ? (
                 <div className={styles.tagPicker}>
                   {tags.map(tag => (
                     <button
@@ -221,8 +231,15 @@ function CourseFormModal({ mode, initialData, categories, tags, onClose, onSaved
                     </button>
                   ))}
                 </div>
-              </div>
-            )}
+              ) : (
+                <p className={styles.tagEmpty}>
+                  Chưa có tag nào.{' '}
+                  <Link to="/expert/tags" target="_blank" className={styles.tagCreateLink}>
+                    Tạo tag mới
+                  </Link>
+                </p>
+              )}
+            </div>
 
             {formError && (
               <div className={styles.formError}>
@@ -302,6 +319,14 @@ function CourseRow({ course, onEdit, onPublish, onUnpublish }) {
           <i className="fas fa-pen" /> Sửa
         </button>
 
+        <Link
+          to={`/expert/courses/${course.id}/modules`}
+          className={styles.actionBtn}
+          title="Quản lý module & bài học"
+        >
+          <i className="fas fa-list-ul" /> Module
+        </Link>
+
         {isPublished ? (
           <button
             className={`${styles.actionBtn} ${styles.actionBtnWarning}`}
@@ -376,9 +401,18 @@ export default function ExpertCourseManagement() {
     Promise.all([
       api.get('/categories'),
       api.get('/tags'),
-    ]).then(([catRes, tagRes]) => {
+      api.get('/tags/me'),
+    ]).then(([catRes, tagRes, myTagRes]) => {
       if (catRes.data.success) setCategories(catRes.data.data ?? []);
-      if (tagRes.data.success) setTags(tagRes.data.data ?? []);
+
+      // Gộp published tags + tags của expert (đã duyệt hoặc chưa), tránh trùng id
+      const publicTags = tagRes.data.success ? (tagRes.data.data ?? []) : [];
+      const myTags     = myTagRes.data.success ? (myTagRes.data.data ?? []) : [];
+      const merged     = [...publicTags];
+      myTags.forEach(t => {
+        if (!merged.find(p => p.id === t.id)) merged.push(t);
+      });
+      setTags(merged);
     }).catch(() => {});
   }, []);
 
