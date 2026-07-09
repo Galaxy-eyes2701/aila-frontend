@@ -6,10 +6,10 @@ import styles from './ExpertHeader.module.css';
 
 const DEFAULT_AVATAR = 'https://i.pravatar.cc/80';
 
-// Nav links dành riêng cho Expert — bạn bổ sung sau khi có yêu cầu
+// Nav links dành riêng cho Expert
 const EXPERT_NAV_LINKS = [
-  // { label: 'Quản lý khóa học', href: '/expert/courses' },
-  // { label: 'Học viên',         href: '/expert/students' },
+  { label: 'Trang chủ',        href: '/expert'         },
+  { label: 'Quản lý khóa học', href: '/expert/courses' },
 ];
 
 export default function ExpertHeader() {
@@ -65,7 +65,7 @@ export default function ExpertHeader() {
     <header className={styles.navbar}>
       <div className={`container ${styles.navContent}`}>
         {/* Logo */}
-        <Link to="/" className={styles.logo}>
+        <Link to="/expert" className={styles.logo}>
           Bình Dân <span>Học AI</span>
         </Link>
 
