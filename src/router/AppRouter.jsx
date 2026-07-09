@@ -8,6 +8,7 @@ import ExpertLayout from "../layout/ExpertLayout";
 import AdminLogin from "../pages/AdminLogin/AdminLogin";
 import ExpertLogin from "../pages/ExpertLogin/ExpertLogin";
 import ExpertProfile from "../pages/ExpertProfile/ExpertProfile";
+import ModuleManagement from "../pages/ModuleManagement/ModuleManagement";
 import Notifications from "../pages/Notifications/Notifications";
 import CourseList from "../pages/Courses/CourseList";
 import CourseDetail from "../pages/Courses/CourseDetail";
@@ -61,6 +62,7 @@ const router = createBrowserRouter([
     children: [
       { index: true, element: <Navigate to="/expert/profile" replace /> },
       { path: "profile", element: <ExpertProfile /> },
+      { path: "courses/:courseId/modules", element: <ModuleManagement /> },
       { path: "notifications", element: <Notifications /> },
     ],
   },
