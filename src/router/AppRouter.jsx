@@ -26,6 +26,9 @@ import PublicExpertProfile from '../pages/PublicExpertProfile/PublicExpertProfil
 import QuizTakingPage from "../pages/Quiz/QuizTakingPage";
 import QuizResultPage from "../pages/Quiz/QuizResultPage";
 import QuizResultDetailPage from "../pages/Quiz/QuizResultDetailPage";
+import CoursesPage from "../pages/LearningProfile/CoursesPage";
+import QuizHistoryPage from "../pages/LearningProfile/QuizHistoryPage";
+import AiScenariosPage from "../pages/LearningProfile/AiScenariosPage";
 
 const router = createBrowserRouter([
   // ── Auth pages (không có Header) ─────────────────────────────
@@ -89,6 +92,30 @@ const router = createBrowserRouter([
         element: (
           <LearnerProtectedRoute>
             <LearnerProfile />
+          </LearnerProtectedRoute>
+        ),
+      },
+      {
+        path: "profile/courses",
+        element: (
+          <LearnerProtectedRoute>
+            <CoursesPage />
+          </LearnerProtectedRoute>
+        ),
+      },
+      {
+        path: "profile/quiz-history",
+        element: (
+          <LearnerProtectedRoute>
+            <QuizHistoryPage />
+          </LearnerProtectedRoute>
+        ),
+      },
+      {
+        path: "profile/ai-scenarios",
+        element: (
+          <LearnerProtectedRoute>
+            <AiScenariosPage />
           </LearnerProtectedRoute>
         ),
       },

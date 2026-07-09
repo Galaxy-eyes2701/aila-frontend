@@ -8,6 +8,7 @@ const Pagination = ({
   totalItems,
   onPageChange,
   onItemsPerPageChange,
+  unitLabel = "sản phẩm",
 }) => {
   const getPageNumbers = () => {
     const pageNumbers = [];
@@ -36,7 +37,7 @@ const Pagination = ({
     <div className={styles.pagination}>
       <div className={styles.paginationInfo}>
         Hiển thị {indexOfFirstItem}-{indexOfLastItem} trong tổng số {totalItems}{" "}
-        sản phẩm
+        {unitLabel}
       </div>
 
       <div className={styles.paginationControls}>

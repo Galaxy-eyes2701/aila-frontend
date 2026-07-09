@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
 import api from '../../utils/api';
+import LearningSections from '../LearningProfile/LearningSections';
 import styles from './LearnerProfile.module.css';
 
 const AVATAR_ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
@@ -56,7 +56,6 @@ function ProfileSkeleton() {
 
 /* ── Component ── */
 export default function LearnerProfile() {
-  const navigate = useNavigate();
   const [profile, setProfile] = useState(null);
   const [tags, setTags] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -592,58 +591,8 @@ export default function LearnerProfile() {
 
             </div>
 
-            {/* ── Khóa học đã tham gia ── */}
-            {profile.enrollments && profile.enrollments.length > 0 && (
-              <div className={styles.enrollSection}>
-                <div className={styles.enrollHeader}>
-                  <h2 className={styles.enrollTitle}>
-                    <i className="fas fa-book-open" /> Khóa học đã tham gia
-                  </h2>
-                  <Link to="/courses" className={styles.enrollSeeAll}>
-                    Xem tất cả <i className="fas fa-arrow-right" />
-                  </Link>
-                </div>
-                <div className={styles.enrollGrid}>
-                  {profile.enrollments.slice(0, 4).map(en => (
-                    <div
-                      key={en.courseId}
-                      className={styles.courseCard}
-                      onClick={() => navigate(`/courses/${en.courseId}`)}
-                    >
-                      <div className={styles.courseThumb}>
-                        {en.thumbnailUrl
-                          ? <img className={styles.courseImg} src={en.thumbnailUrl} alt={en.courseName} />
-                          : <div className={styles.courseImgFallback}><i className="fas fa-play-circle" /></div>
-                        }
-                        <span className={`${styles.statusBadge} ${en.status === 'Completed' ? styles.statusCompleted : styles.statusActive}`}>
-                          {en.status === 'Completed' ? 'Hoàn thành' : 'Đang học'}
-                        </span>
-                      </div>
-                      <div className={styles.courseInfo}>
-                        {en.categoryName && <div className={styles.courseCat}>{en.categoryName}</div>}
-                        <div className={styles.courseName}>{en.courseName}</div>
-                        {en.description && <p className={styles.courseDesc}>{en.description}</p>}
-                        <div className={styles.progressRow}>
-                          <div className={styles.progressTrack}>
-                            <div className={styles.progressFill} style={{ width: `${en.progressPct}%` }} />
-                          </div>
-                          <span className={styles.progressPct}>{en.progressPct}%</span>
-                        </div>
-                        <div className={styles.courseFoot}>
-                          <span className={styles.courseMeta}>
-                            <i className="fas fa-clock" /> {en.durationHours} giờ
-                          </span>
-                          {en.status === 'Completed'
-                            ? <span className={styles.courseCertificate}><i className="fas fa-check-circle" /> Hoàn thành</span>
-                            : <span className={styles.btnContinue}><i className="fas fa-play" /> Tiếp tục</span>
-                          }
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
+            {/* ── Các khối học tập UC-30 ── */}
+            <LearningSections profile={profile} />
 
             {showAvatarModal && (
               <div className={styles.modalOverlay} onClick={closeAvatarModal}>
