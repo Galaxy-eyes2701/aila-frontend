@@ -17,7 +17,7 @@ export default function AdminLogin() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!form.username.trim() || !form.password.trim()) {
-      setError('Vui lòng nhập đầy đủ tên đăng nhập và mật khẩu.');
+      setError('Vui lòng nhập đầy đủ Email và mật khẩu.');
       return;
     }
     setLoading(true);
@@ -35,7 +35,7 @@ export default function AdminLogin() {
         setError(res.data.errorMessage || 'Đăng nhập thất bại.');
       }
     } catch {
-      setError('Tên đăng nhập hoặc mật khẩu không đúng.');
+      setError('Email hoặc mật khẩu không đúng.');
     } finally {
       setLoading(false);
     }
@@ -46,19 +46,19 @@ export default function AdminLogin() {
       <div className={styles.authCard}>
         <div className={styles.authModalHeader}>
           <h2>Đăng nhập Admin</h2>
-          <p>Nhập tên đăng nhập và mật khẩu để truy cập khu vực quản trị.</p>
+          <p>Nhập email và mật khẩu để truy cập khu vực quản trị.</p>
         </div>
 
         <form className={styles.authForm} onSubmit={handleSubmit} noValidate>
           {/* Username */}
           <div className={styles.inputGroup}>
-            <label>Tên đăng nhập</label>
+            <label>Email</label>
             <div className={styles.inputWrapper}>
               <i className="fas fa-user" />
               <input
-                type="text"
+                type="email"
                 name="username"
-                placeholder="Tên đăng nhập"
+                placeholder="Email"
                 value={form.username}
                 onChange={handleChange}
                 autoFocus

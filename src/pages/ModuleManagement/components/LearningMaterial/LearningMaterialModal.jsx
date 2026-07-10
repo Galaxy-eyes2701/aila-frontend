@@ -74,9 +74,7 @@ export default function LearningMaterialModal({
           >
             <option value="Video">Video</option>
             <option value="Document">Tài liệu</option>
-            <option value="Quiz" disabled>
-              Câu hỏi (sắp ra mắt)
-            </option>
+            <option value="Quiz">Câu hỏi</option>
             <option value="AiPractice" disabled>
               Thực hành AI (sắp ra mắt)
             </option>

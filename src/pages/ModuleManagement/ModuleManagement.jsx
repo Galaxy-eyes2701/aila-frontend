@@ -10,6 +10,7 @@ import LearningMaterialModal from "./components/LearningMaterial/LearningMateria
 import VideoDetailModal from "./components/LearningMaterial/VideoDetailModal";
 import DocumentDetailModal from "./components/LearningMaterial/DocumentDetailModal";
 import { getMaterialModalType } from "../../constants/materialType";
+import QuizDetailModal from "./components/LearningMaterial/QuizDetailModal";
 
 const emptyForm = {
   title: "",
@@ -384,7 +385,12 @@ export default function ModuleManagement() {
                       setMaterialModal(true);
                     },
                     onEditMaterial: (material, onDone) => {
-                      console.log("materialTypeName:", material.materialTypeName, "| materialType:", material.materialType);
+                      console.log(
+                        "materialTypeName:",
+                        material.materialTypeName,
+                        "| materialType:",
+                        material.materialType,
+                      );
                       setPendingCallback(() => onDone);
                       setMaterialDetailModal({
                         type: getMaterialModalType(material),
@@ -463,6 +469,23 @@ export default function ModuleManagement() {
           setPendingCallback(null);
           fetchModules();
           showToast("Đã cập nhật tài liệu.");
+        }}
+      />
+      <QuizDetailModal
+        open={materialDetailModal?.type === "Quiz"}
+        material={materialDetailModal?.material}
+        onClose={() => {
+          setMaterialDetailModal(null);
+          pendingCallback?.();
+          setPendingCallback(null);
+          fetchModules();
+        }}
+        onSuccess={() => {
+          setMaterialDetailModal(null);
+          pendingCallback?.();
+          setPendingCallback(null);
+          fetchModules();
+          showToast("Đã cập nhật Quiz.");
         }}
       />
       {toast && <Toast toast={toast} onClose={() => setToast(null)} />}
