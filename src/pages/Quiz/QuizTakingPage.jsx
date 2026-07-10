@@ -15,7 +15,7 @@ export default function QuizTakingPage() {
   const [status, setStatus] = useState("loading"); // loading | ready | error
   const [attempt, setAttempt] = useState(null);
   const [error, setError] = useState(null);
-  const [answers, setAnswers] = useState({}); // Record<questionId, optionId>
+  const [answers, setAnswers] = useState({}); // Record<questionId, optionId[]>
   const [showConfirm, setShowConfirm] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [locked, setLocked] = useState(false); // khóa form khi hết giờ / đang nộp
@@ -50,11 +50,13 @@ export default function QuizTakingPage() {
     [attempt]
   );
 
-  const answeredCount = Object.values(answers).filter(Boolean).length;
+  const answeredCount = Object.values(answers).filter(
+    (ids) => ids && ids.length > 0
+  ).length;
 
-  const setAnswer = (questionId, optionId) => {
+  const setAnswer = (questionId, optionIds) => {
     if (locked) return;
-    setAnswers((prev) => ({ ...prev, [questionId]: optionId }));
+    setAnswers((prev) => ({ ...prev, [questionId]: optionIds }));
   };
 
   // 2. Nộp bài (dùng chung cho nộp tay & tự nộp khi hết giờ)
@@ -67,7 +69,7 @@ export default function QuizTakingPage() {
 
       const payload = questions.map((q) => ({
         questionId: q.questionId,
-        selectedOptionId: answers[q.questionId] ?? null,
+        selectedOptionIds: answers[q.questionId] ?? [],
       }));
 
       try {
@@ -154,8 +156,8 @@ export default function QuizTakingPage() {
             key={q.questionId}
             question={q}
             index={i}
-            selectedOptionId={answers[q.questionId] || null}
-            onSelect={setAnswer}
+            selectedOptionIds={answers[q.questionId] || []}
+            onChange={setAnswer}
             disabled={locked}
           />
         ))}
