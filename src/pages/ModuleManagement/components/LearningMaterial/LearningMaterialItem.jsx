@@ -1,5 +1,13 @@
 import styles from './LearningMaterial.module.css';
-export default function LearningMaterialItem({ material, onEdit, onDelete }) {
+
+export default function LearningMaterialItem({
+  material,
+  index,
+  totalMaterials,
+  onMove,
+  onEdit,
+  onDelete,
+}) {
   const type = material.materialTypeName ?? material.materialType ?? "";
 
   const icons = {
@@ -12,6 +20,27 @@ export default function LearningMaterialItem({ material, onEdit, onDelete }) {
   return (
     <div className={styles.item}>
       <div className={styles.left}>
+        <div className={styles.orderColumn}>
+          <div className={styles.orderControls}>
+            <button
+              type="button"
+              disabled={index === 0}
+              onClick={() => onMove(material.id, -1)}
+              title="Di chuyển lên"
+            >
+              <i className="fas fa-arrow-up" />
+            </button>
+            <button
+              type="button"
+              disabled={index === totalMaterials - 1}
+              onClick={() => onMove(material.id, 1)}
+              title="Di chuyển xuống"
+            >
+              <i className="fas fa-arrow-down" />
+            </button>
+          </div>
+        </div>
+
         <i className={`fas ${icons[type] ?? "fa-file"}`} />
         <div>
           <div className={styles.title}>{material.title}</div>

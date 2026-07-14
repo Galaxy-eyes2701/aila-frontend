@@ -269,3 +269,56 @@
 @keyframes spin {
   to { transform: rotate(360deg); }
 }
+
+.orderColumn {
+  display: flex;
+  align-items: center;
+}
+
+.orderControls {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-right: 8px;
+}
+
+.orderControls button {
+  border: none;
+  background: transparent;
+  color: #6b7280;
+  cursor: pointer;
+  font-size: 11px;
+  padding: 2px 4px;
+}
+
+.orderControls button:hover:not(:disabled) {
+  color: #2563eb;
+}
+
+.orderControls button:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.saveOrderButton {
+  margin-top: 10px;
+
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+
+  padding: 8px 14px;
+  border: none;
+  border-radius: 8px;
+
+  background: #2563eb;
+  color: #fff;
+  font-weight: 600;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.saveOrderButton:disabled {
+  background: #93c5fd;
+  cursor: not-allowed;
+}

@@ -399,7 +399,7 @@ export default function ModuleManagement() {
                     },
                     onMaterialDeleted: (success, message) => {
                       if (success) {
-                        showToast("Đã xóa học liệu.");
+                        showToast(message || "Đã xóa học liệu.");
                         fetchModules();
                       } else {
                         showToast(
