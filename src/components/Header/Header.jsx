@@ -5,9 +5,10 @@ import api from '../../utils/api';
 import styles from './Header.module.css';
 
 const NAV_LINKS = [
-  { label: 'Khóa học',              href: '/courses' },
-  { label: 'Hướng dẫn',            href: '*' },
-  { label: 'Bài viết',             href: '/blogs' },
+  { label: 'Khóa học',            href: '/courses' },
+  { label: 'Hướng dẫn',           href: '*' },
+  { label: 'Tin tức',             href: '/blogs' },
+  { label: 'Hỏi đáp',             href: '*' },
 ];
 
 const DEFAULT_AVATAR = 'https://i.pravatar.cc/80';

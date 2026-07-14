@@ -185,7 +185,7 @@ export default function Home() {
           {/* Banner slider */}
           <div className={styles.heroPreview}>
             <div className={styles.heroBanner}>
-              <div className={styles.bannerTitle}><h3>🔥 Khóa học nổi bật tháng này</h3></div>
+              <div className={styles.bannerTitle}><h3>🔥 Chủ đề nổi bật tháng này</h3></div>
               <div ref={sliderRef}>
                 {BANNER_SLIDES.map((s, i) => (
                   <div key={i} className={`${styles.bannerSlide} ${i === slide ? styles.active : ''}`}>
@@ -283,7 +283,7 @@ export default function Home() {
         {/* ══ TOP BLOGS ══ */}
         <section className={styles.homeSection}>
           <div className={styles.sectionHeader}>
-            <h2 className={styles.sectionTitle}>Bài viết nổi bật</h2>
+            <h2 className={styles.sectionTitle}>Tin tức mới</h2>
             <Link to="/blogs" className={styles.seeAll}>
               Xem tất cả <i className="fas fa-arrow-right" />
             </Link>
