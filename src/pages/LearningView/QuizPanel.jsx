@@ -11,19 +11,29 @@ export default function QuizPanel({ courseId, materialId }) {
 
   useEffect(() => {
     let alive = true;
-    getQuizResult(courseId, materialId)
-      .then((data) => {
-        if (alive) setSummary(data);
-      })
-      .catch(() => {
-        // Chưa làm / chưa có kết quả → coi như chưa làm (hiện nút bắt đầu)
-        if (alive) setSummary({ hasResult: false });
-      })
-      .finally(() => {
-        if (alive) setLoading(false);
-      });
+
+    const load = () => {
+      getQuizResult(courseId, materialId)
+        .then((data) => {
+          if (alive) setSummary(data);
+        })
+        .catch(() => {
+          // Chưa làm / chưa có kết quả → coi như chưa làm (hiện nút bắt đầu)
+          if (alive) setSummary({ hasResult: false });
+        })
+        .finally(() => {
+          if (alive) setLoading(false);
+        });
+    };
+
+    load();
+
+    // Làm bài mở ở tab mới; khi quay lại tab này thì tải lại điểm mới nhất
+    const onFocus = () => load();
+    window.addEventListener("focus", onFocus);
     return () => {
       alive = false;
+      window.removeEventListener("focus", onFocus);
     };
   }, [courseId, materialId]);
 
@@ -75,7 +85,12 @@ export default function QuizPanel({ courseId, materialId }) {
             <Link to={resultUrl} className={styles.quizStartBtn}>
               <i className="fas fa-list-check" /> Xem kết quả
             </Link>
-            <Link to={takingUrl} className={styles.quizResultBtn}>
+            <Link
+              to={takingUrl}
+              target="_blank"
+              rel="noreferrer"
+              className={styles.quizResultBtn}
+            >
               <i className="fas fa-rotate-right" /> Làm lại
             </Link>
           </div>
@@ -87,7 +102,12 @@ export default function QuizPanel({ courseId, materialId }) {
             khóa học.
           </p>
           <div className={styles.quizCtaActions}>
-            <Link to={takingUrl} className={styles.quizStartBtn}>
+            <Link
+              to={takingUrl}
+              target="_blank"
+              rel="noreferrer"
+              className={styles.quizStartBtn}
+            >
               <i className="fas fa-play" /> Bắt đầu làm bài
             </Link>
           </div>
