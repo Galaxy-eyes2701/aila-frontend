@@ -50,31 +50,63 @@ function StatusBadge({ tag }) {
 
 /* ── Create Tag Modal ──────────────────────────────────────────────────────── */
 function CreateTagModal({ onClose, onCreated }) {
-  const [name,    setName]    = useState('');
-  const [code,    setCode]    = useState('');
-  const [saving,  setSaving]  = useState(false);
-  const [error,   setError]   = useState('');
+  const [name,        setName]        = useState('');
+  const [code,        setCode]        = useState('');
+  const [saving,      setSaving]      = useState(false);
+  const [error,       setError]       = useState('');
+  const [fieldErrors, setFieldErrors] = useState({});
 
-  // Auto-generate code from name
+  const CODE_PATTERN = /^[a-z0-9]+(-[a-z0-9]+)*$/;
+
+  const autoCode = val =>
+    val.trim()
+      .toLowerCase()
+      .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+      .replace(/đ/g, 'd')
+      .replace(/[^a-z0-9\s-]/g, '')
+      .trim()
+      .replace(/\s+/g, '-');
+
   const handleNameChange = e => {
     const val = e.target.value;
     setName(val);
-    setCode(
-      val.trim()
-        .toLowerCase()
-        .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
-        .replace(/đ/g, 'd')
-        .replace(/[^a-z0-9\s-]/g, '')
-        .trim()
-        .replace(/\s+/g, '-')
-    );
+    setCode(autoCode(val));
     setError('');
+    setFieldErrors(prev => ({ ...prev, name: '', code: '' }));
+  };
+
+  const handleCodeChange = e => {
+    setCode(e.target.value);
+    setError('');
+    setFieldErrors(prev => ({ ...prev, code: '' }));
+  };
+
+  const validate = () => {
+    const errs = {};
+    const n = name.trim();
+    const c = code.trim();
+
+    if (!n)               errs.name = 'Tên tag không được để trống.';
+    else if (n.length < 2) errs.name = 'Tên tag phải có ít nhất 2 ký tự.';
+    else if (n.length > 50) errs.name = 'Tên tag không được vượt quá 50 ký tự.';
+
+    if (!c)               errs.code = 'Code tag không được để trống.';
+    else if (c.length < 2) errs.code = 'Code tag phải có ít nhất 2 ký tự.';
+    else if (c.length > 50) errs.code = 'Code tag không được vượt quá 50 ký tự.';
+    else if (!CODE_PATTERN.test(c))
+      errs.code = 'Code chỉ gồm chữ thường, số và dấu gạch ngang (a-z, 0-9, -). Không bắt đầu hoặc kết thúc bằng dấu gạch ngang.';
+
+    return errs;
   };
 
   const handleSubmit = async e => {
     e.preventDefault();
-    if (!name.trim()) { setError('Tên tag không được để trống.'); return; }
-    if (!code.trim()) { setError('Code tag không được để trống.'); return; }
+    const errs = validate();
+    if (Object.keys(errs).length > 0) {
+      setFieldErrors(errs);
+      setError('Vui lòng kiểm tra lại các trường bên dưới.');
+      return;
+    }
 
     setSaving(true);
     setError('');
@@ -111,30 +143,42 @@ function CreateTagModal({ onClose, onCreated }) {
               Tag mới sẽ ở trạng thái <strong>chưa duyệt</strong>. Sau khi tạo, bạn có thể gửi yêu cầu xét duyệt để tag xuất hiện công khai.
             </div>
 
+            {/* Tên tag */}
             <div className={styles.formGroup}>
               <label className={styles.formLabel}>
                 <i className="fas fa-tag" /> Tên tag *
               </label>
               <input
-                className={styles.formInput}
+                className={`${styles.formInput} ${fieldErrors.name ? styles.inputError : ''}`}
                 value={name}
                 onChange={handleNameChange}
                 placeholder="VD: Machine Learning"
                 autoFocus
+                maxLength={50}
               />
+              {fieldErrors.name
+                ? <span className={styles.fieldError}><i className="fas fa-exclamation-circle" /> {fieldErrors.name}</span>
+                : <span className={styles.charCount}>{name.trim().length}/50</span>
+              }
             </div>
 
+            {/* Code tag */}
             <div className={styles.formGroup}>
               <label className={styles.formLabel}>
                 <i className="fas fa-code" /> Code tag *
-                <span className={styles.labelHint}>(tự động tạo từ tên)</span>
+                <span className={styles.labelHint}>(tự động tạo từ tên, có thể sửa)</span>
               </label>
               <input
-                className={styles.formInput}
+                className={`${styles.formInput} ${styles.codeInput} ${fieldErrors.code ? styles.inputError : ''}`}
                 value={code}
-                onChange={e => { setCode(e.target.value); setError(''); }}
+                onChange={handleCodeChange}
                 placeholder="VD: machine-learning"
+                maxLength={50}
               />
+              {fieldErrors.code
+                ? <span className={styles.fieldError}><i className="fas fa-exclamation-circle" /> {fieldErrors.code}</span>
+                : <span className={styles.charCount}>Chỉ dùng: chữ thường, số, dấu gạch ngang · {code.trim().length}/50</span>
+              }
             </div>
 
             {error && (
