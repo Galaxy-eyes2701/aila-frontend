@@ -141,6 +141,18 @@ export default function QuizResultPage() {
           {formatDateTime(summary.submittedAt)}
         </p>
 
+        {!passed && (
+          <p className={styles.failNote}>
+            <i className="fas fa-circle-info" />
+            <span>
+              Bạn cần đạt tối thiểu {Math.round(summary.passingScore)} điểm để
+              hoàn thành. Bài kiểm tra đã được ghi nhận là{" "}
+              <strong>Đã nộp</strong>, nhưng tiến độ học tập{" "}
+              <strong>chưa được cập nhật</strong> — hãy làm lại để đạt.
+            </span>
+          </p>
+        )}
+
         <div className={styles.resultActions}>
           {summary.canViewDetails ? (
             <Link to={detailUrl} className={`${styles.btn} ${styles.btnPrimary}`}>
@@ -171,11 +183,30 @@ export default function QuizResultPage() {
       </div>
 
       {showToast && (
-        <div className={styles.toast}>
-          <i className="fas fa-circle-check" />
-          Nộp bài thành công! Điểm: {Math.round(justSubmitted.score)}/100
-          {typeof justSubmitted.progressPct === "number" &&
-            ` · Tiến độ khóa học: ${Math.round(justSubmitted.progressPct)}%`}
+        <div
+          className={`${styles.toast} ${
+            justSubmitted.isPassed ? "" : styles.toastWarn
+          }`}
+        >
+          <i
+            className={`fas ${
+              justSubmitted.isPassed
+                ? "fa-circle-check"
+                : "fa-triangle-exclamation"
+            }`}
+          />
+          {justSubmitted.isPassed ? (
+            <>
+              Nộp bài thành công! Điểm: {Math.round(justSubmitted.score)}/100
+              {typeof justSubmitted.progressPct === "number" &&
+                ` · Tiến độ đã cập nhật: ${Math.round(justSubmitted.progressPct)}%`}
+            </>
+          ) : (
+            <>
+              Đã nộp bài. Điểm: {Math.round(justSubmitted.score)}/100 — chưa đạt
+              điểm sàn, tiến độ chưa được cập nhật.
+            </>
+          )}
         </div>
       )}
     </Shell>

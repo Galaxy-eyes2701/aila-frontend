@@ -197,6 +197,12 @@ export default function LearningContent({
                 <i className="fas fa-check-circle" /> Bạn đã hoàn thành học liệu
                 này
               </span>
+            ) : type.includes("quiz") ? (
+              /* Quiz: hoàn thành do ĐẠT bài quyết định, không cho đánh dấu tay */
+              <span className={styles.completeHint}>
+                <i className="fas fa-circle-info" /> Học liệu này hoàn thành khi
+                bạn đạt bài kiểm tra.
+              </span>
             ) : (
               <button className={styles.completeBtn} onClick={onComplete}>
                 <i className="fas fa-check" /> Đánh dấu đã hoàn thành

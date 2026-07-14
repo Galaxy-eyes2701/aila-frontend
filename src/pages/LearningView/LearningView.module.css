@@ -548,3 +548,14 @@
   align-items: center;
   gap: 10px;
 }
+
+/* Gợi ý cho học liệu quiz: hoàn thành do đạt bài, không đánh dấu tay */
+.completeHint {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+.completeHint i { color: var(--primary); }
