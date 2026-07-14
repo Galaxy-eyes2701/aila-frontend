@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import styles from "./LearningMaterial.module.css";
+import RichTextEditor from "../common/RichTextEditor";
 
 import {
   getDocumentDetail,
@@ -47,13 +48,16 @@ export default function DocumentDetailModal({
       setLoading(false);
     }
   }
+  function isContentEmpty(html) {
+    if (!html) return true;
+    return html.replace(/<[^>]*>/g, "").trim().length === 0;
+  }
 
   async function handleSubmit(e) {
     e.preventDefault();
 
-    if (!content.trim()) {
+    if (isContentEmpty(content)) {
       setError("Nội dung không được để trống.");
-
       return;
     }
 
@@ -110,10 +114,11 @@ export default function DocumentDetailModal({
             <div className={styles.formGroup}>
               <label>Nội dung</label>
 
-              <textarea
-                rows={12}
+              <RichTextEditor
                 value={content}
-                onChange={(e) => setContent(e.target.value)}
+                onChange={setContent}
+                placeholder="Nhập nội dung tài liệu..."
+                disabled={saving}
               />
             </div>
             {error && (
