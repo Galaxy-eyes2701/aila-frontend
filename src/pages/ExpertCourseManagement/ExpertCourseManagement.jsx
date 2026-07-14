@@ -60,20 +60,48 @@ function CourseFormModal({ mode, initialData, categories, tags, onClose, onSaved
   const isEdit = mode === 'edit';
 
   const [form, setForm] = useState({
-    name:        initialData?.name        ?? '',
-    categoryId:  initialData?.categoryId  ?? '',
-    level:       initialData?.level       ?? 'Beginner',
-    description: initialData?.description ?? '',
-    thumbnailUrl:initialData?.thumbnailUrl ?? '',
-    tagIds:      initialData?.tagIds      ?? [],
+    name:         initialData?.name         ?? '',
+    categoryId:   initialData?.categoryId   ?? '',
+    level:        initialData?.level        ?? 'Beginner',
+    description:  initialData?.description  ?? '',
+    thumbnailUrl: initialData?.thumbnailUrl ?? '',
+    tagIds:       initialData?.tagIds       ?? [],
   });
-  const [saving, setSaving]       = useState(false);
-  const [formError, setFormError] = useState('');
+  const [saving,      setSaving]      = useState(false);
+  const [formError,   setFormError]   = useState('');
+  const [fieldErrors, setFieldErrors] = useState({});
+
+  const clearFieldError = field =>
+    setFieldErrors(prev => ({ ...prev, [field]: '' }));
 
   const handleChange = e => {
     const { name, value } = e.target;
     setFormError('');
+    clearFieldError(name);
     setForm(prev => ({ ...prev, [name]: value }));
+  };
+
+  // Validate URL format
+  const isValidUrl = url => {
+    try { new URL(url); return true; } catch { return false; }
+  };
+
+  const validate = () => {
+    const errs = {};
+    const name = form.name.trim();
+    if (!name)                  errs.name = 'Tên khóa học không được để trống.';
+    else if (name.length < 3)   errs.name = 'Tên khóa học phải có ít nhất 3 ký tự.';
+    else if (name.length > 150) errs.name = 'Tên khóa học không được vượt quá 150 ký tự.';
+
+    if (!form.categoryId)       errs.categoryId = 'Vui lòng chọn danh mục.';
+
+    if (form.thumbnailUrl.trim() && !isValidUrl(form.thumbnailUrl.trim()))
+      errs.thumbnailUrl = 'URL ảnh bìa không hợp lệ. Phải bắt đầu bằng https://.';
+
+    if (form.description.length > 1000)
+      errs.description = `Mô tả không được vượt quá 1000 ký tự (hiện tại: ${form.description.length}).`;
+
+    return errs;
   };
 
   const toggleTag = tagId => {
@@ -87,8 +115,12 @@ function CourseFormModal({ mode, initialData, categories, tags, onClose, onSaved
 
   const handleSubmit = async e => {
     e.preventDefault();
-    if (!form.name.trim())       { setFormError('Tên khóa học không được để trống.'); return; }
-    if (!form.categoryId)        { setFormError('Vui lòng chọn danh mục.'); return; }
+    const errs = validate();
+    if (Object.keys(errs).length > 0) {
+      setFieldErrors(errs);
+      setFormError('Vui lòng kiểm tra lại các trường bên dưới.');
+      return;
+    }
 
     setSaving(true);
     setFormError('');
@@ -143,24 +175,32 @@ function CourseFormModal({ mode, initialData, categories, tags, onClose, onSaved
               <label className={styles.formLabel}><i className="fas fa-book" /> Tên khóa học *</label>
               <input
                 name="name"
-                className={styles.formInput}
+                className={`${styles.formInput} ${fieldErrors.name ? styles.inputError : ''}`}
                 value={form.name}
                 onChange={handleChange}
                 placeholder="VD: Machine Learning cơ bản"
                 autoFocus
               />
+              {fieldErrors.name && <span className={styles.fieldError}><i className="fas fa-exclamation-circle" /> {fieldErrors.name}</span>}
+              <span className={styles.charCount}>{form.name.length}/150</span>
             </div>
 
             {/* Category + Level row */}
             <div className={styles.formRow}>
               <div className={styles.formGroup}>
                 <label className={styles.formLabel}><i className="fas fa-tag" /> Danh mục *</label>
-                <select name="categoryId" className={styles.formSelect} value={form.categoryId} onChange={handleChange}>
+                <select
+                  name="categoryId"
+                  className={`${styles.formSelect} ${fieldErrors.categoryId ? styles.inputError : ''}`}
+                  value={form.categoryId}
+                  onChange={handleChange}
+                >
                   <option value="">-- Chọn danh mục --</option>
                   {categories.map(cat => (
                     <option key={cat.id} value={cat.id}>{cat.name}</option>
                   ))}
                 </select>
+                {fieldErrors.categoryId && <span className={styles.fieldError}><i className="fas fa-exclamation-circle" /> {fieldErrors.categoryId}</span>}
               </div>
               <div className={styles.formGroup}>
                 <label className={styles.formLabel}><i className="fas fa-signal" /> Trình độ *</label>
@@ -177,12 +217,13 @@ function CourseFormModal({ mode, initialData, categories, tags, onClose, onSaved
               <label className={styles.formLabel}><i className="fas fa-image" /> URL ảnh bìa</label>
               <input
                 name="thumbnailUrl"
-                className={styles.formInput}
+                className={`${styles.formInput} ${fieldErrors.thumbnailUrl ? styles.inputError : ''}`}
                 value={form.thumbnailUrl}
                 onChange={handleChange}
                 placeholder="https://example.com/thumbnail.jpg"
               />
-              {form.thumbnailUrl && (
+              {fieldErrors.thumbnailUrl && <span className={styles.fieldError}><i className="fas fa-exclamation-circle" /> {fieldErrors.thumbnailUrl}</span>}
+              {form.thumbnailUrl && !fieldErrors.thumbnailUrl && (
                 <div className={styles.thumbPreview}>
                   <img
                     src={form.thumbnailUrl}
@@ -198,11 +239,15 @@ function CourseFormModal({ mode, initialData, categories, tags, onClose, onSaved
               <label className={styles.formLabel}><i className="fas fa-align-left" /> Mô tả khóa học</label>
               <textarea
                 name="description"
-                className={styles.formTextarea}
+                className={`${styles.formTextarea} ${fieldErrors.description ? styles.inputError : ''}`}
                 value={form.description}
                 onChange={handleChange}
                 placeholder="Mô tả nội dung, mục tiêu, đối tượng học viên..."
               />
+              {fieldErrors.description
+                ? <span className={styles.fieldError}><i className="fas fa-exclamation-circle" /> {fieldErrors.description}</span>
+                : <span className={styles.charCount}>{form.description.length}/1000</span>
+              }
             </div>
 
             {/* Tags */}
