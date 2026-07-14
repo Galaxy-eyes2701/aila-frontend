@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import styles from "./LearningMaterial.module.css";
 import { getVideoDetail, updateVideoDetail } from "../../services/videoApi";
+import RichTextEditor from "../common/RichTextEditor";
 
 export default function VideoDetailModal({
   open,
@@ -136,10 +137,11 @@ export default function VideoDetailModal({
             <div className={styles.formGroup}>
               <label>Mô tả</label>
 
-              <textarea
-                rows={6}
+              <RichTextEditor
                 value={content}
-                onChange={(e) => setContent(e.target.value)}
+                onChange={setContent}
+                placeholder="Nhập mô tả video..."
+                disabled={saving}
               />
             </div>
             {error && (

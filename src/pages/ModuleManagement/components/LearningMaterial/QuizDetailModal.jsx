@@ -19,6 +19,7 @@ export default function QuizDetailModal({
 }) {
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [settingsSaved, setSettingsSaved] = useState(false);
   const [error, setError] = useState("");
   const [bulkModalOpen, setBulkModalOpen] = useState(false);
   const [timeLimitMinutes, setTimeLimitMinutes] = useState(30);
@@ -96,6 +97,7 @@ export default function QuizDetailModal({
     try {
       setSaving(true);
       setError("");
+      setSettingsSaved(false);
 
       await updateQuizDetail(material.id, {
         timeLimitMinutes: Number(timeLimitMinutes),
@@ -106,6 +108,9 @@ export default function QuizDetailModal({
       if (!quizExists) {
         await loadQuestions();
       }
+
+      setSettingsSaved(true);
+      setTimeout(() => setSettingsSaved(false), 2500);
     } catch (err) {
       setError(
         err.response?.data?.errorMessage ?? "Không thể lưu cài đặt Quiz.",
@@ -158,10 +163,6 @@ export default function QuizDetailModal({
     }
   }
 
-  function handleFinish() {
-    onSuccess();
-  }
-
   if (!open) return null;
 
   return (
@@ -173,7 +174,7 @@ export default function QuizDetailModal({
           <button
             type="button"
             className={styles.closeButton}
-            onClick={handleFinish}
+            onClick={onClose}
           >
             <i className="fas fa-times" />
           </button>
@@ -225,6 +226,23 @@ export default function QuizDetailModal({
                 <div className={styles.formError} style={{ marginTop: 16 }}>
                   <i className="fas fa-circle-exclamation" />
                   <span>{error}</span>
+                </div>
+              )}
+
+              {settingsSaved && (
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 6,
+                    color: "#16a34a",
+                    fontSize: 13,
+                    fontWeight: 600,
+                    marginTop: 16,
+                  }}
+                >
+                  <i className="fas fa-circle-check" />
+                  <span>Đã lưu cài đặt.</span>
                 </div>
               )}
 
