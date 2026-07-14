@@ -47,6 +47,34 @@ export default function LearningContent({
 
   const type = currentMaterial.type?.toLowerCase() || "";
 
+  const videoUrl = currentMaterial.videoDetails?.videoUrl || "";
+
+  const getYoutubeEmbedUrl = (url) => {
+    if (!url) return null;
+
+    // youtu.be/xxxx
+    let match = url.match(/youtu\.be\/([^?&]+)/);
+    if (match) {
+      return `https://www.youtube.com/embed/${match[1]}`;
+    }
+
+    // youtube.com/watch?v=xxxx
+    match = url.match(/[?&]v=([^&]+)/);
+    if (match) {
+      return `https://www.youtube.com/embed/${match[1]}`;
+    }
+
+    // youtube.com/embed/xxxx
+    if (url.includes("/embed/")) {
+      return url;
+    }
+
+    return null;
+  };
+
+  const youtubeEmbedUrl = getYoutubeEmbedUrl(videoUrl);
+  const isYoutube = !!youtubeEmbedUrl;
+
   return (
     <div className={styles.contentArea}>
       <div className={styles.materialWrapper}>
@@ -57,22 +85,32 @@ export default function LearningContent({
           {type.includes("video") && currentMaterial.videoDetails ? (
             <div className={styles.videoSectionWrapper}>
               <div className={styles.videoHolder}>
-                <video
-                  src={currentMaterial.videoDetails.videoUrl}
-                  poster={currentMaterial.videoDetails.thumbnailUrl}
-                  controls
-                  className={styles.videoPlayer}
-                  onEnded={onComplete}
-                >
-                  {currentMaterial.videoDetails.captionsUrl && (
-                    <track
-                      src={currentMaterial.videoDetails.captionsUrl}
-                      kind="captions"
-                      srcLang="vi"
-                      label="Tiếng Việt"
-                    />
-                  )}
-                </video>
+                {isYoutube ? (
+                  <iframe
+                    src={youtubeEmbedUrl}
+                    title={currentMaterial.title}
+                    className={styles.videoPlayer}
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                  />
+                ) : (
+                  <video
+                    src={videoUrl}
+                    poster={currentMaterial.videoDetails.thumbnailUrl}
+                    controls
+                    className={styles.videoPlayer}
+                    onEnded={onComplete}
+                  >
+                    {currentMaterial.videoDetails.captionsUrl && (
+                      <track
+                        src={currentMaterial.videoDetails.captionsUrl}
+                        kind="captions"
+                        srcLang="vi"
+                        label="Tiếng Việt"
+                      />
+                    )}
+                  </video>
+                )}
               </div>
 
               {currentMaterial.videoDetails.content && (
