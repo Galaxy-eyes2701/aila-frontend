@@ -56,8 +56,9 @@ function ConfirmDialog({ title, message, confirmLabel, danger, onConfirm, onCanc
 }
 
 /* ── Course Form Modal ─────────────────────────────────────────────────────── */
-function CourseFormModal({ mode, initialData, categories, tags, onClose, onSaved }) {
+function CourseFormModal({ mode, initialData, categories, onClose, onSaved }) {
   const isEdit = mode === 'edit';
+  const CODE_PATTERN = /^[a-z0-9]+(-[a-z0-9]+)*$/;
 
   const [form, setForm] = useState({
     name:         initialData?.name         ?? '',
@@ -70,6 +71,32 @@ function CourseFormModal({ mode, initialData, categories, tags, onClose, onSaved
   const [saving,      setSaving]      = useState(false);
   const [formError,   setFormError]   = useState('');
   const [fieldErrors, setFieldErrors] = useState({});
+
+  /* ── tags state ── */
+  const [tags,        setTags]        = useState([]);
+  const [tagsLoading, setTagsLoading] = useState(true);
+
+  /* ── inline create-tag state ── */
+  const [showNewTag,   setShowNewTag]   = useState(false);
+  const [newTagName,   setNewTagName]   = useState('');
+  const [newTagCode,   setNewTagCode]   = useState('');
+  const [newTagSaving, setNewTagSaving] = useState(false);
+  const [newTagErrors, setNewTagErrors] = useState({});
+  const [newTagError,  setNewTagError]  = useState('');
+
+  useEffect(() => {
+    setTagsLoading(true);
+    Promise.all([api.get('/tags'), api.get('/tags/me')])
+      .then(([pubRes, myRes]) => {
+        const pub = pubRes.data.success ? (pubRes.data.data ?? []) : [];
+        const my  = myRes.data.success  ? (myRes.data.data  ?? []) : [];
+        const merged = [...pub];
+        my.forEach(t => { if (!merged.find(p => p.id === t.id)) merged.push(t); });
+        setTags(merged);
+      })
+      .catch(() => {})
+      .finally(() => setTagsLoading(false));
+  }, []);
 
   const clearFieldError = field =>
     setFieldErrors(prev => ({ ...prev, [field]: '' }));
@@ -111,6 +138,58 @@ function CourseFormModal({ mode, initialData, categories, tags, onClose, onSaved
         ? prev.tagIds.filter(id => id !== tagId)
         : [...prev.tagIds, tagId],
     }));
+  };
+
+  /* ── inline new-tag helpers ── */
+  const autoCode = val =>
+    val.trim().toLowerCase()
+      .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+      .replace(/đ/g, 'd')
+      .replace(/[^a-z0-9\s-]/g, '').trim()
+      .replace(/\s+/g, '-');
+
+  const handleNewTagNameChange = e => {
+    const val = e.target.value;
+    setNewTagName(val);
+    setNewTagCode(autoCode(val));
+    setNewTagErrors({});
+    setNewTagError('');
+  };
+
+  const validateNewTag = () => {
+    const errs = {};
+    const n = newTagName.trim(), c = newTagCode.trim();
+    if (!n)                errs.name = 'Tên tag không được để trống.';
+    else if (n.length < 2) errs.name = 'Tên tag phải có ít nhất 2 ký tự.';
+    else if (n.length > 50) errs.name = 'Tên tag tối đa 50 ký tự.';
+    if (!c)                errs.code = 'Code tag không được để trống.';
+    else if (c.length < 2) errs.code = 'Code tag phải có ít nhất 2 ký tự.';
+    else if (c.length > 50) errs.code = 'Code tag tối đa 50 ký tự.';
+    else if (!CODE_PATTERN.test(c))
+      errs.code = 'Chỉ dùng chữ thường, số, dấu gạch ngang. Không bắt đầu/kết thúc bằng -.';
+    return errs;
+  };
+
+  const handleCreateTag = async () => {
+    const errs = validateNewTag();
+    if (Object.keys(errs).length > 0) { setNewTagErrors(errs); return; }
+    setNewTagSaving(true);
+    setNewTagError('');
+    try {
+      const res = await api.post('/tags/custom', { name: newTagName.trim(), code: newTagCode.trim() });
+      if (res.data.success) {
+        const created = res.data.data;
+        setTags(prev => [created, ...prev]);
+        setForm(prev => ({ ...prev, tagIds: [...prev.tagIds, created.id] }));
+        setNewTagName(''); setNewTagCode(''); setShowNewTag(false);
+      } else {
+        setNewTagError(res.data.errorMessage || 'Tạo tag thất bại.');
+      }
+    } catch (err) {
+      setNewTagError(err.response?.data?.errorMessage || 'Lỗi kết nối. Vui lòng thử lại.');
+    } finally {
+      setNewTagSaving(false);
+    }
   };
 
   const handleSubmit = async e => {
@@ -250,20 +329,67 @@ function CourseFormModal({ mode, initialData, categories, tags, onClose, onSaved
               }
             </div>
 
-            {/* Tags */}
+            {/* ── TAGS ── */}
             <div className={styles.formGroup}>
               <div className={styles.tagLabelRow}>
                 <label className={styles.formLabel}><i className="fas fa-hashtag" /> Kỹ năng / Tags</label>
-                <Link
-                  to="/expert/tags"
-                  target="_blank"
+                <button
+                  type="button"
                   className={styles.tagCreateLink}
-                  title="Tạo tag mới (mở tab mới)"
+                  onClick={() => { setShowNewTag(v => !v); setNewTagErrors({}); setNewTagError(''); }}
                 >
-                  <i className="fas fa-plus" /> Tạo tag mới
-                </Link>
+                  <i className={`fas ${showNewTag ? 'fa-minus' : 'fa-plus'}`} />
+                  {showNewTag ? 'Đóng' : 'Tạo tag mới'}
+                </button>
               </div>
-              {tags.length > 0 ? (
+
+              {showNewTag && (
+                <div className={styles.inlineTagForm}>
+                  <div className={styles.formRow}>
+                    <div className={styles.formGroup}>
+                      <label className={styles.formLabel}><i className="fas fa-tag" /> Tên tag *</label>
+                      <input
+                        className={`${styles.formInput} ${newTagErrors.name ? styles.inputError : ''}`}
+                        value={newTagName}
+                        onChange={handleNewTagNameChange}
+                        placeholder="VD: Machine Learning"
+                        maxLength={50}
+                      />
+                      {newTagErrors.name
+                        ? <span className={styles.fieldError}><i className="fas fa-exclamation-circle" /> {newTagErrors.name}</span>
+                        : <span className={styles.charCount}>{newTagName.trim().length}/50</span>}
+                    </div>
+                    <div className={styles.formGroup}>
+                      <label className={styles.formLabel}><i className="fas fa-code" /> Code tag *</label>
+                      <input
+                        className={`${styles.formInput} ${styles.codeInput} ${newTagErrors.code ? styles.inputError : ''}`}
+                        value={newTagCode}
+                        onChange={e => { setNewTagCode(e.target.value); setNewTagErrors(p => ({ ...p, code: '' })); }}
+                        placeholder="machine-learning"
+                        maxLength={50}
+                      />
+                      {newTagErrors.code
+                        ? <span className={styles.fieldError}><i className="fas fa-exclamation-circle" /> {newTagErrors.code}</span>
+                        : <span className={styles.charCount}>a-z, 0-9, - · {newTagCode.trim().length}/50</span>}
+                    </div>
+                  </div>
+                  {newTagError && (
+                    <div className={styles.formError}>
+                      <i className="fas fa-exclamation-circle" /> {newTagError}
+                    </div>
+                  )}
+                  <div className={styles.inlineTagNote}>
+                    <i className="fas fa-info-circle" /> Tag mới sẽ ở trạng thái chưa duyệt và được chọn ngay vào khóa học.
+                  </div>
+                  <button type="button" className={styles.btnInlineCreate} onClick={handleCreateTag} disabled={newTagSaving}>
+                    {newTagSaving ? <><span className={styles.spinner} /> Đang tạo...</> : <><i className="fas fa-plus" /> Tạo & chọn tag</>}
+                  </button>
+                </div>
+              )}
+
+              {tagsLoading ? (
+                <div className={styles.tagPickerLoading}><span className={styles.spinner} /> Đang tải tags...</div>
+              ) : tags.length > 0 ? (
                 <div className={styles.tagPicker}>
                   {tags.map(tag => (
                     <button
@@ -273,16 +399,12 @@ function CourseFormModal({ mode, initialData, categories, tags, onClose, onSaved
                       onClick={() => toggleTag(tag.id)}
                     >
                       {tag.name}
+                      {!tag.isPublished && <span className={styles.tagDraft}> (nháp)</span>}
                     </button>
                   ))}
                 </div>
               ) : (
-                <p className={styles.tagEmpty}>
-                  Chưa có tag nào.{' '}
-                  <Link to="/expert/tags" target="_blank" className={styles.tagCreateLink}>
-                    Tạo tag mới
-                  </Link>
-                </p>
+                <p className={styles.tagEmpty}>Chưa có tag nào. Nhấn "Tạo tag mới" để thêm.</p>
               )}
             </div>
 
@@ -418,7 +540,6 @@ export default function ExpertCourseManagement() {
 
   const [courses,    setCourses]    = useState([]);
   const [categories, setCategories] = useState([]);
-  const [tags,       setTags]       = useState([]);
   const [loading,    setLoading]    = useState(true);
   const [total,      setTotal]      = useState(0);
   const [pageIndex,  setPageIndex]  = useState(0);
@@ -441,24 +562,11 @@ export default function ExpertCourseManagement() {
     setToast({ message, type });
   };
 
-  /* ── load categories & tags once ── */
+  /* ── load categories once ── */
   useEffect(() => {
-    Promise.all([
-      api.get('/categories'),
-      api.get('/tags'),
-      api.get('/tags/me'),
-    ]).then(([catRes, tagRes, myTagRes]) => {
-      if (catRes.data.success) setCategories(catRes.data.data ?? []);
-
-      // Gộp published tags + tags của expert (đã duyệt hoặc chưa), tránh trùng id
-      const publicTags = tagRes.data.success ? (tagRes.data.data ?? []) : [];
-      const myTags     = myTagRes.data.success ? (myTagRes.data.data ?? []) : [];
-      const merged     = [...publicTags];
-      myTags.forEach(t => {
-        if (!merged.find(p => p.id === t.id)) merged.push(t);
-      });
-      setTags(merged);
-    }).catch(() => {});
+    api.get('/categories')
+      .then(res => { if (res.data.success) setCategories(res.data.data ?? []); })
+      .catch(() => {});
   }, []);
 
   /* ── fetch courses ── */
@@ -713,7 +821,6 @@ export default function ExpertCourseManagement() {
           mode={editingCourse ? 'edit' : 'create'}
           initialData={editingCourse}
           categories={categories}
-          tags={tags}
           onClose={() => { setShowForm(false); setEditingCourse(null); }}
           onSaved={handleFormSaved}
         />

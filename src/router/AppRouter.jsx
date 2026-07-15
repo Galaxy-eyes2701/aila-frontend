@@ -10,7 +10,6 @@ import ExpertLogin from "../pages/ExpertLogin/ExpertLogin";
 import ExpertProfile from "../pages/ExpertProfile/ExpertProfile";
 import ExpertHome from "../pages/ExpertHome/ExpertHome";
 import ExpertCourseManagement from "../pages/ExpertCourseManagement/ExpertCourseManagement";
-import ExpertTagManagement from "../pages/ExpertTagManagement/ExpertTagManagement";
 import ModuleManagement from "../pages/ModuleManagement/ModuleManagement";
 import Notifications from "../pages/Notifications/Notifications";
 import CourseList from "../pages/Courses/CourseList";
@@ -73,7 +72,6 @@ const router = createBrowserRouter([
       { path: "profile", element: <ExpertProfile /> },
       { path: "courses", element: <ExpertCourseManagement /> },
       { path: "courses/:courseId/modules", element: <ModuleManagement /> },
-      { path: "tags", element: <ExpertTagManagement /> },
       { path: "notifications", element: <Notifications /> },
     ],
   },

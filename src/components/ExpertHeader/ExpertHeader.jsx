@@ -10,7 +10,6 @@ const DEFAULT_AVATAR = 'https://i.pravatar.cc/80';
 const EXPERT_NAV_LINKS = [
   { label: 'Trang chủ',        href: '/expert'         },
   { label: 'Quản lý khóa học', href: '/expert/courses' },
-  { label: 'Tạo Tag',          href: '/expert/tags'    },
 ];
 
 export default function ExpertHeader() {
