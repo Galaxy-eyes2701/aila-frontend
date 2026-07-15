@@ -85,10 +85,14 @@ function CourseFormModal({ mode, initialData, categories, onClose, onSaved }) {
   const [newTagError,  setNewTagError]  = useState('');
 
   /* ── request-verification state ── */
-  const [verifyTag,    setVerifyTag]    = useState(null); // tag object
+  const [verifyTag,    setVerifyTag]    = useState(null);
   const [verifyNote,   setVerifyNote]   = useState('');
   const [verifySaving, setVerifySaving] = useState(false);
   const [verifyError,  setVerifyError]  = useState('');
+
+  /* ── check-code debounce ── */
+  const [codeChecking,  setCodeChecking]  = useState(false);
+  const [codeDuplicate, setCodeDuplicate] = useState(false);
 
   useEffect(() => {
     setTagsLoading(true);
@@ -96,7 +100,9 @@ function CourseFormModal({ mode, initialData, categories, onClose, onSaved }) {
       .then(([pubRes, myRes]) => {
         const pub = pubRes.data.success ? (pubRes.data.data ?? []) : [];
         const my  = myRes.data.success  ? (myRes.data.data  ?? []) : [];
-        const merged = [...pub];
+        // Tags từ GET /tags đều đã published — đảm bảo field isPublished = true
+        const pubNorm = pub.map(t => ({ ...t, isPublished: true }));
+        const merged  = [...pubNorm];
         my.forEach(t => { if (!merged.find(p => p.id === t.id)) merged.push(t); });
         setTags(merged);
       })
@@ -160,6 +166,7 @@ function CourseFormModal({ mode, initialData, categories, onClose, onSaved }) {
     setNewTagCode(autoCode(val));
     setNewTagErrors({});
     setNewTagError('');
+    setCodeDuplicate(false);
   };
 
   const validateNewTag = () => {
@@ -179,6 +186,7 @@ function CourseFormModal({ mode, initialData, categories, onClose, onSaved }) {
   const handleCreateTag = async () => {
     const errs = validateNewTag();
     if (Object.keys(errs).length > 0) { setNewTagErrors(errs); return; }
+    if (codeDuplicate) { setNewTagErrors(prev => ({ ...prev, code: 'Code này đã tồn tại trong hệ thống.' })); return; }
     setNewTagSaving(true);
     setNewTagError('');
     try {
@@ -226,6 +234,52 @@ function CourseFormModal({ mode, initialData, categories, onClose, onSaved }) {
       setVerifyError(err.response?.data?.errorMessage || 'Lỗi kết nối. Vui lòng thử lại.');
     } finally {
       setVerifySaving(false);
+    }
+  };
+
+  /* ── check-code: gọi API khi người dùng ngừng gõ 500ms ── */
+  const checkCodeTimer = useState(null);
+  const handleNewTagCodeChange = e => {
+    const val = e.target.value;
+    setNewTagCode(val);
+    setNewTagErrors(p => ({ ...p, code: '' }));
+    setCodeDuplicate(false);
+    if (checkCodeTimer[0]) clearTimeout(checkCodeTimer[0]);
+    if (val.trim().length >= 2) {
+      checkCodeTimer[0] = setTimeout(async () => {
+        setCodeChecking(true);
+        try {
+          const res = await api.get('/tags/check-code', { params: { code: val.trim() } });
+          if (res.data.success) setCodeDuplicate(res.data.data);
+        } catch { /* silent */ } finally { setCodeChecking(false); }
+      }, 500);
+    }
+  };
+
+  /* ── hủy yêu cầu xét duyệt Pending ── */
+  const handleDeletePublishRequest = async tagId => {
+    if (!window.confirm('Bạn có chắc muốn hủy yêu cầu xét duyệt này không?\nTag sẽ quay về trạng thái chưa gửi duyệt.')) return;
+    try {
+      const res = await api.delete(`/tags/${tagId}/publish-request`);
+      if (res.data.success) {
+        setTags(prev => prev.map(t => t.id === tagId ? res.data.data : t));
+      }
+    } catch (err) {
+      alert(err.response?.data?.errorMessage || 'Hủy yêu cầu thất bại.');
+    }
+  };
+
+  /* ── xóa tag chưa publish ── */
+  const handleDeleteTag = async tagId => {
+    if (!window.confirm('Bạn có chắc muốn xóa tag này không? Hành động này không thể hoàn tác.')) return;
+    try {
+      const res = await api.delete(`/tags/${tagId}`);
+      if (res.data.success) {
+        setTags(prev => prev.filter(t => t.id !== tagId));
+        setForm(prev => ({ ...prev, tagIds: prev.tagIds.filter(id => id !== tagId) }));
+      }
+    } catch (err) {
+      alert(err.response?.data?.errorMessage || 'Xóa tag thất bại.');
     }
   };
 
@@ -399,15 +453,19 @@ function CourseFormModal({ mode, initialData, categories, onClose, onSaved }) {
                     <div className={styles.formGroup}>
                       <label className={styles.formLabel}><i className="fas fa-code" /> Code tag *</label>
                       <input
-                        className={`${styles.formInput} ${styles.codeInput} ${newTagErrors.code ? styles.inputError : ''}`}
+                        className={`${styles.formInput} ${styles.codeInput} ${newTagErrors.code || codeDuplicate ? styles.inputError : ''}`}
                         value={newTagCode}
-                        onChange={e => { setNewTagCode(e.target.value); setNewTagErrors(p => ({ ...p, code: '' })); }}
+                        onChange={handleNewTagCodeChange}
                         placeholder="machine-learning"
                         maxLength={50}
                       />
                       {newTagErrors.code
                         ? <span className={styles.fieldError}><i className="fas fa-exclamation-circle" /> {newTagErrors.code}</span>
-                        : <span className={styles.charCount}>a-z, 0-9, - · {newTagCode.trim().length}/50</span>}
+                        : codeDuplicate
+                          ? <span className={styles.fieldError}><i className="fas fa-exclamation-circle" /> Code này đã tồn tại trong hệ thống.</span>
+                          : codeChecking
+                            ? <span className={styles.charCount}><span className={styles.spinner} style={{borderTopColor:'#6b7280'}} /> Đang kiểm tra...</span>
+                            : <span className={styles.charCount}>a-z, 0-9, - · {newTagCode.trim().length}/50</span>}
                     </div>
                   </div>
                   {newTagError && (
@@ -437,25 +495,48 @@ function CourseFormModal({ mode, initialData, categories, onClose, onSaved }) {
                     if (isPending)    cls += ` ${styles.tagBtnPending}`;
                     else if (isUnpub) cls += ` ${styles.tagBtnUnpub}`;
 
-                    const title = isPending
-                      ? 'Tag đang chờ duyệt — không thể chọn'
-                      : isUnpub
-                        ? 'Tag chưa được duyệt — nhấn để gửi yêu cầu xét duyệt'
-                        : undefined;
-
                     return (
-                      <button
-                        type="button"
-                        key={tag.id}
-                        className={cls}
-                        onClick={() => handleTagClick(tag)}
-                        title={title}
-                        aria-disabled={isUnpub}
-                      >
-                        {tag.name}
-                        {isPending && <span className={styles.tagStatusIcon} title="Đang chờ duyệt"><i className="fas fa-clock" /></span>}
-                        {isUnpub && !isPending && <span className={styles.tagStatusIcon} title="Chưa duyệt"><i className="fas fa-exclamation-circle" /></span>}
-                      </button>
+                      <div key={tag.id} className={styles.tagBtnWrap}>
+                        <button
+                          type="button"
+                          className={cls}
+                          onClick={() => handleTagClick(tag)}
+                          title={
+                            isPending ? 'Đang chờ duyệt — không thể chọn'
+                            : isUnpub ? 'Chưa duyệt — nhấn để gửi yêu cầu xét duyệt'
+                            : undefined
+                          }
+                          aria-disabled={isUnpub}
+                        >
+                          {tag.name}
+                          {isPending && <span className={styles.tagStatusIcon}><i className="fas fa-clock" /></span>}
+                          {isUnpub && !isPending && <span className={styles.tagStatusIcon}><i className="fas fa-exclamation-circle" /></span>}
+                        </button>
+
+                        {/* Nút hủy yêu cầu (chỉ khi Pending) */}
+                        {isPending && (
+                          <button
+                            type="button"
+                            className={styles.tagActionBtn}
+                            onClick={() => handleDeletePublishRequest(tag.id)}
+                            title="Hủy yêu cầu xét duyệt"
+                          >
+                            <i className="fas fa-times" />
+                          </button>
+                        )}
+
+                        {/* Nút xóa tag (chỉ khi chưa publish, chưa Pending) */}
+                        {isUnpub && !isPending && (
+                          <button
+                            type="button"
+                            className={`${styles.tagActionBtn} ${styles.tagActionBtnDanger}`}
+                            onClick={() => handleDeleteTag(tag.id)}
+                            title="Xóa tag này"
+                          >
+                            <i className="fas fa-trash" />
+                          </button>
+                        )}
+                      </div>
                     );
                   })}
                 </div>
