@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import api from '../../utils/api';
 import styles from './ExpertCourseManagement.module.css';
+import CoursePreviewModal from '../../components/CoursePreviewModal/CoursePreviewModal';
 
 const FALLBACK_THUMB = 'https://images.unsplash.com/photo-1677442135703-1787eea5ce01?w=480&q=75';
 
@@ -618,7 +619,7 @@ function CourseFormModal({ mode, initialData, categories, onClose, onSaved }) {
 }
 
 /* ── Course Row Card ──────────────────────────────────────────────────────── */
-function CourseRow({ course, onEdit, onPublish, onUnpublish }) {
+function CourseRow({ course, onEdit, onPublish, onUnpublish, onPreview }) {
   const isPublished = course.isPublished;
   const [busy, setBusy] = useState(false);
 
@@ -666,6 +667,14 @@ function CourseRow({ course, onEdit, onPublish, onUnpublish }) {
       </div>
 
       <div className={styles.rowActions}>
+        <button
+          className={`${styles.actionBtn} ${styles.actionBtnPreview}`}
+          onClick={() => onPreview(course.id)}
+          title="Xem trước như học viên"
+        >
+          <i className="fas fa-eye" /> Xem trước
+        </button>
+
         <button
           className={styles.actionBtn}
           onClick={() => onEdit(course)}
@@ -741,7 +750,8 @@ export default function ExpertCourseManagement() {
   // Modals
   const [showForm,     setShowForm]     = useState(searchParams.get('action') === 'create');
   const [editingCourse,setEditingCourse]= useState(null);
-  const [confirm,      setConfirm]      = useState(null); // { type, courseId, courseName }
+  const [confirm,      setConfirm]      = useState(null);
+  const [previewCourseId, setPreviewCourseId] = useState(null);
 
   // Toast
   const [toast, setToast] = useState(null);
@@ -982,6 +992,7 @@ export default function ExpertCourseManagement() {
                 onEdit={handleEdit}
                 onPublish={handlePublish}
                 onUnpublish={handleUnpublish}
+                onPreview={setPreviewCourseId}
               />
             ))}
           </div>
@@ -1032,6 +1043,14 @@ export default function ExpertCourseManagement() {
           message={toast.message}
           type={toast.type}
           onClose={() => setToast(null)}
+        />
+      )}
+
+      {/* ── COURSE PREVIEW MODAL ─────────────────────────────── */}
+      {previewCourseId && (
+        <CoursePreviewModal
+          courseId={previewCourseId}
+          onClose={() => setPreviewCourseId(null)}
         />
       )}
     </div>
