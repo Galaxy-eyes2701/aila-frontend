@@ -185,7 +185,7 @@ export default function LearningContent({
             className={styles.reportBtn}
             onClick={() => setShowReport(true)}
           >
-            <i className="fas fa-flag" /> Báo cáo khóa học
+            <i className="fas fa-flag" /> Báo cáo
           </button>
         </div>
 
@@ -224,6 +224,7 @@ export default function LearningContent({
         <ReportCourseModal
           courseId={courseId}
           courseName={currentMaterial.courseName}
+          materialId={currentMaterial.id}
           onClose={() => setShowReport(false)}
           onSuccess={() => {
             setShowReport(false);

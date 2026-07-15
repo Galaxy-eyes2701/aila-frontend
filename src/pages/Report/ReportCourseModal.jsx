@@ -5,15 +5,17 @@ import { reasonLabel, DESCRIPTION_MAX } from "./constants/reportReasons";
 import styles from "./ReportCourseModal.module.css";
 
 /**
- * Modal báo cáo khóa học (UC-33).
+ * Modal báo cáo khóa học / bài học (UC-33).
  * @param courseId  id khóa học
  * @param courseName tên khóa (hiển thị dưới tiêu đề)
+ * @param materialId  id bài học — nếu truyền vào thì báo cáo bài học đó; bỏ trống thì báo cáo cả khóa học
  * @param onClose  đóng modal
  * @param onSuccess gọi khi gửi thành công (parent hiển thị toast)
  */
 export default function ReportCourseModal({
   courseId,
   courseName,
+  materialId,
   onClose,
   onSuccess,
 }) {
@@ -81,10 +83,13 @@ export default function ReportCourseModal({
 
     setSubmitting(true);
     try {
-      await reportCourse(courseId, {
+      const body = {
         reason,
         description: description.trim() ? description.trim() : null,
-      });
+      };
+      // Có materialId → báo cáo bài học; bỏ trống → báo cáo cả khóa học.
+      if (materialId) body.materialId = materialId;
+      await reportCourse(courseId, body);
       onSuccess();
     } catch (err) {
       setSubmitting(false);
@@ -119,6 +124,14 @@ export default function ReportCourseModal({
           alert(err.errorMessage || "Khóa học không tồn tại.");
           onClose();
           break;
+        case "MATERIAL_NOT_FOUND":
+          setBanner({
+            type: "error",
+            message:
+              err.errorMessage ||
+              "Bài học không tồn tại hoặc không thuộc khóa học này.",
+          });
+          break;
         case "UNAUTHORIZED":
           navigate("/");
           break;
@@ -145,7 +158,7 @@ export default function ReportCourseModal({
         <div className={styles.header}>
           <div>
             <h2 id="report-title" className={styles.title}>
-              Báo cáo khóa học
+              {materialId ? "Báo cáo bài học" : "Báo cáo khóa học"}
             </h2>
             {courseName && <p className={styles.subtitle}>{courseName}</p>}
           </div>
@@ -196,15 +209,15 @@ export default function ReportCourseModal({
                 }`}
               >
                 {reasons.map((r) => (
-                  <label key={r.value} className={styles.radioItem}>
+                  <label key={r.id} className={styles.radioItem}>
                     <input
                       type="radio"
                       name="report-reason"
-                      value={r.value}
-                      checked={reason === r.value}
+                      value={r.id}
+                      checked={reason === r.id}
                       disabled={alreadyReported}
                       onChange={() => {
-                        setReason(r.value);
+                        setReason(r.id);
                         setReasonError(null);
                       }}
                     />

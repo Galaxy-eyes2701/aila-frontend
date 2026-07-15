@@ -4,6 +4,7 @@ import api from '../../utils/api';
 import useAuth from '../../hooks/useAuth';
 import LoginModal    from '../../components/AuthModals/LoginModal';
 import RegisterModal from '../../components/AuthModals/RegisterModal';
+import ReportCourseModal from '../Report/ReportCourseModal';
 import styles from './CourseDetail.module.css';
 
 const LEVEL_LABELS = {
@@ -68,6 +69,16 @@ export default function CourseDetail() {
 
   // Auth modal: null | 'login' | 'register'
   const [authModal, setAuthModal] = useState(null);
+
+  // Báo cáo khóa học
+  const [showReport, setShowReport] = useState(false);
+  const [reportToast, setReportToast] = useState(false);
+
+  useEffect(() => {
+    if (!reportToast) return undefined;
+    const t = setTimeout(() => setReportToast(false), 3000);
+    return () => clearTimeout(t);
+  }, [reportToast]);
 
   // Load course detail
   useEffect(() => {
@@ -411,6 +422,17 @@ export default function CourseDetail() {
                 </li>
               )}
             </ul>
+
+            {/* Báo cáo khóa học — chỉ hiện khi đã đăng ký học */}
+            {enrolled === true && (
+              <button
+                type="button"
+                className={styles.reportCourseBtn}
+                onClick={() => setShowReport(true)}
+              >
+                <i className="fas fa-flag" /> Báo cáo khóa học
+              </button>
+            )}
           </div>
         </aside>
       </div>
@@ -438,6 +460,25 @@ export default function CourseDetail() {
           onSwitchToLogin={() => setAuthModal('login')}
           onRegisterSuccess={() => setAuthModal(null)}
         />
+      )}
+
+      {/* ── REPORT MODAL (cấp khóa học — không kèm materialId) ── */}
+      {showReport && (
+        <ReportCourseModal
+          courseId={id}
+          courseName={course.name}
+          onClose={() => setShowReport(false)}
+          onSuccess={() => {
+            setShowReport(false);
+            setReportToast(true);
+          }}
+        />
+      )}
+
+      {reportToast && (
+        <div className={styles.reportToast}>
+          <i className="fas fa-circle-check" /> Đã gửi báo cáo. Cảm ơn bạn đã đóng góp!
+        </div>
       )}
     </div>
   );

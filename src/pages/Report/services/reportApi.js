@@ -38,7 +38,11 @@ export function getReportReasons(courseId) {
   return request(api.get(`/courses/${courseId}/reports/reasons`));
 }
 
-/** POST /api/courses/{courseId}/reports — gửi báo cáo. body: { reason: number, description?: string }. */
+/**
+ * POST /api/courses/{courseId}/reports — gửi báo cáo.
+ * body: { reason: number, description?: string|null, materialId?: string }.
+ * Có materialId → báo cáo riêng bài học; bỏ trống → báo cáo cả khóa học.
+ */
 export function reportCourse(courseId, body) {
   return request(api.post(`/courses/${courseId}/reports`, body));
 }
