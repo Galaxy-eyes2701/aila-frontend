@@ -84,6 +84,12 @@ function CourseFormModal({ mode, initialData, categories, onClose, onSaved }) {
   const [newTagErrors, setNewTagErrors] = useState({});
   const [newTagError,  setNewTagError]  = useState('');
 
+  /* ── request-verification state ── */
+  const [verifyTag,    setVerifyTag]    = useState(null); // tag object
+  const [verifyNote,   setVerifyNote]   = useState('');
+  const [verifySaving, setVerifySaving] = useState(false);
+  const [verifyError,  setVerifyError]  = useState('');
+
   useEffect(() => {
     setTagsLoading(true);
     Promise.all([api.get('/tags'), api.get('/tags/me')])
@@ -189,6 +195,37 @@ function CourseFormModal({ mode, initialData, categories, onClose, onSaved }) {
       setNewTagError(err.response?.data?.errorMessage || 'Lỗi kết nối. Vui lòng thử lại.');
     } finally {
       setNewTagSaving(false);
+    }
+  };
+
+  /* ── request verification for an unpublished tag ── */
+  const handleTagClick = tag => {
+    if (tag.isPublished) { toggleTag(tag.id); return; }
+    // Chờ duyệt → chỉ hiện thông báo, không cho chọn
+    if (tag.publishRequest?.status === 'Pending') return;
+    // Chưa gửi hoặc bị từ chối → mở modal gửi duyệt
+    setVerifyTag(tag);
+    setVerifyNote('');
+    setVerifyError('');
+  };
+
+  const handleSendVerification = async () => {
+    setVerifySaving(true);
+    setVerifyError('');
+    try {
+      const res = await api.post(`/tags/${verifyTag.id}/request-verification`, {
+        note: verifyNote.trim() || null,
+      });
+      if (res.data.success) {
+        setTags(prev => prev.map(t => t.id === verifyTag.id ? res.data.data : t));
+        setVerifyTag(null);
+      } else {
+        setVerifyError(res.data.errorMessage || 'Gửi yêu cầu thất bại.');
+      }
+    } catch (err) {
+      setVerifyError(err.response?.data?.errorMessage || 'Lỗi kết nối. Vui lòng thử lại.');
+    } finally {
+      setVerifySaving(false);
     }
   };
 
@@ -391,17 +428,36 @@ function CourseFormModal({ mode, initialData, categories, onClose, onSaved }) {
                 <div className={styles.tagPickerLoading}><span className={styles.spinner} /> Đang tải tags...</div>
               ) : tags.length > 0 ? (
                 <div className={styles.tagPicker}>
-                  {tags.map(tag => (
-                    <button
-                      type="button"
-                      key={tag.id}
-                      className={`${styles.tagBtn} ${form.tagIds.includes(tag.id) ? styles.tagBtnActive : ''}`}
-                      onClick={() => toggleTag(tag.id)}
-                    >
-                      {tag.name}
-                      {!tag.isPublished && <span className={styles.tagDraft}> (nháp)</span>}
-                    </button>
-                  ))}
+                  {tags.map(tag => {
+                    const isPending  = !tag.isPublished && tag.publishRequest?.status === 'Pending';
+                    const isUnpub    = !tag.isPublished;
+                    const isSelected = form.tagIds.includes(tag.id);
+                    let cls = styles.tagBtn;
+                    if (isSelected)   cls += ` ${styles.tagBtnActive}`;
+                    if (isPending)    cls += ` ${styles.tagBtnPending}`;
+                    else if (isUnpub) cls += ` ${styles.tagBtnUnpub}`;
+
+                    const title = isPending
+                      ? 'Tag đang chờ duyệt — không thể chọn'
+                      : isUnpub
+                        ? 'Tag chưa được duyệt — nhấn để gửi yêu cầu xét duyệt'
+                        : undefined;
+
+                    return (
+                      <button
+                        type="button"
+                        key={tag.id}
+                        className={cls}
+                        onClick={() => handleTagClick(tag)}
+                        title={title}
+                        aria-disabled={isUnpub}
+                      >
+                        {tag.name}
+                        {isPending && <span className={styles.tagStatusIcon} title="Đang chờ duyệt"><i className="fas fa-clock" /></span>}
+                        {isUnpub && !isPending && <span className={styles.tagStatusIcon} title="Chưa duyệt"><i className="fas fa-exclamation-circle" /></span>}
+                      </button>
+                    );
+                  })}
                 </div>
               ) : (
                 <p className={styles.tagEmpty}>Chưa có tag nào. Nhấn "Tạo tag mới" để thêm.</p>
@@ -425,6 +481,57 @@ function CourseFormModal({ mode, initialData, categories, onClose, onSaved }) {
           </div>
         </form>
       </div>
+
+      {/* ── Modal gửi yêu cầu xét duyệt tag ── */}
+      {verifyTag && (
+        <div className={styles.overlay} onClick={e => e.target === e.currentTarget && setVerifyTag(null)}>
+          <div className={styles.verifyModal}>
+            <div className={styles.modalHeader}>
+              <div className={styles.modalTitle}>
+                <i className="fas fa-paper-plane" /> Gửi yêu cầu xét duyệt
+              </div>
+              <button className={styles.modalClose} onClick={() => setVerifyTag(null)} aria-label="Đóng">
+                <i className="fas fa-times" />
+              </button>
+            </div>
+            <div className={styles.modalBody}>
+              <div className={styles.tagPreviewBox}>
+                <span className={styles.tagPreviewName}>{verifyTag.name}</span>
+                <code className={styles.tagPreviewCode}>{verifyTag.code}</code>
+              </div>
+              <div className={styles.infoBoxBlue}>
+                <i className="fas fa-info-circle" />
+                Sau khi được admin duyệt, tag sẽ xuất hiện công khai và có thể gắn vào khóa học.
+              </div>
+              <div className={styles.formGroup}>
+                <label className={styles.formLabel}><i className="fas fa-comment-alt" /> Ghi chú cho admin <span className={styles.labelOptional}>(không bắt buộc)</span></label>
+                <textarea
+                  className={styles.formTextarea}
+                  value={verifyNote}
+                  onChange={e => setVerifyNote(e.target.value)}
+                  placeholder="Mô tả ngắn về tag này, lý do muốn thêm..."
+                  rows={3}
+                />
+              </div>
+              {verifyError && (
+                <div className={styles.formError}>
+                  <i className="fas fa-exclamation-circle" /> {verifyError}
+                </div>
+              )}
+            </div>
+            <div className={styles.modalFooter}>
+              <button className={styles.btnCancel} onClick={() => setVerifyTag(null)}>Hủy</button>
+              <button className={styles.btnSave} onClick={handleSendVerification} disabled={verifySaving}>
+                {verifySaving
+                  ? <><span className={styles.spinner} /> Đang gửi...</>
+                  : <><i className="fas fa-paper-plane" /> Gửi yêu cầu</>}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Tooltip chờ duyệt (hiện dưới dạng banner nhỏ khi hover tag pending) ── */}
     </div>
   );
 }

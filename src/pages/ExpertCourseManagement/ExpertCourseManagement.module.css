@@ -659,6 +659,95 @@
 .tagBtn:hover { border-color: var(--primary); color: var(--primary); }
 .tagBtnActive { background: var(--primary-light); border-color: var(--primary); color: var(--primary); font-weight: 700; }
 
+/* Tag chưa duyệt — màu đỏ, không cho chọn */
+.tagBtnUnpub {
+  background: #fff1f1;
+  border-color: #fca5a5;
+  color: #dc2626;
+  cursor: pointer;
+}
+.tagBtnUnpub:hover {
+  background: #fee2e2;
+  border-color: #ef4444;
+  color: #b91c1c;
+}
+
+/* Tag đang chờ duyệt — màu cam nhạt, cursor mặc định */
+.tagBtnPending {
+  background: #fffbeb;
+  border-color: #fcd34d;
+  color: #b45309;
+  cursor: default;
+  opacity: .8;
+}
+.tagBtnPending:hover {
+  background: #fffbeb;
+  border-color: #fcd34d;
+  color: #b45309;
+}
+
+.tagStatusIcon {
+  margin-left: 5px;
+  font-size: 11px;
+  opacity: .8;
+}
+
+/* Verify modal (nhỏ hơn formModal) */
+.verifyModal {
+  background: var(--bg-card);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  width: 100%;
+  max-width: 460px;
+  max-height: 90vh;
+  overflow-y: auto;
+  animation: modalIn .2s ease;
+}
+
+.tagPreviewBox {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  background: var(--bg);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  flex-wrap: wrap;
+}
+.tagPreviewName { font-size: 15px; font-weight: 700; color: var(--text); }
+.tagPreviewCode {
+  font-size: 12px;
+  font-family: monospace;
+  background: #f3f4f6;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 2px 8px;
+  color: var(--text-muted);
+}
+
+.infoBoxBlue {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  padding: 11px 13px;
+  border-radius: var(--radius-sm);
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  color: #1d4ed8;
+  font-size: 13px;
+  line-height: 1.6;
+}
+.infoBoxBlue i { flex-shrink: 0; margin-top: 1px; }
+
+.labelOptional {
+  font-size: 11px;
+  font-weight: 400;
+  color: var(--text-muted);
+  text-transform: none;
+  letter-spacing: 0;
+  margin-left: 4px;
+}
+
 .formError {
   display: flex;
   align-items: center;
