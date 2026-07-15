@@ -24,3 +24,11 @@ export async function deleteLearningMaterial(moduleId, materialId) {
 
     return { success: res.status === 204 };
 }
+
+export async function reorderLearningMaterials(moduleId, items) {
+    const res = await api.put(
+        `/modules/${moduleId}/learning-materials/reorder`,
+        { items }
+    );
+    return res.data;
+}

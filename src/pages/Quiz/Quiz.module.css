@@ -322,6 +322,21 @@
   font-style: italic;
 }
 
+.failNote {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  text-align: left;
+  background: #fef3e2;
+  color: #8a5300;
+  border-radius: var(--radius-sm);
+  padding: 12px 16px;
+  font-size: 14px;
+  line-height: 1.5;
+  margin: 0 0 20px;
+}
+.failNote i { margin-top: 3px; }
+
 /* ── Review (detail) ────────────────────────────────────────────────────── */
 .reviewHead {
   display: flex;
@@ -396,6 +411,7 @@
   align-items: center;
   gap: 10px;
 }
+.toastWarn { background: #b26a00; }
 
 @media (max-width: 560px) {
   .scoreRing { width: 130px; height: 130px; }

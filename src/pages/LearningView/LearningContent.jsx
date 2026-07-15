@@ -185,7 +185,7 @@ export default function LearningContent({
             className={styles.reportBtn}
             onClick={() => setShowReport(true)}
           >
-            <i className="fas fa-flag" /> Báo cáo khóa học
+            <i className="fas fa-flag" /> Báo cáo
           </button>
         </div>
 
@@ -196,6 +196,12 @@ export default function LearningContent({
               <span className={styles.completedBadge}>
                 <i className="fas fa-check-circle" /> Bạn đã hoàn thành học liệu
                 này
+              </span>
+            ) : type.includes("quiz") ? (
+              /* Quiz: hoàn thành do ĐẠT bài quyết định, không cho đánh dấu tay */
+              <span className={styles.completeHint}>
+                <i className="fas fa-circle-info" /> Học liệu này hoàn thành khi
+                bạn đạt bài kiểm tra.
               </span>
             ) : (
               <button className={styles.completeBtn} onClick={onComplete}>
@@ -218,6 +224,7 @@ export default function LearningContent({
         <ReportCourseModal
           courseId={courseId}
           courseName={currentMaterial.courseName}
+          materialId={currentMaterial.id}
           onClose={() => setShowReport(false)}
           onSuccess={() => {
             setShowReport(false);
