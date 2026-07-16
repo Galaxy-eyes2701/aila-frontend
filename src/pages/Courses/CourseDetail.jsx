@@ -4,7 +4,7 @@ import api from '../../utils/api';
 import useAuth from '../../hooks/useAuth';
 import LoginModal    from '../../components/AuthModals/LoginModal';
 import RegisterModal from '../../components/AuthModals/RegisterModal';
-import ReportCourseModal from '../Report/ReportCourseModal';
+import ReportCourseModal from '../Learner/Report/ReportCourseModal';
 import styles from './CourseDetail.module.css';
 
 const LEVEL_LABELS = {

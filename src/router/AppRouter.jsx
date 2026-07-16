@@ -4,33 +4,36 @@ import {
   Navigate,
 } from "react-router-dom";
 import MainLayout from "../layout/MainLayout";
+import AdminLayout from "../layout/AdminLayout";
 import ExpertLayout from "../layout/ExpertLayout";
-import AdminLogin from "../pages/AdminLogin/AdminLogin";
-import ExpertLogin from "../pages/ExpertLogin/ExpertLogin";
-import ExpertProfile from "../pages/ExpertProfile/ExpertProfile";
-import ExpertHome from "../pages/ExpertHome/ExpertHome";
-import ExpertCourseManagement from "../pages/ExpertCourseManagement/ExpertCourseManagement";
-import ModuleManagement from "../pages/ModuleManagement/ModuleManagement";
+import AdminLogin from "../pages/Admin/AdminLogin/AdminLogin";
+import UserManagement from "../pages/Admin/UserManagement/UserManagement";
+import TagManagement from "../pages/Admin/TagManagement/TagManagement";
+import ExpertLogin from "../pages/Expert/ExpertLogin/ExpertLogin";
+import ExpertProfile from "../pages/Expert/ExpertProfile/ExpertProfile";
+import ExpertHome from "../pages/Expert/ExpertHome/ExpertHome";
+import ExpertCourseManagement from "../pages/Expert/ExpertCourseManagement/ExpertCourseManagement";
+import ModuleManagement from "../pages/Expert/ModuleManagement/ModuleManagement";
 import Notifications from "../pages/Notifications/Notifications";
 import CourseList from "../pages/Courses/CourseList";
 import CourseDetail from "../pages/Courses/CourseDetail";
 import BlogDetail from "../pages/BlogDetail/BlogDetail";
-import LearnerProfile from "../pages/LearnerProfile/LearnerProfile";
+import LearnerProfile from "../pages/Learner/LearnerProfile/LearnerProfile";
 import PageNotFound from "../pages/PageNotFound";
 import Home from "../pages/Home/Home";
 import AdminProtectedRoute from "./AdminProtectedRoute";
 import ExpertProtectedRoute from "./ExpertProtectedRoute";
 import LearnerProtectedRoute from "./LearnerProtectedRoute";
-import LearningView from "../pages/LearningView/LearningView";
+import LearningView from "../pages/Learner/LearningView/LearningView";
 import GoogleCallback from '../pages/GoogleCallback/GoogleCallback';
 import BlogList from '../pages/BlogList/BlogList';
-import PublicExpertProfile from '../pages/PublicExpertProfile/PublicExpertProfile';
-import QuizTakingPage from "../pages/Quiz/QuizTakingPage";
-import QuizResultPage from "../pages/Quiz/QuizResultPage";
-import QuizResultDetailPage from "../pages/Quiz/QuizResultDetailPage";
-import CoursesPage from "../pages/LearningProfile/CoursesPage";
-import QuizHistoryPage from "../pages/LearningProfile/QuizHistoryPage";
-import AiScenariosPage from "../pages/LearningProfile/AiScenariosPage";
+import PublicExpertProfile from '../pages/Learner/PublicExpertProfile/PublicExpertProfile';
+import QuizTakingPage from "../pages/Learner/Quiz/QuizTakingPage";
+import QuizResultPage from "../pages/Learner/Quiz/QuizResultPage";
+import QuizResultDetailPage from "../pages/Learner/Quiz/QuizResultDetailPage";
+import CoursesPage from "../pages/Learner/LearningProfile/CoursesPage";
+import QuizHistoryPage from "../pages/Learner/LearningProfile/QuizHistoryPage";
+import AiScenariosPage from "../pages/Learner/LearningProfile/AiScenariosPage";
 
 const router = createBrowserRouter([
   // ── Auth pages (không có Header) ─────────────────────────────
@@ -43,7 +46,7 @@ const router = createBrowserRouter([
     path: "/admin",
     element: (
       <AdminProtectedRoute>
-        <div style={{ minHeight: "100vh", background: "#f7f3eb" }} />
+        <AdminLayout />
       </AdminProtectedRoute>
     ),
     children: [
@@ -53,8 +56,25 @@ const router = createBrowserRouter([
         element: (
           <div style={{ padding: 48 }}>
             <h2>Admin Dashboard</h2>
+            <p>Chọn chức năng bên dưới để quản lý người dùng hoặc tags.</p>
+            <div style={{ display: 'flex', gap: 16, marginTop: 24, flexWrap: 'wrap' }}>
+              <a href="/admin/users" style={{ padding: '14px 22px', background: '#2563eb', color: '#fff', borderRadius: 12, textDecoration: 'none' }}>
+                Quản lý người dùng
+              </a>
+              <a href="/admin/tags" style={{ padding: '14px 22px', background: '#1d4ed8', color: '#fff', borderRadius: 12, textDecoration: 'none' }}>
+                Quản lý tags
+              </a>
+            </div>
           </div>
         ),
+      },
+      {
+        path: "users",
+        element: <UserManagement />,
+      },
+      {
+        path: "tags",
+        element: <TagManagement />,
       },
     ],
   },
