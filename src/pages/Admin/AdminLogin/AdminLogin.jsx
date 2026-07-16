@@ -5,7 +5,7 @@ import styles from './AdminLogin.module.css';
 
 export default function AdminLogin() {
   const navigate = useNavigate();
-  const [form, setForm]       = useState({ username: '', password: '' });
+  const [form, setForm]       = useState({ email: '', password: '' });
   const [error, setError]     = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -16,26 +16,34 @@ export default function AdminLogin() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!form.username.trim() || !form.password.trim()) {
+    if (!form.email.trim() || !form.password.trim()) {
       setError('Vui lòng nhập đầy đủ Email và mật khẩu.');
       return;
     }
     setLoading(true);
     try {
+      const normalizedEmail = form.email.trim().toLowerCase();
       const res = await api.post('/auth/admin/login', {
-        username: form.username.trim(),
+        email: normalizedEmail,
+        username: normalizedEmail,
         password: form.password,
       });
       if (res.data.success) {
-        localStorage.setItem('accessToken', res.data.data.accessToken);
+        const data = res.data.data;
+        localStorage.setItem('accessToken', data.accessToken);
         localStorage.setItem('adminLoggedIn', 'true');
         localStorage.setItem('role', 'Admin');
         navigate('/admin/dashboard');
       } else {
         setError(res.data.errorMessage || 'Đăng nhập thất bại.');
       }
-    } catch {
-      setError('Email hoặc mật khẩu không đúng.');
+    } catch (err) {
+      const apiError =
+        err?.response?.data?.errorMessage ||
+        err?.response?.data?.message ||
+        err?.response?.data?.title ||
+        'Email hoặc mật khẩu không đúng.';
+      setError(apiError);
     } finally {
       setLoading(false);
     }
@@ -57,9 +65,9 @@ export default function AdminLogin() {
               <i className="fas fa-user" />
               <input
                 type="email"
-                name="username"
+                name="email"
                 placeholder="Email"
-                value={form.username}
+                value={form.email}
                 onChange={handleChange}
                 autoFocus
                 required
