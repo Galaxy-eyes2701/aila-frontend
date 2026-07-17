@@ -40,9 +40,11 @@ function ModuleItem({ module, index, initialOpen }) {
         <ul className={styles.lessonList} role="list">
           {module.materials.map(mat => (
             <li key={mat.id} className={styles.lessonItem}>
-              <i className={`fas ${mat.materialType === 'Video' ? 'fa-play-circle' : 'fa-file-alt'} ${styles.lessonIcon}`} />
+              <i className={`fas ${(mat.type ?? mat.materialType) === 'Video' ? 'fa-play-circle' : (mat.type ?? mat.materialType) === 'Quiz' ? 'fa-vial' : 'fa-file-alt'} ${styles.lessonIcon}`} />
               <span className={styles.lessonTitle}>{mat.title}</span>
-              <span className={styles.lessonType}>{mat.materialType === 'Video' ? 'Video' : 'Tài liệu'}</span>
+              <span className={styles.lessonType}>
+                {(mat.type ?? mat.materialType) === 'Video' ? 'Video' : (mat.type ?? mat.materialType) === 'Quiz' ? 'Bài kiểm tra' : 'Tài liệu'}
+              </span>
             </li>
           ))}
         </ul>
