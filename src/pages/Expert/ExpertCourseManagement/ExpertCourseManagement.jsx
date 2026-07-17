@@ -715,16 +715,6 @@ function CourseRow({ course, onEdit, onPublish, onUnpublish, onPreview }) {
           </button>
         )}
 
-        {isPublished && (
-          <Link
-            to={`/courses/${course.id}`}
-            target="_blank"
-            className={`${styles.actionBtn} ${styles.actionBtnView}`}
-            title="Xem trang công khai"
-          >
-            <i className="fas fa-eye" /> Xem
-          </Link>
-        )}
       </div>
     </div>
   );

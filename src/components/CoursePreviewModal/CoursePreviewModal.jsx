@@ -31,6 +31,111 @@ function getYoutubeEmbedUrl(url) {
   return null;
 }
 
+/* ── Quiz Preview Panel ───────────────────────────────────────────────────── */
+function QuizPreviewPanel({ materialId }) {
+  const [settings,  setSettings]  = useState(null);
+  const [questions, setQuestions] = useState([]);
+  const [answers,   setAnswers]   = useState({});
+  const [loading,   setLoading]   = useState(true);
+  const [error,     setError]     = useState('');
+
+  useEffect(() => {
+    if (!materialId) return;
+    setLoading(true);
+    setError('');
+
+    const load = async () => {
+      try {
+        const settingsRes = await api.get(`/quiz-materials/${materialId}`);
+        if (settingsRes.data.success) setSettings(settingsRes.data.data);
+
+        const qRes = await api.get(`/quiz-materials/${materialId}/questions`);
+        const qs = (qRes.data.data ?? []).sort((a, b) => a.orderIndex - b.orderIndex);
+        setQuestions(qs);
+
+        const answerMap = {};
+        await Promise.all(qs.map(async q => {
+          try {
+            const aRes = await api.get(`/questions/${q.id}/answer-options`);
+            answerMap[q.id] = (aRes.data.data ?? []).sort((a, b) => a.orderIndex - b.orderIndex);
+          } catch { answerMap[q.id] = []; }
+        }));
+        setAnswers(answerMap);
+      } catch (err) {
+        setError(err.response?.data?.errorMessage || 'Không tải được nội dung quiz.');
+      } finally {
+        setLoading(false);
+      }
+    };
+    load();
+  }, [materialId]);
+
+  if (loading) return (
+    <div className={styles.quizLoadingBox}>
+      <span className={styles.spinner} /> Đang tải bài kiểm tra...
+    </div>
+  );
+
+  if (error) return (
+    <div className={styles.quizErrorBox}>
+      <i className="fas fa-exclamation-triangle" /> {error}
+    </div>
+  );
+
+  return (
+    <div className={styles.quizPreviewPanel}>
+      {settings && (
+        <div className={styles.quizInfoBar}>
+          <span><i className="fas fa-clock" /> Thời gian: <strong>{settings.timeLimitMinutes} phút</strong></span>
+          <span><i className="fas fa-star" /> Điểm đạt: <strong>{settings.passingScore}%</strong></span>
+          <span><i className="fas fa-list-ol" /> Số câu: <strong>{questions.length}</strong></span>
+          <span className={styles.quizPreviewTag}>
+            <i className="fas fa-eye" /> Chế độ xem trước — không tính kết quả
+          </span>
+        </div>
+      )}
+
+      {questions.length === 0 ? (
+        <div className={styles.quizEmpty}>
+          <i className="fas fa-vial" />
+          <p>Bài kiểm tra chưa có câu hỏi nào.</p>
+        </div>
+      ) : (
+        <div className={styles.quizQuestionList}>
+          {questions.map((q, idx) => {
+            const opts = answers[q.id] ?? [];
+            const isMulti = (q.questionTypeName ?? q.questionType ?? '') === 'MultipleChoice';
+            return (
+              <div key={q.id} className={styles.quizQuestionCard}>
+                <div className={styles.quizQuestionHead}>
+                  <span className={styles.quizQNum}>{idx + 1}</span>
+                  <span className={styles.quizQContent}>{q.content}</span>
+                  <span className={`${styles.quizQBadge} ${isMulti ? styles.quizQBadgeMulti : styles.quizQBadgeSingle}`}>
+                    {isMulti ? 'Nhiều đáp án' : 'Một đáp án'}
+                  </span>
+                </div>
+                <ul className={styles.quizOptionList}>
+                  {opts.map(opt => (
+                    <li key={opt.id} className={`${styles.quizOption} ${opt.isCorrect ? styles.quizOptionCorrect : ''}`}>
+                      <span className={styles.quizOptionDot}>
+                        {opt.isCorrect
+                          ? <i className="fas fa-check-circle" />
+                          : <i className="far fa-circle" />}
+                      </span>
+                      <span className={styles.quizOptionText}>{opt.content}</span>
+                      {opt.isCorrect && <span className={styles.quizCorrectLabel}>Đúng</span>}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+
 /* ── Sidebar ──────────────────────────────────────────────────────────────── */
 function PreviewSidebar({ modules, currentMaterialId, onSelect }) {
   const sorted = [...modules].sort((a, b) => a.orderIndex - b.orderIndex);
@@ -68,7 +173,7 @@ function PreviewSidebar({ modules, currentMaterialId, onSelect }) {
 }
 
 /* ── Content Panel ────────────────────────────────────────────────────────── */
-function PreviewContent({ material, loading }) {
+function PreviewContent({ material, loading, courseId }) {
   if (loading) {
     return (
       <div className={styles.contentArea}>
@@ -142,27 +247,16 @@ function PreviewContent({ material, loading }) {
             <p className={styles.noContent}>Không có nội dung văn bản cho bài học này.</p>
           )}
           {material.documentDetails.documentUrl && (
-            <a
-              href={material.documentDetails.documentUrl}
-              target="_blank"
-              rel="noreferrer"
-              className={styles.downloadBtn}
-            >
+            <a href={material.documentDetails.documentUrl} target="_blank" rel="noreferrer" className={styles.downloadBtn}>
               <i className="fas fa-download" /> Tải tài liệu đi kèm
             </a>
           )}
         </div>
       )}
 
-      {/* QUIZ */}
+      {/* QUIZ — hiển thị đầy đủ câu hỏi + đáp án đúng */}
       {type.includes('quiz') && (
-        <div className={styles.quizPreview}>
-          <i className="fas fa-vial" />
-          <p>Bài kiểm tra — Chỉ xem được khi học viên đăng ký khóa học.</p>
-          <span className={styles.quizNote}>
-            <i className="fas fa-info-circle" /> Preview mode không hiển thị câu hỏi để bảo mật nội dung.
-          </span>
-        </div>
+        <QuizPreviewPanel materialId={material.id} />
       )}
 
       {/* UNSUPPORTED */}
@@ -173,20 +267,15 @@ function PreviewContent({ material, loading }) {
   );
 }
 
-/* ── Overview Panel (trang chủ khoá học) ─────────────────────────────────── */
+/* ── Overview Panel ───────────────────────────────────────────────────────── */
 function PreviewOverview({ course }) {
   const totalMaterials = course.modules?.reduce((s, m) => s + (m.materials?.length ?? 0), 0) ?? 0;
-
   return (
     <div className={styles.contentArea}>
-      {/* Hero */}
       <section className={styles.overviewHero}>
         <div className={styles.overviewHeroThumb}>
-          <img
-            src={course.thumbnailUrl || FALLBACK_THUMB}
-            alt={course.name}
-            onError={e => { e.target.src = FALLBACK_THUMB; }}
-          />
+          <img src={course.thumbnailUrl || FALLBACK_THUMB} alt={course.name}
+            onError={e => { e.target.src = FALLBACK_THUMB; }} />
         </div>
         <div className={styles.overviewHeroInfo}>
           <span className={styles.overviewCategory}>{course.category?.name}</span>
@@ -203,8 +292,6 @@ function PreviewOverview({ course }) {
           </div>
         </div>
       </section>
-
-      {/* Tags */}
       {course.tags?.length > 0 && (
         <section className={styles.overviewSection}>
           <h3 className={styles.overviewSectionTitle}>Kỹ năng đạt được</h3>
@@ -213,17 +300,11 @@ function PreviewOverview({ course }) {
           </div>
         </section>
       )}
-
-      {/* Instructor */}
       <section className={styles.overviewSection}>
         <h3 className={styles.overviewSectionTitle}>Giảng viên</h3>
         <div className={styles.instructorRow}>
-          <img
-            src={course.author?.avatarUrl || DEFAULT_AVATAR}
-            alt={course.author?.fullName}
-            className={styles.instructorAvatar}
-            onError={e => { e.target.src = DEFAULT_AVATAR; }}
-          />
+          <img src={course.author?.avatarUrl || DEFAULT_AVATAR} alt={course.author?.fullName}
+            className={styles.instructorAvatar} onError={e => { e.target.src = DEFAULT_AVATAR; }} />
           <div>
             <div className={styles.instructorName}>{course.author?.fullName}</div>
             {course.author?.specialty && <div className={styles.instructorSub}>{course.author.specialty}</div>}
@@ -231,7 +312,6 @@ function PreviewOverview({ course }) {
           </div>
         </div>
       </section>
-
       <div className={styles.overviewHint}>
         <i className="fas fa-arrow-right" /> Chọn một bài học từ danh sách bên phải để xem trước nội dung.
       </div>
@@ -239,7 +319,7 @@ function PreviewOverview({ course }) {
   );
 }
 
-/* ── Main Modal ────────────────────────────────────────────────────────────── */
+/* ── Main Modal ───────────────────────────────────────────────────────────── */
 export default function CoursePreviewModal({ courseId, onClose }) {
   const [course,          setCourse]          = useState(null);
   const [loading,         setLoading]         = useState(true);
@@ -248,17 +328,13 @@ export default function CoursePreviewModal({ courseId, onClose }) {
   const [contentLoading,  setContentLoading]  = useState(false);
 
   const fetchCourse = useCallback(async () => {
-    setLoading(true);
-    setError('');
+    setLoading(true); setError('');
     try {
       const res = await api.get(`/courses/${courseId}`);
       if (res.data.success) setCourse(res.data.data);
       else setError('Không tải được khóa học.');
-    } catch {
-      setError('Lỗi kết nối. Vui lòng thử lại.');
-    } finally {
-      setLoading(false);
-    }
+    } catch { setError('Lỗi kết nối. Vui lòng thử lại.'); }
+    finally   { setLoading(false); }
   }, [courseId]);
 
   useEffect(() => { fetchCourse(); }, [fetchCourse]);
@@ -281,29 +357,25 @@ export default function CoursePreviewModal({ courseId, onClose }) {
     try {
       const res = await api.get(`/experts/me/courses/${courseId}/materials/${materialId}/preview`);
       if (res.data.success) setCurrentMaterial(res.data.data);
-    } catch { /* silent */ } finally {
-      setContentLoading(false);
-    }
+    } catch { /* silent */ }
+    finally   { setContentLoading(false); }
   };
 
   return (
     <div className={styles.backdrop} onClick={e => e.target === e.currentTarget && onClose()}>
       <div className={styles.dialog} role="dialog" aria-modal="true">
 
-        {/* ── BANNER ─────────────────────────────────────────────── */}
         <div className={styles.previewBanner}>
           <i className="fas fa-eye" />
           CHẾ ĐỘ XEM TRƯỚC — Mô phỏng giao diện học viên. Không tạo enrollment, tiến độ hay kết quả quiz.
-          <button className={styles.closeBannerBtn} onClick={onClose} aria-label="Đóng xem trước">
+          <button className={styles.closeBannerBtn} onClick={onClose} aria-label="Đóng">
             <i className="fas fa-times" /> Đóng xem trước
           </button>
         </div>
 
-        {/* ── BODY ───────────────────────────────────────────────── */}
         {loading && (
           <div className={styles.centerState}>
-            <span className={styles.spinner} />
-            <p>Đang tải khóa học...</p>
+            <span className={styles.spinner} /><p>Đang tải khóa học...</p>
           </div>
         )}
 
@@ -319,12 +391,9 @@ export default function CoursePreviewModal({ courseId, onClose }) {
 
         {!loading && !error && course && (
           <div className={styles.learningLayout}>
-            {/* Left: content */}
             {currentMaterial || contentLoading
-              ? <PreviewContent material={currentMaterial} loading={contentLoading} />
-              : <PreviewOverview course={course} />
-            }
-            {/* Right: sidebar */}
+              ? <PreviewContent material={currentMaterial} loading={contentLoading} courseId={courseId} />
+              : <PreviewOverview course={course} />}
             <PreviewSidebar
               modules={course.modules ?? []}
               currentMaterialId={currentMaterial?.id}
