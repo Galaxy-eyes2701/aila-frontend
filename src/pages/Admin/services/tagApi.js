@@ -19,3 +19,18 @@ export async function deleteSystemTag(tagId) {
   const res = await api.delete(`/admin/tags/system/${tagId}`);
   return res.data;
 }
+
+export async function getPendingTagVerificationRequests(params = {}) {
+  const res = await api.get("/admin/tags/pending", { params });
+  return res.data;
+}
+
+export async function getPendingTagVerificationDetail(tagId) {
+  const res = await api.get(`/admin/tags/pending/${tagId}`);
+  return res.data;
+}
+
+export async function reviewTagVerificationRequest(tagId, payload) {
+  const res = await api.post(`/admin/tags/${tagId}/verify`, payload);
+  return res.data;
+}

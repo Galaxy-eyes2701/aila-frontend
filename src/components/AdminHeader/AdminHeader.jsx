@@ -7,6 +7,8 @@ const NAV_LINKS = [
   { label: 'Dashboard', href: '/admin/dashboard' },
   { label: 'Người dùng', href: '/admin/users' },
   { label: 'Tags', href: '/admin/tags' },
+  { label: 'Reports', href: '/admin/reports' },
+  { label: 'Categories', href: '/admin/categories' },
 ];
 
 export default function AdminHeader() {

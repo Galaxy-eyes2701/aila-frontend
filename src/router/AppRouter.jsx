@@ -9,6 +9,8 @@ import ExpertLayout from "../layout/ExpertLayout";
 import AdminLogin from "../pages/Admin/AdminLogin/AdminLogin";
 import UserManagement from "../pages/Admin/UserManagement/UserManagement";
 import TagManagement from "../pages/Admin/TagManagement/TagManagement";
+import ReportManagement from "../pages/Admin/ReportManagement/ReportManagement";
+import CategoryManagement from "../pages/Admin/CategoryManagement/CategoryManagement";
 import ExpertLogin from "../pages/Expert/ExpertLogin/ExpertLogin";
 import ExpertProfile from "../pages/Expert/ExpertProfile/ExpertProfile";
 import ExpertHome from "../pages/Expert/ExpertHome/ExpertHome";
@@ -64,6 +66,12 @@ const router = createBrowserRouter([
               <a href="/admin/tags" style={{ padding: '14px 22px', background: '#1d4ed8', color: '#fff', borderRadius: 12, textDecoration: 'none' }}>
                 Quản lý tags
               </a>
+              <a href="/admin/reports" style={{ padding: '14px 22px', background: '#0f766e', color: '#fff', borderRadius: 12, textDecoration: 'none' }}>
+                Review reports
+              </a>
+              <a href="/admin/categories" style={{ padding: '14px 22px', background: '#7c3aed', color: '#fff', borderRadius: 12, textDecoration: 'none' }}>
+                Quản lý category
+              </a>
             </div>
           </div>
         ),
@@ -75,6 +83,14 @@ const router = createBrowserRouter([
       {
         path: "tags",
         element: <TagManagement />,
+      },
+      {
+        path: "reports",
+        element: <ReportManagement />,
+      },
+      {
+        path: "categories",
+        element: <CategoryManagement />,
       },
     ],
   },
