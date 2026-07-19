@@ -227,7 +227,6 @@ export default function CourseDetail() {
       {/* ── STICKY SECONDARY TABS ─────────────────────────── */}
       <div className={`${styles.stickyTabs} ${stickyVisible ? styles.stickyVisible : ''}`}>
         <div className={styles.stickyTabsInner}>
-          <a href="#learn"      className={styles.stickyTab}>Học gì</a>
           <a href="#curriculum" className={styles.stickyTab}>Nội dung</a>
           <a href="#instructor" className={styles.stickyTab}>Giảng viên</a>
         </div>
@@ -268,27 +267,6 @@ export default function CourseDetail() {
 
         {/* ══ CONTENT COLUMN ══ */}
         <div className={styles.contentCol}>
-
-          {/* WHAT YOU'LL LEARN */}
-          <section className={styles.sectionCard} id="learn">
-            <h2 className={styles.sectionTitle}>Bạn sẽ học được gì</h2>
-            <div className={styles.learnGrid}>
-              {course.tags?.length > 0 ? (
-                course.tags.map(tag => (
-                  <div key={tag.id} className={styles.learnItem}>
-                    <i className="fas fa-check" /><span>{tag.name}</span>
-                  </div>
-                ))
-              ) : (
-                <>
-                  <div className={styles.learnItem}><i className="fas fa-check" /><span>Nắm vững kiến thức nền tảng trong lĩnh vực này</span></div>
-                  <div className={styles.learnItem}><i className="fas fa-check" /><span>Áp dụng thực tế vào công việc và dự án</span></div>
-                  <div className={styles.learnItem}><i className="fas fa-check" /><span>Xây dựng portfolio cá nhân nổi bật</span></div>
-                  <div className={styles.learnItem}><i className="fas fa-check" /><span>Học từ những chuyên gia đầu ngành</span></div>
-                </>
-              )}
-            </div>
-          </section>
 
           {/* SKILL TAGS */}
           {course.tags?.length > 0 && (

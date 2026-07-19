@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import api from '../../../utils/api';
 import styles from './ExpertCourseManagement.module.css';
@@ -94,6 +94,11 @@ function CourseFormModal({ mode, initialData, categories, onClose, onSaved }) {
   /* ── check-code debounce ── */
   const [codeChecking,  setCodeChecking]  = useState(false);
   const [codeDuplicate, setCodeDuplicate] = useState(false);
+  const codeDuplicateRef = useRef(false);   // ref để handleCreateTag luôn đọc giá trị mới nhất
+  const checkCodeTimerRef = useRef(null);   // ref để clear timeout đúng cách
+
+  /* ── duplicate tag candidate (khi code trùng, hỏi expert có muốn dùng tag đó không) ── */
+  const [duplicateTagCandidate, setDuplicateTagCandidate] = useState(null);
 
   useEffect(() => {
     setTagsLoading(true);
@@ -161,13 +166,37 @@ function CourseFormModal({ mode, initialData, categories, onClose, onSaved }) {
       .replace(/[^a-z0-9\s-]/g, '').trim()
       .replace(/\s+/g, '-');
 
+  /* ── debounce check-code dùng chung cho cả 2 input ── */
+  const scheduleCodeCheck = useCallback((code) => {
+    codeDuplicateRef.current = false;
+    setCodeDuplicate(false);
+    setDuplicateTagCandidate(null);   // reset candidate khi user gõ lại
+    if (checkCodeTimerRef.current) clearTimeout(checkCodeTimerRef.current);
+    if (code.trim().length >= 2) {
+      checkCodeTimerRef.current = setTimeout(async () => {
+        setCodeChecking(true);
+        try {
+          // GET /tags/by-code trả về TagDto đầy đủ nếu tìm thấy, null nếu không
+          const res = await api.get('/tags/by-code', { params: { code: code.trim() } });
+          if (res.data.success) {
+            const found = res.data.data;   // TagDto | null
+            codeDuplicateRef.current = found !== null;
+            setCodeDuplicate(found !== null);
+            // Lưu sẵn tag để hiển thị confirm ngay khi nhấn nút
+            if (found) setDuplicateTagCandidate(found);
+          }
+        } catch { /* silent */ } finally { setCodeChecking(false); }
+      }, 500);
+    }
+  }, []);
   const handleNewTagNameChange = e => {
     const val = e.target.value;
+    const generatedCode = autoCode(val);
     setNewTagName(val);
-    setNewTagCode(autoCode(val));
+    setNewTagCode(generatedCode);
     setNewTagErrors({});
     setNewTagError('');
-    setCodeDuplicate(false);
+    scheduleCodeCheck(generatedCode);
   };
 
   const validateNewTag = () => {
@@ -187,7 +216,19 @@ function CourseFormModal({ mode, initialData, categories, onClose, onSaved }) {
   const handleCreateTag = async () => {
     const errs = validateNewTag();
     if (Object.keys(errs).length > 0) { setNewTagErrors(errs); return; }
-    if (codeDuplicate) { setNewTagErrors(prev => ({ ...prev, code: 'Code này đã tồn tại trong hệ thống.' })); return; }
+
+    // Nếu code trùng → duplicateTagCandidate đã được set sẵn từ bước check-code
+    if (codeDuplicateRef.current) {
+      if (duplicateTagCandidate) {
+        // Mở confirm modal (đã có data sẵn)
+        // duplicateTagCandidate đã được set trong scheduleCodeCheck
+      } else {
+        // Edge case: trùng nhưng chưa có data (gọi API lại)
+        setNewTagError('Tag với code này đã tồn tại. Vui lòng chọn tag từ danh sách bên dưới hoặc dùng code khác.');
+      }
+      return;
+    }
+
     setNewTagSaving(true);
     setNewTagError('');
     try {
@@ -207,9 +248,28 @@ function CourseFormModal({ mode, initialData, categories, onClose, onSaved }) {
     }
   };
 
+  /* ── xác nhận dùng tag đã tồn tại (khi code trùng) ── */
+  const handleConfirmUseDuplicateTag = () => {
+    const tag = duplicateTagCandidate;
+    if (!tag) return;
+    // Thêm vào danh sách tags nếu chưa có (trường hợp tag chưa được load)
+    setTags(prev => prev.find(t => t.id === tag.id) ? prev : [tag, ...prev]);
+    // Add vào tagIds của course nếu chưa có
+    setForm(prev => ({
+      ...prev,
+      tagIds: prev.tagIds.includes(tag.id) ? prev.tagIds : [...prev.tagIds, tag.id],
+    }));
+    setDuplicateTagCandidate(null);
+    setNewTagName(''); setNewTagCode(''); setShowNewTag(false);
+    codeDuplicateRef.current = false;
+    setCodeDuplicate(false);
+  };
+
   /* ── request verification for an unpublished tag ── */
   const handleTagClick = tag => {
     if (tag.isPublished) { toggleTag(tag.id); return; }
+    // Tag đang bị trùng code với ô nhập → không cho gửi xét duyệt, chỉ highlight
+    if (duplicateTagCandidate?.id === tag.id) return;
     // Chờ duyệt → chỉ hiện thông báo, không cho chọn
     if (tag.publishRequest?.status === 'Pending') return;
     // Chưa gửi hoặc bị từ chối → mở modal gửi duyệt
@@ -239,22 +299,11 @@ function CourseFormModal({ mode, initialData, categories, onClose, onSaved }) {
   };
 
   /* ── check-code: gọi API khi người dùng ngừng gõ 500ms ── */
-  const checkCodeTimer = useState(null);
   const handleNewTagCodeChange = e => {
     const val = e.target.value;
     setNewTagCode(val);
     setNewTagErrors(p => ({ ...p, code: '' }));
-    setCodeDuplicate(false);
-    if (checkCodeTimer[0]) clearTimeout(checkCodeTimer[0]);
-    if (val.trim().length >= 2) {
-      checkCodeTimer[0] = setTimeout(async () => {
-        setCodeChecking(true);
-        try {
-          const res = await api.get('/tags/check-code', { params: { code: val.trim() } });
-          if (res.data.success) setCodeDuplicate(res.data.data);
-        } catch { /* silent */ } finally { setCodeChecking(false); }
-      }, 500);
-    }
+    scheduleCodeCheck(val);
   };
 
   /* ── hủy yêu cầu xét duyệt Pending ── */
@@ -463,7 +512,7 @@ function CourseFormModal({ mode, initialData, categories, onClose, onSaved }) {
                       {newTagErrors.code
                         ? <span className={styles.fieldError}><i className="fas fa-exclamation-circle" /> {newTagErrors.code}</span>
                         : codeDuplicate
-                          ? <span className={styles.fieldError}><i className="fas fa-exclamation-circle" /> Code này đã tồn tại trong hệ thống.</span>
+                          ? <span className={styles.fieldError}><i className="fas fa-exclamation-circle" /> Code này đã tồn tại — nhấn "Tạo & chọn tag" để thêm tag đó vào khóa học.</span>
                           : codeChecking
                             ? <span className={styles.charCount}><span className={styles.spinner} style={{borderTopColor:'#6b7280'}} /> Đang kiểm tra...</span>
                             : <span className={styles.charCount}>a-z, 0-9, - · {newTagCode.trim().length}/50</span>}
@@ -478,7 +527,7 @@ function CourseFormModal({ mode, initialData, categories, onClose, onSaved }) {
                     <i className="fas fa-info-circle" /> Tag mới sẽ ở trạng thái chưa duyệt và được chọn ngay vào khóa học.
                   </div>
                   <button type="button" className={styles.btnInlineCreate} onClick={handleCreateTag} disabled={newTagSaving}>
-                    {newTagSaving ? <><span className={styles.spinner} /> Đang tạo...</> : <><i className="fas fa-plus" /> Tạo & chọn tag</>}
+                    {newTagSaving ? <><span className={styles.spinner} /> Đang tạo...</> : codeDuplicate ? <><i className="fas fa-link" /> Dùng tag này</> : <><i className="fas fa-plus" /> Tạo & chọn tag</>}
                   </button>
                 </div>
               )}
@@ -488,12 +537,14 @@ function CourseFormModal({ mode, initialData, categories, onClose, onSaved }) {
               ) : tags.length > 0 ? (
                 <div className={styles.tagPicker}>
                   {tags.map(tag => {
-                    const isPending  = !tag.isPublished && tag.publishRequest?.status === 'Pending';
-                    const isUnpub    = !tag.isPublished;
-                    const isSelected = form.tagIds.includes(tag.id);
+                    const isPending   = !tag.isPublished && tag.publishRequest?.status === 'Pending';
+                    const isUnpub     = !tag.isPublished;
+                    const isSelected  = form.tagIds.includes(tag.id);
+                    const isDuplicate = duplicateTagCandidate?.id === tag.id;
                     let cls = styles.tagBtn;
-                    if (isSelected)   cls += ` ${styles.tagBtnActive}`;
-                    if (isPending)    cls += ` ${styles.tagBtnPending}`;
+                    if (isSelected)    cls += ` ${styles.tagBtnActive}`;
+                    if (isDuplicate)   cls += ` ${styles.tagBtnDuplicate}`;
+                    else if (isPending)    cls += ` ${styles.tagBtnPending}`;
                     else if (isUnpub) cls += ` ${styles.tagBtnUnpub}`;
 
                     return (
@@ -503,19 +554,21 @@ function CourseFormModal({ mode, initialData, categories, onClose, onSaved }) {
                           className={cls}
                           onClick={() => handleTagClick(tag)}
                           title={
-                            isPending ? 'Đang chờ duyệt — không thể chọn'
+                            isDuplicate ? 'Tag trùng code với ô nhập — nhấn "Dùng tag này" để thêm'
+                            : isPending ? 'Đang chờ duyệt — không thể chọn'
                             : isUnpub ? 'Chưa duyệt — nhấn để gửi yêu cầu xét duyệt'
                             : undefined
                           }
-                          aria-disabled={isUnpub}
+                          aria-disabled={isUnpub && !isDuplicate}
                         >
                           {tag.name}
-                          {isPending && <span className={styles.tagStatusIcon}><i className="fas fa-clock" /></span>}
-                          {isUnpub && !isPending && <span className={styles.tagStatusIcon}><i className="fas fa-exclamation-circle" /></span>}
+                          {isDuplicate && <span className={styles.tagStatusIcon}><i className="fas fa-link" /></span>}
+                          {!isDuplicate && isPending && <span className={styles.tagStatusIcon}><i className="fas fa-clock" /></span>}
+                          {!isDuplicate && isUnpub && !isPending && <span className={styles.tagStatusIcon}><i className="fas fa-exclamation-circle" /></span>}
                         </button>
 
-                        {/* Nút hủy yêu cầu (chỉ khi Pending) */}
-                        {isPending && (
+                        {/* Nút hủy yêu cầu (chỉ khi Pending và không phải duplicate) */}
+                        {!isDuplicate && isPending && (
                           <button
                             type="button"
                             className={styles.tagActionBtn}
@@ -526,8 +579,8 @@ function CourseFormModal({ mode, initialData, categories, onClose, onSaved }) {
                           </button>
                         )}
 
-                        {/* Nút xóa tag (chỉ khi chưa publish, chưa Pending) */}
-                        {isUnpub && !isPending && (
+                        {/* Nút xóa tag (chỉ khi chưa publish, chưa Pending, không phải duplicate) */}
+                        {!isDuplicate && isUnpub && !isPending && (
                           <button
                             type="button"
                             className={`${styles.tagActionBtn} ${styles.tagActionBtnDanger}`}
@@ -614,6 +667,48 @@ function CourseFormModal({ mode, initialData, categories, onClose, onSaved }) {
       )}
 
       {/* ── Tooltip chờ duyệt (hiện dưới dạng banner nhỏ khi hover tag pending) ── */}
+
+      {/* ── Confirm dùng tag đã tồn tại ── */}
+      {duplicateTagCandidate && (
+        <div className={styles.overlay} onClick={e => e.target === e.currentTarget && setDuplicateTagCandidate(null)}>
+          <div className={styles.verifyModal}>
+            <div className={styles.modalHeader}>
+              <div className={styles.modalTitle}>
+                <i className="fas fa-tag" /> Tag đã tồn tại trong hệ thống
+              </div>
+              <button className={styles.modalClose} onClick={() => setDuplicateTagCandidate(null)} aria-label="Đóng">
+                <i className="fas fa-times" />
+              </button>
+            </div>
+            <div className={styles.modalBody}>
+              <div className={styles.tagPreviewBox}>
+                <span className={styles.tagPreviewName}>{duplicateTagCandidate.name}</span>
+                <code className={styles.tagPreviewCode}>{duplicateTagCandidate.code}</code>
+              </div>
+              <div className={styles.infoBoxBlue}>
+                <i className="fas fa-info-circle" />
+                Tag này đã tồn tại trong hệ thống. Bạn có muốn thêm tag này vào khóa học không?
+              </div>
+              {form.tagIds.includes(duplicateTagCandidate.id) && (
+                <div className={styles.infoBoxBlue} style={{ marginTop: '8px', background: '#fef3c7', borderColor: '#f59e0b', color: '#92400e' }}>
+                  <i className="fas fa-check-circle" />
+                  Tag này đã được chọn trong khóa học của bạn.
+                </div>
+              )}
+            </div>
+            <div className={styles.modalFooter}>
+              <button className={styles.btnCancel} onClick={() => setDuplicateTagCandidate(null)}>Hủy</button>
+              <button
+                className={styles.btnSave}
+                onClick={handleConfirmUseDuplicateTag}
+                disabled={form.tagIds.includes(duplicateTagCandidate.id)}
+              >
+                <i className="fas fa-plus" /> Thêm vào khóa học
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -666,6 +666,28 @@
 .tagBtn:hover { border-color: var(--primary); color: var(--primary); }
 .tagBtnActive { background: var(--primary-light); border-color: var(--primary); color: var(--primary); font-weight: 700; }
 
+/* Tag đang trùng code với ô nhập — màu tím, pulse nhẹ để thu hút chú ý */
+.tagBtnDuplicate {
+  background: #f5f3ff;
+  border-color: #a78bfa;
+  border-width: 2px;
+  color: #6d28d9;
+  cursor: default;
+  font-weight: 700;
+  box-shadow: 0 0 0 3px rgba(167,139,250,.2);
+  animation: duplicatePulse 1.8s ease infinite;
+}
+.tagBtnDuplicate:hover {
+  background: #ede9fe;
+  border-color: #7c3aed;
+  color: #5b21b6;
+}
+
+@keyframes duplicatePulse {
+  0%, 100% { box-shadow: 0 0 0 3px rgba(167,139,250,.2); }
+  50%       { box-shadow: 0 0 0 5px rgba(167,139,250,.35); }
+}
+
 /* Tag chưa duyệt — màu đỏ, không cho chọn */
 .tagBtnUnpub {
   background: #fff1f1;
