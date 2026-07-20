@@ -1,8 +1,9 @@
 import { Navigate, useLocation } from 'react-router-dom';
+import { normalizeRole } from '../utils/role';
 
 const LearnerProtectedRoute = ({ children }) => {
   const token = localStorage.getItem('accessToken');
-  const role  = localStorage.getItem('role');
+  const role  = normalizeRole(localStorage.getItem('role'));
   const location = useLocation();
 
   if (!token || role !== 'Learner') {

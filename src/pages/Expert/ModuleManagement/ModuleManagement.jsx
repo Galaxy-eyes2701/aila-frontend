@@ -42,12 +42,11 @@ export default function ModuleManagement() {
   );
 
   const stats = useMemo(() => {
-    const published = modules.filter((module) => module.isPublished).length;
     const materialCount = modules.reduce(
       (sum, module) => sum + (module.materialCount ?? 0),
       0,
     );
-    return { published, hidden: modules.length - published, materialCount };
+    return { materialCount };
   }, [modules]);
 
   const showToast = useCallback((message, type = "success") => {
@@ -170,36 +169,6 @@ export default function ModuleManagement() {
     }
   };
 
-  const handlePublishToggle = async (module) => {
-    const nextAction = module.isPublished ? "unpublish" : "publish";
-    setBusyId(module.id);
-    try {
-      const res = await api.patch(
-        `/courses/${courseId}/modules/${module.id}/${nextAction}`,
-      );
-      if (res.data.success) {
-        setModules((current) =>
-          current.map((item) => (item.id === module.id ? res.data.data : item)),
-        );
-        showToast(
-          module.isPublished ? "Đã ẩn chương." : "Đã công khai chương.",
-        );
-      } else {
-        showToast(
-          res.data.errorMessage || "Không thể đổi trạng thái chương.",
-          "error",
-        );
-      }
-    } catch (error) {
-      showToast(
-        error.response?.data?.errorMessage || "Lỗi kết nối máy chủ.",
-        "error",
-      );
-    } finally {
-      setBusyId("");
-    }
-  };
-
   const handleDelete = async (module) => {
     const confirmed = window.confirm(
       `Xóa chương "${module.title}"? Tất cả học liệu bên trong sẽ bị xóa theo.`,
@@ -299,14 +268,6 @@ export default function ModuleManagement() {
             <strong>{modules.length}</strong>
           </div>
           <div className={styles.summaryItem}>
-            <span>Đang công khai</span>
-            <strong>{stats.published}</strong>
-          </div>
-          <div className={styles.summaryItem}>
-            <span>Đang ẩn</span>
-            <strong>{stats.hidden}</strong>
-          </div>
-          <div className={styles.summaryItem}>
             <span>Học liệu</span>
             <strong>{stats.materialCount}</strong>
           </div>
@@ -378,7 +339,6 @@ export default function ModuleManagement() {
                   actions={{
                     onMove: moveModule,
                     onEdit: openEditModal,
-                    onPublish: handlePublishToggle,
                     onDelete: handleDelete,
                     onCreateMaterial: (module) => {
                       setSelectedModule(module);

@@ -36,6 +36,7 @@ import QuizResultDetailPage from "../pages/Learner/Quiz/QuizResultDetailPage";
 import CoursesPage from "../pages/Learner/LearningProfile/CoursesPage";
 import QuizHistoryPage from "../pages/Learner/LearningProfile/QuizHistoryPage";
 import AiScenariosPage from "../pages/Learner/LearningProfile/AiScenariosPage";
+import BlogManagement from "../pages/Admin/BlogManagement/BlogManagement";
 
 const router = createBrowserRouter([
   // ── Auth pages (không có Header) ─────────────────────────────
@@ -91,6 +92,10 @@ const router = createBrowserRouter([
       {
         path: "categories",
         element: <CategoryManagement />,
+      },
+      {
+        path: "blogs",
+        element: <BlogManagement />,
       },
     ],
   },

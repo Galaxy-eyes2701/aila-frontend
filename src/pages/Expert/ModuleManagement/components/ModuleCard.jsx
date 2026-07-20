@@ -53,14 +53,6 @@ export default function ModuleCard({
       <div className={styles.moduleContent}>
         <div className={styles.moduleTitleRow}>
           <h3>{module.title}</h3>
-
-          <span
-            className={`${styles.statusPill} ${
-              module.isPublished ? styles.published : styles.hidden
-            }`}
-          >
-            {module.isPublished ? "Công khai" : "Đang ẩn"}
-          </span>
         </div>
 
         <p
@@ -133,18 +125,6 @@ export default function ModuleCard({
         >
           <i className="fas fa-pen" />
           Sửa
-        </button>
-
-        <button
-          className={styles.secondaryButton}
-          disabled={busy}
-          onClick={() => actions.onPublish(module)}
-        >
-          <i
-            className={`fas ${module.isPublished ? "fa-eye-slash" : "fa-eye"}`}
-          />
-
-          {module.isPublished ? "Ẩn" : "Công khai"}
         </button>
 
         <button

@@ -23,19 +23,33 @@ export default function RegisterModal({ onClose, onSwitchToLogin, onRegisterSucc
 
     setLoading(true); setError('');
     try {
-      const res = await api.post('/auth/register', {
+      const registerRes = await api.post('/auth/register', {
         fullName: form.fullName.trim(),
         email:    form.email.trim().toLowerCase(),
         password: form.password,
       });
 
-      if (res.data.success) {
-        const d = res.data.data;
-        // Tự động đăng nhập sau khi đăng ký thành công
-        login(d.accessToken, { userId: d.userId, fullName: d.fullName, email: d.email, role: d.role });
-        onRegisterSuccess?.(d); // → Home sẽ mở OnboardingModal
+      if (!registerRes.data.success) {
+        setError(registerRes.data.errorMessage || 'Đăng ký thất bại.');
+        return;
+      }
+
+      const loginRes = await api.post('/learner/login', {
+        email: form.email.trim().toLowerCase(),
+        password: form.password,
+      });
+
+      if (loginRes.data.success) {
+        const d = loginRes.data.data;
+        login(d.accessToken, {
+          userId: d.userId,
+          fullName: d.fullName,
+          email: d.email,
+          role: d.role,
+        });
+        onRegisterSuccess?.(d);
       } else {
-        setError(res.data.errorMessage || 'Đăng ký thất bại.');
+        setError(loginRes.data.errorMessage || 'Đăng ký thành công nhưng đăng nhập tự động thất bại.');
       }
     } catch (err) {
       const msg = err.response?.data?.errorMessage;
