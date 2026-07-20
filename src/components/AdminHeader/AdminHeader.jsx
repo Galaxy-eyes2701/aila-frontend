@@ -26,7 +26,7 @@ export default function AdminHeader() {
     <header className={styles.navbar}>
       <div className={`container ${styles.navContent}`}>
         <Link to="/admin" className={styles.logo}>
-          Admin <span>Học AI</span>
+          Bình dân <span>Học AI</span>
         </Link>
 
         <ul className={styles.navLinks}>

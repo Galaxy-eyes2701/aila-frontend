@@ -1,8 +1,9 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import styles from "./UserManagement.module.css";
 import Toast from "../../Expert/ModuleManagement/components/Toast";
 import CreateExpertModal from "./CreateExpertModal";
+import Pagination from "../../../components/Pagination/Pagination";
 import { getUsers, updateUserStatus } from "../services/userApi";
 
 const ROLE_LABEL = {
@@ -25,7 +26,8 @@ export default function UserManagement() {
   const [loading, setLoading] = useState(true);
   const [pageError, setPageError] = useState("");
   const [toast, setToast] = useState(null);
-
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
   const [searchInput, setSearchInput] = useState("");
   const [searchKeyword, setSearchKeyword] = useState("");
   const [roleFilter, setRoleFilter] = useState("");
@@ -52,14 +54,10 @@ export default function UserManagement() {
       if (res.success) {
         setUsers(res.data ?? []);
       } else {
-        setPageError(
-          res.errorMessage || "Không thể tải danh sách người dùng.",
-        );
+        setPageError(res.errorMessage || "Không thể tải danh sách người dùng.");
       }
     } catch (err) {
-      setPageError(
-        err.response?.data?.errorMessage ?? "Lỗi kết nối máy chủ.",
-      );
+      setPageError(err.response?.data?.errorMessage ?? "Lỗi kết nối máy chủ.");
     } finally {
       setLoading(false);
     }
@@ -68,6 +66,13 @@ export default function UserManagement() {
   useEffect(() => {
     fetchUsers();
   }, [fetchUsers]);
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchKeyword, roleFilter, statusFilter]);
+  const paginatedUsers = useMemo(() => {
+    const start = (currentPage - 1) * itemsPerPage;
+    return users.slice(start, start + itemsPerPage);
+  }, [users, currentPage, itemsPerPage]);
 
   function handleSearchSubmit(e) {
     e.preventDefault();
@@ -195,11 +200,27 @@ export default function UserManagement() {
             </thead>
 
             <tbody>
-              {loading && (
-                <tr className={styles.loadingRow}>
-                  <td colSpan={5}>Đang tải danh sách người dùng...</td>
-                </tr>
-              )}
+              {loading &&
+                Array.from({ length: 5 }).map((_, i) => (
+                  <tr key={`skeleton-${i}`} className={styles.loadingRow}>
+                    <td colSpan={5}>
+                      <div className={styles.skeletonRow}>
+                        <div
+                          className={`${styles.skeletonLine} ${styles.wide}`}
+                        />
+                        <div
+                          className={`${styles.skeletonLine} ${styles.narrow}`}
+                        />
+                        <div
+                          className={`${styles.skeletonLine} ${styles.narrow}`}
+                        />
+                        <div
+                          className={`${styles.skeletonLine} ${styles.narrow}`}
+                        />
+                      </div>
+                    </td>
+                  </tr>
+                ))}
 
               {!loading && pageError && (
                 <tr>
@@ -231,7 +252,7 @@ export default function UserManagement() {
 
               {!loading &&
                 !pageError &&
-                users.map((user) => {
+                paginatedUsers.map((user) => {
                   const roleInfo = ROLE_LABEL[user.role] ?? {
                     text: user.role,
                     cls: "roleLearner",
@@ -242,9 +263,7 @@ export default function UserManagement() {
                       <td>
                         <div className={styles.userCell}>
                           <span>{user.fullName}</span>
-                          <span className={styles.userEmail}>
-                            {user.email}
-                          </span>
+                          <span className={styles.userEmail}>{user.email}</span>
                         </div>
                       </td>
 
@@ -296,6 +315,20 @@ export default function UserManagement() {
             </tbody>
           </table>
         </div>
+        {!loading && !pageError && users.length > 0 && (
+          <Pagination
+            currentPage={currentPage}
+            totalPages={Math.max(1, Math.ceil(users.length / itemsPerPage))}
+            itemsPerPage={itemsPerPage}
+            totalItems={users.length}
+            onPageChange={setCurrentPage}
+            onItemsPerPageChange={(n) => {
+              setItemsPerPage(n);
+              setCurrentPage(1);
+            }}
+            unitLabel="người dùng"
+          />
+        )}
       </div>
 
       <CreateExpertModal

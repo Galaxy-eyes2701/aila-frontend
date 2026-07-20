@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import styles from "./BlogManagement.module.css";
 import Toast from "../../Expert/ModuleManagement/components/Toast";
 import BlogFormModal from "./BlogFormModal";
+import Pagination from "../../../components/Pagination/Pagination";
 import {
   getBlogs,
   getBlogDetail,
@@ -10,8 +11,6 @@ import {
   publishBlog,
   unpublishBlog,
 } from "../services/blogApi";
-
-const PAGE_SIZE = 10;
 
 function formatDate(value) {
   if (!value) return "—";
@@ -36,14 +35,17 @@ export default function BlogManagement() {
 
   const [busyBlogId, setBusyBlogId] = useState("");
 
-  const [formModal, setFormModal] = useState(null); // { mode: "create" | "edit", blog }
+  const [formModal, setFormModal] = useState(null);
+  const PAGE_SIZE = 10;
   const [detailLoading, setDetailLoading] = useState(false);
-
-  const totalPages = Math.max(1, Math.ceil(totalCount / PAGE_SIZE));
 
   const showToast = useCallback((message, type = "success") => {
     setToast({ message, type });
   }, []);
+
+  const [pageSize, setPageSize] = useState(10);
+
+  const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
 
   const fetchBlogs = useCallback(async () => {
     setLoading(true);
@@ -53,7 +55,7 @@ export default function BlogManagement() {
       const res = await getBlogs({
         search: searchKeyword.trim() || undefined,
         pageNumber,
-        pageSize: PAGE_SIZE,
+        pageSize,
       });
 
       if (res.success) {
@@ -67,7 +69,7 @@ export default function BlogManagement() {
     } finally {
       setLoading(false);
     }
-  }, [searchKeyword, pageNumber]);
+  }, [searchKeyword, pageNumber, pageSize]);
 
   useEffect(() => {
     fetchBlogs();
@@ -120,7 +122,9 @@ export default function BlogManagement() {
           ),
         );
         showToast(
-          blog.isPublished ? "Đã bỏ công khai bài viết." : "Đã công khai bài viết.",
+          blog.isPublished
+            ? "Đã bỏ công khai bài viết."
+            : "Đã công khai bài viết.",
         );
       } else {
         showToast(res.errorMessage || "Không thể đổi trạng thái.", "error");
@@ -136,7 +140,11 @@ export default function BlogManagement() {
   }
 
   async function handleDelete(blog) {
-    if (!window.confirm(`Xóa bài viết "${blog.title}"? Hành động này không thể hoàn tác.`))
+    if (
+      !window.confirm(
+        `Xóa bài viết "${blog.title}"? Hành động này không thể hoàn tác.`,
+      )
+    )
       return;
 
     setBusyBlogId(blog.id);
@@ -168,12 +176,12 @@ export default function BlogManagement() {
         <div className={styles.breadcrumb}>
           <Link to="/admin">Quản trị</Link>
           <i className="fas fa-chevron-right" />
-          <span>Quản lý Blog</span>
+          <span>Quản lý bài viết</span>
         </div>
 
         <section className={styles.headerBand}>
           <div>
-            <h1>Quản lý Blog</h1>
+            <h1>Quản lý bài viết</h1>
             <p className={styles.headerText}>
               Tạo, chỉnh sửa, công khai và quản lý các bài viết blog của hệ
               thống.
@@ -221,11 +229,17 @@ export default function BlogManagement() {
             </thead>
 
             <tbody>
-              {loading && (
-                <tr className={styles.loadingRow}>
-                  <td colSpan={5}>Đang tải danh sách blog...</td>
-                </tr>
-              )}
+              {loading &&
+                Array.from({ length: 5 }).map((_, i) => (
+                  <tr key={`skeleton-${i}`} className={styles.loadingRow}>
+                    <td colSpan={5}>
+                      <div className={styles.skeletonRow}>
+                        <div className={styles.skeletonThumb} />
+                        <div className={styles.skeletonLine} />
+                      </div>
+                    </td>
+                  </tr>
+                ))}
 
               {!loading && pageError && (
                 <tr>
@@ -339,27 +353,18 @@ export default function BlogManagement() {
         </div>
 
         {!loading && !pageError && totalCount > 0 && (
-          <div className={styles.pagination}>
-            <span className={styles.paginationInfo}>
-              Trang {pageNumber}/{totalPages} · {totalCount} bài viết
-            </span>
-            <div className={styles.paginationButtons}>
-              <button
-                className={styles.secondaryButton}
-                disabled={pageNumber <= 1}
-                onClick={() => setPageNumber((p) => p - 1)}
-              >
-                <i className="fas fa-chevron-left" />
-              </button>
-              <button
-                className={styles.secondaryButton}
-                disabled={pageNumber >= totalPages}
-                onClick={() => setPageNumber((p) => p + 1)}
-              >
-                <i className="fas fa-chevron-right" />
-              </button>
-            </div>
-          </div>
+          <Pagination
+            currentPage={pageNumber}
+            totalPages={totalPages}
+            itemsPerPage={pageSize}
+            totalItems={totalCount}
+            onPageChange={setPageNumber}
+            onItemsPerPageChange={(n) => {
+              setPageSize(n);
+              setPageNumber(1);
+            }}
+            unitLabel="bài viết"
+          />
         )}
       </div>
 

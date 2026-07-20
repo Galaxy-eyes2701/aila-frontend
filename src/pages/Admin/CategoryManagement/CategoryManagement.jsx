@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import styles from "./CategoryManagement.module.css";
 import Toast from "../../Expert/ModuleManagement/components/Toast";
+import Pagination from "../../../components/Pagination/Pagination";
 import {
   changeCategoryStatus,
   createAdminCategory,
@@ -77,7 +78,10 @@ function CategoryFormModal({ mode, initialData, onClose, onSaved }) {
   };
 
   return (
-    <div className={styles.modalOverlay} onClick={(e) => e.target === e.currentTarget && onClose()}>
+    <div
+      className={styles.modalOverlay}
+      onClick={(e) => e.target === e.currentTarget && onClose()}
+    >
       <div className={styles.modal}>
         <div className={styles.modalHeader}>
           <h2>{mode === "edit" ? "Chỉnh sửa danh mục" : "Tạo danh mục mới"}</h2>
@@ -101,7 +105,9 @@ function CategoryFormModal({ mode, initialData, onClose, onSaved }) {
             <label>Mô tả</label>
             <textarea
               value={form.description || ""}
-              onChange={(e) => setForm({ ...form, description: e.target.value })}
+              onChange={(e) =>
+                setForm({ ...form, description: e.target.value })
+              }
               placeholder="Nhập mô tả danh mục"
             />
           </div>
@@ -113,7 +119,9 @@ function CategoryFormModal({ mode, initialData, onClose, onSaved }) {
                 type="number"
                 min="1"
                 value={form.orderIndex ?? 1}
-                onChange={(e) => setForm({ ...form, orderIndex: Number(e.target.value) })}
+                onChange={(e) =>
+                  setForm({ ...form, orderIndex: Number(e.target.value) })
+                }
                 placeholder="1"
               />
             </div>
@@ -127,16 +135,27 @@ function CategoryFormModal({ mode, initialData, onClose, onSaved }) {
           )}
 
           <div className={styles.modalActions}>
-            <button type="button" className={styles.secondaryButton} onClick={onClose} disabled={saving}>
+            <button
+              type="button"
+              className={styles.secondaryButton}
+              onClick={onClose}
+              disabled={saving}
+            >
               Hủy
             </button>
-            <button type="submit" className={styles.primaryButton} disabled={saving}>
+            <button
+              type="submit"
+              className={styles.primaryButton}
+              disabled={saving}
+            >
               {saving ? (
                 <>
                   <i className="fas fa-spinner fa-spin" /> Đang lưu...
                 </>
+              ) : mode === "edit" ? (
+                "Cập nhật"
               ) : (
-                mode === "edit" ? "Cập nhật" : "Tạo danh mục"
+                "Tạo danh mục"
               )}
             </button>
           </div>
@@ -155,6 +174,12 @@ export default function CategoryManagement() {
   const [editingCategory, setEditingCategory] = useState(null);
   const [busyCategoryId, setBusyCategoryId] = useState("");
 
+  const [searchInput, setSearchInput] = useState("");
+  const [searchKeyword, setSearchKeyword] = useState("");
+
+  const [pageNumber, setPageNumber] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+
   const showToast = useCallback((message, type = "success") => {
     setToast({ message, type });
   }, []);
@@ -166,7 +191,11 @@ export default function CategoryManagement() {
     try {
       const res = await getAdminCategories();
       if (res.success) {
-        setCategories((res.data ?? []).slice().sort((a, b) => (a.orderIndex ?? 0) - (b.orderIndex ?? 0)));
+        setCategories(
+          (res.data ?? [])
+            .slice()
+            .sort((a, b) => (a.orderIndex ?? 0) - (b.orderIndex ?? 0)),
+        );
       } else {
         setPageError(res.errorMessage || "Không thể tải danh sách danh mục.");
       }
@@ -182,8 +211,40 @@ export default function CategoryManagement() {
   }, [fetchCategories]);
 
   const sortedCategories = useMemo(() => {
-    return [...categories].sort((a, b) => (a.orderIndex ?? 0) - (b.orderIndex ?? 0));
+    return [...categories].sort(
+      (a, b) => (a.orderIndex ?? 0) - (b.orderIndex ?? 0),
+    );
   }, [categories]);
+
+  // Search filters the already-loaded list (category count is small; no server-side search endpoint).
+  const filteredCategories = useMemo(() => {
+    const keyword = searchKeyword.trim().toLowerCase();
+    if (!keyword) return sortedCategories;
+    return sortedCategories.filter((c) =>
+      (c.name || "").toLowerCase().includes(keyword),
+    );
+  }, [sortedCategories, searchKeyword]);
+
+  const totalCount = filteredCategories.length;
+  const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
+
+  // Client-side pagination, since getAdminCategories returns the full list.
+  const pagedCategories = useMemo(() => {
+    const start = (pageNumber - 1) * pageSize;
+    return filteredCategories.slice(start, start + pageSize);
+  }, [filteredCategories, pageNumber, pageSize]);
+
+  useEffect(() => {
+    if (pageNumber > totalPages) {
+      setPageNumber(totalPages);
+    }
+  }, [pageNumber, totalPages]);
+
+  function handleSearchSubmit(e) {
+    e.preventDefault();
+    setPageNumber(1);
+    setSearchKeyword(searchInput);
+  }
 
   const handleOpenCreate = () => {
     setModalMode("create");
@@ -206,7 +267,13 @@ export default function CategoryManagement() {
   };
 
   const handleToggleStatus = async (category) => {
-    if (!window.confirm(`Bạn có chắc muốn ${category.isActive ? "vô hiệu hóa" : "kích hoạt"} danh mục này không?`)) {
+    if (
+      !window.confirm(
+        `Bạn có chắc muốn ${
+          category.isActive ? "vô hiệu hóa" : "kích hoạt"
+        } danh mục "${category.name}" không?`,
+      )
+    ) {
       return;
     }
 
@@ -214,20 +281,35 @@ export default function CategoryManagement() {
     try {
       const res = await changeCategoryStatus(category.id, !category.isActive);
       if (res.success) {
-        setCategories((prev) => prev.map((item) => (item.id === category.id ? { ...item, isActive: !category.isActive } : item)));
-        showToast(category.isActive ? "Đã vô hiệu hóa danh mục." : "Đã kích hoạt danh mục.");
+        setCategories((prev) =>
+          prev.map((item) =>
+            item.id === category.id
+              ? { ...item, isActive: !category.isActive }
+              : item,
+          ),
+        );
+        showToast(
+          category.isActive
+            ? "Đã vô hiệu hóa danh mục."
+            : "Đã kích hoạt danh mục.",
+        );
       } else {
         showToast(res.errorMessage || "Không thể cập nhật trạng thái.", "error");
       }
     } catch (err) {
-      showToast(err.response?.data?.errorMessage || "Lỗi kết nối máy chủ.", "error");
+      showToast(
+        err.response?.data?.errorMessage || "Lỗi kết nối máy chủ.",
+        "error",
+      );
     } finally {
       setBusyCategoryId("");
     }
   };
 
   const handleMove = async (categoryId, direction) => {
-    const currentIndex = sortedCategories.findIndex((item) => item.id === categoryId);
+    const currentIndex = sortedCategories.findIndex(
+      (item) => item.id === categoryId,
+    );
     if (currentIndex < 0) return;
 
     const targetIndex = direction === "up" ? currentIndex - 1 : currentIndex + 1;
@@ -243,14 +325,20 @@ export default function CategoryManagement() {
     try {
       const res = await reorderAdminCategories(nextIds);
       if (res.success) {
-        const reordered = next.map((item, index) => ({ ...item, orderIndex: index + 1 }));
+        const reordered = next.map((item, index) => ({
+          ...item,
+          orderIndex: index + 1,
+        }));
         setCategories(reordered);
         showToast("Đã cập nhật thứ tự danh mục.");
       } else {
         showToast(res.errorMessage || "Không thể sắp xếp lại danh mục.", "error");
       }
     } catch (err) {
-      showToast(err.response?.data?.errorMessage || "Lỗi kết nối máy chủ.", "error");
+      showToast(
+        err.response?.data?.errorMessage || "Lỗi kết nối máy chủ.",
+        "error",
+      );
     } finally {
       setBusyCategoryId("");
     }
@@ -262,14 +350,15 @@ export default function CategoryManagement() {
         <div className={styles.breadcrumb}>
           <Link to="/admin">Quản trị</Link>
           <i className="fas fa-chevron-right" />
-          <span>Quản lý course category</span>
+          <span>Quản lý danh mục khóa học</span>
         </div>
 
         <section className={styles.headerBand}>
           <div>
-            <h1>Quản lý course category</h1>
+            <h1>Quản lý danh mục khóa học</h1>
             <p className={styles.headerText}>
-              Tạo, chỉnh sửa, kích hoạt/vô hiệu hóa và sắp xếp lại danh mục khóa học.
+              Tạo, chỉnh sửa, kích hoạt/vô hiệu hóa và sắp xếp lại danh mục
+              khóa học.
             </p>
           </div>
 
@@ -278,6 +367,28 @@ export default function CategoryManagement() {
             Tạo danh mục mới
           </button>
         </section>
+
+        <div className={styles.filterBar}>
+          <form className={styles.searchForm} onSubmit={handleSearchSubmit}>
+            <input
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
+              placeholder="Tìm theo tên danh mục..."
+            />
+            <button type="submit" className={styles.secondaryButton}>
+              <i className="fas fa-search" />
+            </button>
+          </form>
+
+          <button
+            className={styles.secondaryButton}
+            onClick={fetchCategories}
+            disabled={loading}
+          >
+            <i className="fas fa-rotate-right" />
+            Tải lại
+          </button>
+        </div>
 
         <div className={styles.tableWrapper}>
           <table className={styles.table}>
@@ -292,11 +403,16 @@ export default function CategoryManagement() {
               </tr>
             </thead>
             <tbody>
-              {loading && (
-                <tr className={styles.loadingRow}>
-                  <td colSpan={6}>Đang tải danh sách danh mục...</td>
-                </tr>
-              )}
+              {loading &&
+                Array.from({ length: 5 }).map((_, i) => (
+                  <tr key={`skeleton-${i}`} className={styles.loadingRow}>
+                    <td colSpan={6}>
+                      <div className={styles.skeletonRow}>
+                        <div className={styles.skeletonLine} />
+                      </div>
+                    </td>
+                  </tr>
+                ))}
 
               {!loading && pageError && (
                 <tr>
@@ -304,7 +420,10 @@ export default function CategoryManagement() {
                     <div className={styles.errorState}>
                       <i className="fas fa-triangle-exclamation" />
                       <p>{pageError}</p>
-                      <button className={styles.secondaryButton} onClick={fetchCategories}>
+                      <button
+                        className={styles.secondaryButton}
+                        onClick={fetchCategories}
+                      >
                         Thử lại
                       </button>
                     </div>
@@ -312,62 +431,124 @@ export default function CategoryManagement() {
                 </tr>
               )}
 
-              {!loading && !pageError && sortedCategories.length === 0 && (
+              {!loading && !pageError && pagedCategories.length === 0 && (
                 <tr>
                   <td colSpan={6}>
                     <div className={styles.emptyState}>
                       <i className="fas fa-folder-open" />
-                      <p>Chưa có danh mục nào.</p>
+                      <p>
+                        {searchKeyword
+                          ? "Không tìm thấy danh mục nào phù hợp."
+                          : "Chưa có danh mục nào."}
+                      </p>
                     </div>
                   </td>
                 </tr>
               )}
 
-              {!loading && !pageError && sortedCategories.map((category) => (
-                <tr key={category.id}>
-                  <td>{category.name}</td>
-                  <td>{category.description || "—"}</td>
-                  <td>{category.courseCount ?? 0}</td>
-                  <td>{category.orderIndex ?? "—"}</td>
-                  <td>
-                    <span className={`${styles.badge} ${category.isActive ? styles.statusActive : styles.statusInactive}`}>
-                      {category.isActive ? "Đang hiển thị" : "Đã ẩn"}
-                    </span>
-                  </td>
-                  <td>
-                    <div className={styles.actionsCell}>
-                      <button className={styles.iconButton} onClick={() => handleOpenEdit(category)}>
-                        <i className="fas fa-edit" /> Sửa
-                      </button>
-                      <button
-                        className={`${styles.iconButton} ${!category.isActive ? styles.dangerButton : ""}`}
-                        onClick={() => handleToggleStatus(category)}
-                        disabled={busyCategoryId === category.id}
-                      >
-                        <i className={`fas ${category.isActive ? "fa-ban" : "fa-check"}`} />
-                        {category.isActive ? "Ẩn" : "Kích hoạt"}
-                      </button>
-                      <button
-                        className={styles.iconButton}
-                        onClick={() => handleMove(category.id, "up")}
-                        disabled={busyCategoryId === category.id || sortedCategories.findIndex((item) => item.id === category.id) === 0}
-                      >
-                        <i className="fas fa-arrow-up" />
-                      </button>
-                      <button
-                        className={styles.iconButton}
-                        onClick={() => handleMove(category.id, "down")}
-                        disabled={busyCategoryId === category.id || sortedCategories.findIndex((item) => item.id === category.id) === sortedCategories.length - 1}
-                      >
-                        <i className="fas fa-arrow-down" />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
+              {!loading &&
+                !pageError &&
+                pagedCategories.map((category) => {
+                  const globalIndex = sortedCategories.findIndex(
+                    (item) => item.id === category.id,
+                  );
+                  return (
+                    <tr key={category.id}>
+                      <td>
+                        <span className={styles.categoryName}>
+                          {category.name}
+                        </span>
+                      </td>
+                      <td>
+                        <span className={styles.descriptionCell}>
+                          {category.description || "—"}
+                        </span>
+                      </td>
+                      <td>{category.courseCount ?? 0}</td>
+                      <td>{category.orderIndex ?? "—"}</td>
+                      <td>
+                        <span
+                          className={`${styles.badge} ${
+                            category.isActive
+                              ? styles.statusActive
+                              : styles.statusInactive
+                          }`}
+                        >
+                          {category.isActive ? "Đang hiển thị" : "Đã ẩn"}
+                        </span>
+                      </td>
+                      <td>
+                        <div className={styles.actionsCell}>
+                          <button
+                            className={styles.iconActionButton}
+                            disabled={busyCategoryId === category.id}
+                            onClick={() =>
+                              handleMove(category.id, "up")
+                            }
+                            title="Di chuyển lên"
+                          >
+                            <i className="fas fa-arrow-up" />
+                          </button>
+                          <button
+                            className={styles.iconActionButton}
+                            disabled={
+                              busyCategoryId === category.id ||
+                              globalIndex === sortedCategories.length - 1
+                            }
+                            onClick={() => handleMove(category.id, "down")}
+                            title="Di chuyển xuống"
+                          >
+                            <i className="fas fa-arrow-down" />
+                          </button>
+
+                          <button
+                            className={styles.iconActionButton}
+                            disabled={busyCategoryId === category.id}
+                            onClick={() => handleOpenEdit(category)}
+                            title="Sửa"
+                          >
+                            <i className="fas fa-pen" />
+                          </button>
+
+                          <button
+                            className={`${styles.toggleButton} ${
+                              category.isActive
+                                ? styles.toggleButtonDeactivate
+                                : styles.toggleButtonActivate
+                            }`}
+                            disabled={busyCategoryId === category.id}
+                            onClick={() => handleToggleStatus(category)}
+                          >
+                            <i
+                              className={`fas ${
+                                category.isActive ? "fa-ban" : "fa-check"
+                              }`}
+                            />
+                            {category.isActive ? "Ẩn" : "Kích hoạt"}
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
             </tbody>
           </table>
         </div>
+
+        {!loading && !pageError && totalCount > 0 && (
+          <Pagination
+            currentPage={pageNumber}
+            totalPages={totalPages}
+            itemsPerPage={pageSize}
+            totalItems={totalCount}
+            onPageChange={setPageNumber}
+            onItemsPerPageChange={(n) => {
+              setPageSize(n);
+              setPageNumber(1);
+            }}
+            unitLabel="danh mục"
+          />
+        )}
       </div>
 
       {modalMode && (

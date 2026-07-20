@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Underline from "@tiptap/extension-underline";
@@ -6,6 +6,7 @@ import { TextStyle } from "@tiptap/extension-text-style";
 import Color from "@tiptap/extension-color";
 import Highlight from "@tiptap/extension-highlight";
 import Link from "@tiptap/extension-link";
+import Image from "@tiptap/extension-image";
 import Placeholder from "@tiptap/extension-placeholder";
 import styles from "./RichTextEditor.module.css";
 
@@ -17,7 +18,12 @@ export default function RichTextEditor({
   onChange,
   placeholder = "Nhập nội dung...",
   disabled = false,
+  // Tuỳ chọn: hàm async(file) => url, dùng khi cần upload ảnh lên server/CDN.
+  // Nếu không truyền, nút chèn ảnh sẽ hỏi trực tiếp URL ảnh.
+  onImageUpload,
 }) {
+  const fileInputRef = useRef(null);
+
   const editor = useEditor({
     extensions: [
       StarterKit,
@@ -26,6 +32,7 @@ export default function RichTextEditor({
       Color,
       Highlight.configure({ multicolor: true }),
       Link.configure({ openOnClick: false, autolink: true }),
+      Image.configure({ inline: false, HTMLAttributes: { class: styles.editorImage } }),
       Placeholder.configure({ placeholder }),
     ],
     content: value || "",
@@ -57,6 +64,29 @@ export default function RichTextEditor({
       return;
     }
     editor.chain().focus().extendMarkRange("link").setLink({ href: url }).run();
+  }
+
+  function insertImage() {
+    if (onImageUpload) {
+      fileInputRef.current?.click();
+      return;
+    }
+    const url = window.prompt("Nhập URL ảnh:", "https://");
+    if (!url) return;
+    editor.chain().focus().setImage({ src: url }).run();
+  }
+
+  async function handleFileSelected(e) {
+    const file = e.target.files?.[0];
+    e.target.value = ""; // cho phép chọn lại cùng 1 file lần sau
+    if (!file) return;
+
+    try {
+      const url = await onImageUpload(file);
+      if (url) editor.chain().focus().setImage({ src: url }).run();
+    } catch (err) {
+      window.alert("Không thể tải ảnh lên. Vui lòng thử lại.");
+    }
   }
 
   return (
@@ -137,6 +167,18 @@ export default function RichTextEditor({
         >
           <i className="fas fa-link" />
         </button>
+        <button type="button" onClick={insertImage} title="Chèn ảnh">
+          <i className="fas fa-image" />
+        </button>
+        {onImageUpload && (
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            className={styles.hiddenFileInput}
+            onChange={handleFileSelected}
+          />
+        )}
 
         <span className={styles.divider} />
 
