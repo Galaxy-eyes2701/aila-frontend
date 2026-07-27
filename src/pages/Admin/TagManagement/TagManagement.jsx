@@ -28,7 +28,7 @@ function TagFormModal({ mode, initialData, onClose, onSaved }) {
     const name = (form.name ?? "").trim();
     if (!name) return "Tên tag không được để trống.";
     if (name.length < 2) return "Tên tag phải có ít nhất 2 ký tự.";
-    if (name.length > 50) return "Tên tag không được vượt quá 50 ký tự.";
+    if (name.length > 100) return "Tên tag không được vượt quá 100 ký tự.";
     return "";
   };
 
@@ -80,7 +80,7 @@ function TagFormModal({ mode, initialData, onClose, onSaved }) {
               value={form.name ?? ""}
               onChange={(e) => {
                 setError("");
-                setForm({ name: e.target.value });
+                setForm({ ...form, name: e.target.value });
               }}
               placeholder="Nhập tên tag"
               autoFocus
@@ -114,6 +114,13 @@ function TagFormModal({ mode, initialData, onClose, onSaved }) {
   );
 }
 
+// Nhãn tiếng Việt cho TagPublishRequestStatus (Pending/Approved/Rejected)
+const REQUEST_STATUS_LABEL = {
+  Pending: "Chờ duyệt",
+  Approved: "Đã duyệt",
+  Rejected: "Đã từ chối",
+};
+
 function ReviewTagModal({ request, detailLoading, reviewing, onClose, onSubmit }) {
   const [decision, setDecision] = useState("Approved");
   const [rejectionReason, setRejectionReason] = useState("");
@@ -135,11 +142,14 @@ function ReviewTagModal({ request, detailLoading, reviewing, onClose, onSubmit }
       return;
     }
 
+    // BE nhận field "note" (không phải "rejectionReason")
     await onSubmit({
       status: decision,
-      rejectionReason: decision === "Rejected" ? rejectionReason.trim() : undefined,
+      note: decision === "Rejected" ? rejectionReason.trim() : undefined,
     });
   };
+
+  const statusLabel = REQUEST_STATUS_LABEL[request.requestStatus] || request.requestStatus || "Chờ duyệt";
 
   return (
     <div className={styles.modalOverlay} onClick={(e) => e.target === e.currentTarget && onClose()}>
@@ -164,32 +174,30 @@ function ReviewTagModal({ request, detailLoading, reviewing, onClose, onSubmit }
                 <div className={styles.detailValue}>{request.name || "—"}</div>
               </div>
               <div className={styles.detailCard}>
+                <span className={styles.detailLabel}>Mã tag</span>
+                <div className={styles.detailValue}>{request.code || "—"}</div>
+              </div>
+              <div className={styles.detailCard}>
                 <span className={styles.detailLabel}>Người gửi</span>
-                <div className={styles.detailValue}>{request.requestedBy || "—"}</div>
+                <div className={styles.detailValue}>{request.submittedBy || "—"}</div>
               </div>
               <div className={styles.detailCard}>
                 <span className={styles.detailLabel}>Trạng thái</span>
-                <div className={styles.detailValue}>{request.status || "Pending"}</div>
+                <div className={styles.detailValue}>{statusLabel}</div>
               </div>
               <div className={styles.detailCard}>
-                <span className={styles.detailLabel}>Ngày tạo</span>
-                <div className={styles.detailValue}>{new Date(request.createdAt).toLocaleDateString("vi-VN")}</div>
+                <span className={styles.detailLabel}>Ngày gửi</span>
+                <div className={styles.detailValue}>
+                  {request.submittedAt ? new Date(request.submittedAt).toLocaleDateString("vi-VN") : "—"}
+                </div>
               </div>
             </div>
 
-            <div className={styles.detailCard}>
-              <span className={styles.detailLabel}>Lý do</span>
-              <div className={styles.detailValue}>{request.reason || "—"}</div>
-            </div>
-
-            {request.coursesUsedIn?.length > 0 && (
+            {/* BE trả field "note" (ghi chú của request), không phải "reason" */}
+            {request.note && (
               <div className={styles.detailCard}>
-                <span className={styles.detailLabel}>Được dùng trong các khóa học</span>
-                <ul className={styles.courseList}>
-                  {request.coursesUsedIn.map((course) => (
-                    <li key={course.courseId}>{course.courseName || course.courseId}</li>
-                  ))}
-                </ul>
+                <span className={styles.detailLabel}>Ghi chú</span>
+                <div className={styles.detailValue}>{request.note}</div>
               </div>
             )}
 
@@ -468,9 +476,9 @@ export default function TagManagement() {
               <thead>
                 <tr>
                   <th>Tên tag</th>
+                  <th>Mã tag</th>
                   <th>Người gửi</th>
-                  <th>Lý do</th>
-                  <th>Ngày tạo</th>
+                  <th>Ngày gửi</th>
                   <th>Hành động</th>
                 </tr>
               </thead>
@@ -506,9 +514,9 @@ export default function TagManagement() {
                 {!pendingLoading && !pendingError && pendingRequests.map((request) => (
                   <tr key={request.id}>
                     <td>{request.name}</td>
-                    <td>{request.requestedBy || "—"}</td>
-                    <td>{request.reason || "—"}</td>
-                    <td>{new Date(request.createdAt).toLocaleDateString("vi-VN")}</td>
+                    <td>{request.code || "—"}</td>
+                    <td>{request.submittedBy || "—"}</td>
+                    <td>{request.submittedAt ? new Date(request.submittedAt).toLocaleDateString("vi-VN") : "—"}</td>
                     <td>
                       <div className={styles.actionsCell}>
                         <button className={styles.secondaryButton} onClick={() => handleOpenReview(request)}>
@@ -539,7 +547,7 @@ export default function TagManagement() {
             <thead>
               <tr>
                 <th>Tên tag</th>
-                <th>Loại</th>
+                <th>Trạng thái</th>
                 <th>Lượt dùng</th>
                 <th>Ngày tạo</th>
                 <th>Hành động</th>
@@ -582,12 +590,15 @@ export default function TagManagement() {
                   <tr key={tag.id}>
                     <td>{tag.name}</td>
                     <td>
-                      <span className={`${styles.badge} ${styles.systemBadge}`}>
-                        {tag.isSystemTag ? "System" : "Custom"}
+                      {/* SystemTagDto trả "isPublished", không có "isSystemTag" */}
+                      <span
+                        className={`${styles.badge} ${tag.isPublished ? styles.systemBadge : ""}`}
+                      >
+                        {tag.isPublished ? "Đã xuất bản" : "Chưa xuất bản"}
                       </span>
                     </td>
                     <td>{tag.usageCount ?? 0}</td>
-                    <td>{new Date(tag.createdAt).toLocaleDateString("vi-VN")}</td>
+                    <td>{tag.createdAt ? new Date(tag.createdAt).toLocaleDateString("vi-VN") : "—"}</td>
                     <td>
                       <div className={styles.actionsCell}>
                         <button className={styles.secondaryButton} onClick={() => handleOpenEdit(tag)}>

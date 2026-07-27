@@ -27,7 +27,7 @@ import AdminProtectedRoute from "./AdminProtectedRoute";
 import ExpertProtectedRoute from "./ExpertProtectedRoute";
 import LearnerProtectedRoute from "./LearnerProtectedRoute";
 import LearningView from "../pages/Learner/LearningView/LearningView";
-import GoogleCallback from '../pages/GoogleCallback/GoogleCallback';
+import GoogleCallback from "../pages/Learner/GoogleCallback/GoogleCallback";
 import BlogList from '../pages/BlogList/BlogList';
 import PublicExpertProfile from '../pages/Learner/PublicExpertProfile/PublicExpertProfile';
 import QuizTakingPage from "../pages/Learner/Quiz/QuizTakingPage";

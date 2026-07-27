@@ -294,6 +294,7 @@ export default function CategoryManagement() {
             : "Đã kích hoạt danh mục.",
         );
       } else {
+        // BR-01: BE từ chối vô hiệu hóa danh mục đang có khóa học (CATEGORY_HAS_COURSES)
         showToast(res.errorMessage || "Không thể cập nhật trạng thái.", "error");
       }
     } catch (err) {
@@ -325,11 +326,9 @@ export default function CategoryManagement() {
     try {
       const res = await reorderAdminCategories(nextIds);
       if (res.success) {
-        const reordered = next.map((item, index) => ({
-          ...item,
-          orderIndex: index + 1,
-        }));
-        setCategories(reordered);
+        // ReorderCategoriesCommandHandler gán orderIndex 0-based (category.ChangeOrder(i), i bắt đầu từ 0),
+        // nên không tự tính lại orderIndex ở FE (dễ lệch 1 đơn vị) — load lại từ server cho chính xác.
+        await fetchCategories();
         showToast("Đã cập nhật thứ tự danh mục.");
       } else {
         showToast(res.errorMessage || "Không thể sắp xếp lại danh mục.", "error");
@@ -396,7 +395,6 @@ export default function CategoryManagement() {
               <tr>
                 <th>Tên danh mục</th>
                 <th>Mô tả</th>
-                <th>Số khóa học</th>
                 <th>Vị trí</th>
                 <th>Trạng thái</th>
                 <th>Hành động</th>
@@ -406,7 +404,7 @@ export default function CategoryManagement() {
               {loading &&
                 Array.from({ length: 5 }).map((_, i) => (
                   <tr key={`skeleton-${i}`} className={styles.loadingRow}>
-                    <td colSpan={6}>
+                    <td colSpan={5}>
                       <div className={styles.skeletonRow}>
                         <div className={styles.skeletonLine} />
                       </div>
@@ -416,7 +414,7 @@ export default function CategoryManagement() {
 
               {!loading && pageError && (
                 <tr>
-                  <td colSpan={6}>
+                  <td colSpan={5}>
                     <div className={styles.errorState}>
                       <i className="fas fa-triangle-exclamation" />
                       <p>{pageError}</p>
@@ -433,7 +431,7 @@ export default function CategoryManagement() {
 
               {!loading && !pageError && pagedCategories.length === 0 && (
                 <tr>
-                  <td colSpan={6}>
+                  <td colSpan={5}>
                     <div className={styles.emptyState}>
                       <i className="fas fa-folder-open" />
                       <p>
@@ -464,7 +462,6 @@ export default function CategoryManagement() {
                           {category.description || "—"}
                         </span>
                       </td>
-                      <td>{category.courseCount ?? 0}</td>
                       <td>{category.orderIndex ?? "—"}</td>
                       <td>
                         <span
@@ -481,7 +478,10 @@ export default function CategoryManagement() {
                         <div className={styles.actionsCell}>
                           <button
                             className={styles.iconActionButton}
-                            disabled={busyCategoryId === category.id}
+                            disabled={
+                              busyCategoryId === category.id ||
+                              globalIndex === 0
+                            }
                             onClick={() =>
                               handleMove(category.id, "up")
                             }

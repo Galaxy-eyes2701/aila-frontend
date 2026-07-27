@@ -1,4 +1,4 @@
-/* ===== Design tokens (matches BlogManagement) ===== */
+/* ===== Design tokens (shared with UserManagement / TagManagement / ReportManagement) ===== */
 .page {
   --primary: #2563eb;
   --primary-dark: #1d4ed8;
@@ -23,7 +23,6 @@
   background: var(--canvas);
   min-height: 100%;
   color: var(--ink);
-  font-feature-settings: "tnum";
 }
 
 /* ===== Breadcrumb ===== */
@@ -136,14 +135,15 @@
 }
 
 .secondaryButton:disabled {
-  opacity: 0.55;
+  opacity: 0.6;
   cursor: not-allowed;
 }
 
 .primaryButton:focus-visible,
 .secondaryButton:focus-visible,
 .iconActionButton:focus-visible,
-.toggleButton:focus-visible {
+.toggleButton:focus-visible,
+.closeButton:focus-visible {
   outline: 2px solid var(--primary);
   outline-offset: 2px;
 }
@@ -166,8 +166,7 @@
   display: flex;
   gap: 8px;
   flex: 1;
-  min-width: 240px;
-  position: relative;
+  min-width: 220px;
 }
 
 .searchForm input {
@@ -185,10 +184,6 @@
   border-color: var(--primary);
   background-color: #fff;
   box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
-}
-
-.searchForm .secondaryButton {
-  padding: 10px 14px;
 }
 
 /* ===== Table ===== */
@@ -250,22 +245,14 @@
   max-width: 320px;
 }
 
+/* ===== Badges (cùng kiểu phẳng như Tag/Report/User, không chấm tròn) ===== */
 .badge {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 4px 10px 4px 8px;
+  padding: 4px 11px;
   border-radius: 999px;
   font-size: 12px;
   font-weight: 600;
-}
-
-.badge::before {
-  content: "";
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  flex-shrink: 0;
 }
 
 .statusActive {
@@ -273,19 +260,12 @@
   color: #15803d;
 }
 
-.statusActive::before {
-  background: #22c55e;
-}
-
 .statusInactive {
   background: #f1f5f9;
   color: var(--muted);
 }
 
-.statusInactive::before {
-  background: #94a3b8;
-}
-
+/* ===== Row actions ===== */
 .actionsCell {
   display: flex;
   gap: 8px;

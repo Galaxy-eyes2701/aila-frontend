@@ -11,9 +11,7 @@ import {
 const STATUS_OPTIONS = [
   { value: "", label: "Tất cả trạng thái" },
   { value: "Pending", label: "Pending" },
-  { value: "Reviewing", label: "Reviewing" },
   { value: "Resolved", label: "Resolved" },
-  { value: "Rejected", label: "Rejected" },
 ];
 
 const TYPE_OPTIONS = [
@@ -46,6 +44,12 @@ function getStatusClass(status) {
   }
 }
 
+// BE trả contentType = "Course" hoặc "Learning Material" (ReportDto/ReportDetailDto),
+// không có field "reportType".
+function getTypeLabel(contentType) {
+  return contentType === "Course" ? "Course report" : "Content report";
+}
+
 function ReportDetailModal({ report, onClose, onResolve, resolving }) {
   if (!report) return null;
 
@@ -61,8 +65,8 @@ function ReportDetailModal({ report, onClose, onResolve, resolving }) {
 
         <div className={styles.metaGrid}>
           <div className={styles.metaItem}>
-            <span className={styles.metaLabel}>Loại báo cáo</span>
-            <div className={styles.metaValue}>{report.reportType || "—"}</div>
+            <span className={styles.metaLabel}>Loại nội dung</span>
+            <div className={styles.metaValue}>{report.contentType || "—"}</div>
           </div>
           <div className={styles.metaItem}>
             <span className={styles.metaLabel}>Trạng thái</span>
@@ -70,19 +74,27 @@ function ReportDetailModal({ report, onClose, onResolve, resolving }) {
           </div>
           <div className={styles.metaItem}>
             <span className={styles.metaLabel}>Người báo cáo</span>
-            <div className={styles.metaValue}>{report.reportedBy || "—"}</div>
+            <div className={styles.metaValue}>{report.learnerName || "—"}</div>
+          </div>
+          <div className={styles.metaItem}>
+            <span className={styles.metaLabel}>Email người báo cáo</span>
+            <div className={styles.metaValue}>{report.learnerEmail || "—"}</div>
           </div>
           <div className={styles.metaItem}>
             <span className={styles.metaLabel}>Ngày tạo</span>
             <div className={styles.metaValue}>{formatDate(report.createdAt)}</div>
           </div>
           <div className={styles.metaItem}>
-            <span className={styles.metaLabel}>Course ID</span>
-            <div className={styles.metaValue}>{report.courseId || "—"}</div>
+            <span className={styles.metaLabel}>Ngày xử lý</span>
+            <div className={styles.metaValue}>{formatDate(report.resolvedAt)}</div>
           </div>
           <div className={styles.metaItem}>
-            <span className={styles.metaLabel}>Content ID</span>
-            <div className={styles.metaValue}>{report.contentId || "—"}</div>
+            <span className={styles.metaLabel}>Khóa học</span>
+            <div className={styles.metaValue}>{report.courseName || "—"}</div>
+          </div>
+          <div className={styles.metaItem}>
+            <span className={styles.metaLabel}>Học liệu</span>
+            <div className={styles.metaValue}>{report.materialName || "—"}</div>
           </div>
         </div>
 
@@ -189,7 +201,7 @@ export default function ReportManagement() {
         const nextStatus = res.data?.status || "Resolved";
         setReports((prev) => prev.map((item) => (item.id === reportId ? { ...item, status: nextStatus } : item)));
         setSelectedReport((prev) => (prev && prev.id === reportId ? { ...prev, status: nextStatus, resolvedAt: res.data?.resolvedAt } : prev));
-        showToast("Đã đánh dấu báo cáo là đã xử lý.");
+        showToast(res.data?.message || "Đã đánh dấu báo cáo là đã xử lý.");
       } else {
         showToast(res.errorMessage || "Không thể cập nhật báo cáo.", "error");
       }
@@ -297,11 +309,11 @@ export default function ReportManagement() {
                 <tr key={report.id}>
                   <td>
                     <span className={`${styles.badge} ${styles.typeBadge}`}>
-                      {report.reportType === "CourseReport" ? "Course report" : "Content report"}
+                      {getTypeLabel(report.contentType)}
                     </span>
                   </td>
                   <td>{report.reason || "—"}</td>
-                  <td>{report.reportedBy || "—"}</td>
+                  <td>{report.learnerName || "—"}</td>
                   <td>
                     <span className={`${styles.badge} ${getStatusClass(report.status)}`}>
                       {report.status || "Pending"}
