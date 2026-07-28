@@ -510,3 +510,90 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* ===== Lock / Unlock buttons ===== */
+.lockButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 12px;
+  border: 1px solid #fca5a5;
+  border-radius: var(--radius-sm);
+  background: var(--danger-soft);
+  color: var(--danger);
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: filter 0.15s ease;
+}
+
+.lockButton:hover:not(:disabled) {
+  filter: brightness(0.97);
+}
+
+.lockButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.unlockButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 12px;
+  border: 1px solid #fde68a;
+  border-radius: var(--radius-sm);
+  background: #fffbeb;
+  color: #92400e;
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: filter 0.15s ease;
+}
+
+.unlockButton:hover:not(:disabled) {
+  filter: brightness(0.97);
+}
+
+.unlockButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* ===== Locked badge (inline trong cell và modal) ===== */
+.lockedBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  background: var(--danger-soft);
+  color: var(--danger);
+  border: 1px solid #fca5a5;
+  white-space: nowrap;
+}
+
+/* ===== Preview course button (trong metaValue của modal) ===== */
+.previewCourseBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: 10px;
+  padding: 3px 10px;
+  border: 1px solid #93c5fd;
+  border-radius: 999px;
+  background: #eff6ff;
+  color: #1d4ed8;
+  font-size: 11.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+  vertical-align: middle;
+}
+
+.previewCourseBtn:hover {
+  background: #dbeafe;
+  border-color: #3b82f6;
+}

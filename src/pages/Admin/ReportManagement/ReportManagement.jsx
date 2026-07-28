@@ -2,10 +2,13 @@ import { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import styles from "./ReportManagement.module.css";
 import Toast from "../../Expert/ModuleManagement/components/Toast";
+import CoursePreviewModal from "../../../components/CoursePreviewModal/CoursePreviewModal";
 import {
   getAdminReports,
   getReportDetail,
   resolveAdminReport,
+  lockCourseFromReport,
+  unlockCourse,
 } from "../services/reportApi";
 
 const STATUS_OPTIONS = [
@@ -19,6 +22,21 @@ const TYPE_OPTIONS = [
   { value: "course", label: "Course report" },
   { value: "content", label: "Content report" },
 ];
+
+const REASON_LABELS = {
+  InappropriateContent: "Nội dung không phù hợp",
+  HateSpeech:           "Ngôn ngữ thù địch",
+  Violence:             "Bạo lực",
+  SexualContent:        "Nội dung tình dục",
+  Spam:                 "Spam / Quảng cáo",
+  CopyrightViolation:   "Vi phạm bản quyền",
+  IncorrectInformation: "Thông tin sai lệch",
+  Other:                "Khác",
+};
+
+function getReasonLabel(reason) {
+  return REASON_LABELS[reason] ?? reason ?? "—";
+}
 
 function formatDate(value) {
   if (!value) return "—";
@@ -50,8 +68,12 @@ function getTypeLabel(contentType) {
   return contentType === "Course" ? "Course report" : "Content report";
 }
 
-function ReportDetailModal({ report, onClose, onResolve, resolving }) {
+function ReportDetailModal({ report, onClose, onResolve, onLock, onUnlock, onPreview, resolving, locking }) {
   if (!report) return null;
+
+  const isCourseReport = report.contentType === "Course";
+  const isLocked       = !!report.isCourseLocked;
+  const isResolved     = report.status === "Resolved";
 
   return (
     <div className={styles.modalOverlay} onClick={(e) => e.target === e.currentTarget && onClose()}>
@@ -90,7 +112,25 @@ function ReportDetailModal({ report, onClose, onResolve, resolving }) {
           </div>
           <div className={styles.metaItem}>
             <span className={styles.metaLabel}>Khóa học</span>
-            <div className={styles.metaValue}>{report.courseName || "—"}</div>
+            <div className={styles.metaValue}>
+              <span>{report.courseName || "—"}</span>
+              {isCourseReport && isLocked && (
+                <span className={styles.lockedBadge} style={{ marginLeft: 8 }}>
+                  <i className="fas fa-lock" /> Đang bị khoá
+                </span>
+              )}
+              {/* Nút xem trước course */}
+              {report.courseId && (
+                <button
+                  type="button"
+                  className={styles.previewCourseBtn}
+                  onClick={() => onPreview(report.courseId)}
+                  title="Xem trước khóa học"
+                >
+                  <i className="fas fa-eye" /> Xem trước
+                </button>
+              )}
+            </div>
           </div>
           <div className={styles.metaItem}>
             <span className={styles.metaLabel}>Học liệu</span>
@@ -100,7 +140,7 @@ function ReportDetailModal({ report, onClose, onResolve, resolving }) {
 
         <div className={styles.metaItem} style={{ marginBottom: 14 }}>
           <span className={styles.metaLabel}>Lý do</span>
-          <div className={styles.metaValue}>{report.reason || "—"}</div>
+          <div className={styles.metaValue}>{getReasonLabel(report.reason)}</div>
         </div>
 
         <div className={styles.descriptionBox}>
@@ -111,19 +151,57 @@ function ReportDetailModal({ report, onClose, onResolve, resolving }) {
           <button className={styles.secondaryButton} onClick={onClose}>
             Đóng
           </button>
-          <button
-            className={styles.resolveButton}
-            onClick={() => onResolve(report.id)}
-            disabled={resolving || report.status === "Resolved"}
-          >
-            {resolving ? (
-              <>
-                <i className="fas fa-spinner fa-spin" /> Đang xử lý...
-              </>
-            ) : (
-              report.status === "Resolved" ? "Đã xử lý" : "Đánh dấu đã xử lý"
-            )}
-          </button>
+
+          {/* Nút Lock — chỉ hiện với course report chưa bị lock và chưa resolved */}
+          {isCourseReport && !isLocked && !isResolved && (
+            <button
+              className={styles.lockButton}
+              onClick={() => onLock(report.id)}
+              disabled={locking}
+            >
+              {locking ? (
+                <><i className="fas fa-spinner fa-spin" /> Đang khoá...</>
+              ) : (
+                <><i className="fas fa-lock" /> Khoá khóa học & xử lý</>
+              )}
+            </button>
+          )}
+
+          {/* Nút Unlock — chỉ hiện khi course đang bị lock */}
+          {isCourseReport && isLocked && report.courseId && (
+            <button
+              className={styles.unlockButton}
+              onClick={() => onUnlock(report.courseId)}
+              disabled={locking}
+            >
+              {locking ? (
+                <><i className="fas fa-spinner fa-spin" /> Đang gỡ khoá...</>
+              ) : (
+                <><i className="fas fa-lock-open" /> Gỡ khoá khóa học</>
+              )}
+            </button>
+          )}
+
+          {/* Nút Resolve thông thường — chỉ hiện khi chưa resolved và không lock */}
+          {!isResolved && !(isCourseReport && !isLocked) && (
+            <button
+              className={styles.resolveButton}
+              onClick={() => onResolve(report.id)}
+              disabled={resolving}
+            >
+              {resolving ? (
+                <><i className="fas fa-spinner fa-spin" /> Đang xử lý...</>
+              ) : (
+                <><i className="fas fa-check" /> Đánh dấu đã xử lý</>
+              )}
+            </button>
+          )}
+
+          {isResolved && (
+            <button className={styles.resolveButton} disabled>
+              Đã xử lý
+            </button>
+          )}
         </div>
       </div>
     </div>
@@ -140,6 +218,8 @@ export default function ReportManagement() {
   const [selectedReport, setSelectedReport] = useState(null);
   const [detailLoading, setDetailLoading] = useState(false);
   const [resolvingId, setResolvingId] = useState("");
+  const [lockingId, setLockingId] = useState("");
+  const [previewCourseId, setPreviewCourseId] = useState(null);
 
   const showToast = useCallback((message, type = "success") => {
     setToast({ message, type });
@@ -209,6 +289,72 @@ export default function ReportManagement() {
       showToast(err.response?.data?.errorMessage || "Lỗi kết nối máy chủ.", "error");
     } finally {
       setResolvingId("");
+    }
+  };
+
+  const handleLock = async (reportId) => {
+    if (!window.confirm("Khoá khóa học này và đánh dấu báo cáo đã xử lý?\nExpert sẽ không thể publish lại cho đến khi được gỡ khoá.")) return;
+
+    setLockingId(reportId);
+
+    try {
+      const res = await lockCourseFromReport(reportId);
+
+      if (res.success) {
+        // Cập nhật list: report chuyển Resolved, course isCourseLocked = true
+        setReports((prev) =>
+          prev.map((item) =>
+            item.id === reportId
+              ? { ...item, status: "Resolved", isCourseLocked: true }
+              : item
+          )
+        );
+        setSelectedReport((prev) =>
+          prev && prev.id === reportId
+            ? { ...prev, status: "Resolved", isCourseLocked: true, resolvedAt: new Date().toISOString() }
+            : prev
+        );
+        showToast(res.data?.message || "Đã khoá khóa học và xử lý báo cáo.");
+      } else {
+        showToast(res.errorMessage || "Không thể khoá khóa học.", "error");
+      }
+    } catch (err) {
+      showToast(err.response?.data?.errorMessage || "Lỗi kết nối máy chủ.", "error");
+    } finally {
+      setLockingId("");
+    }
+  };
+
+  const handleUnlock = async (courseId) => {
+    if (!window.confirm("Gỡ khoá khóa học này?\nExpert sẽ có thể publish lại khóa học.")) return;
+
+    setLockingId(courseId);
+
+    try {
+      const res = await unlockCourse(courseId);
+
+      if (res.success) {
+        // Cập nhật list và detail: isCourseLocked = false
+        setReports((prev) =>
+          prev.map((item) =>
+            item.courseId === courseId
+              ? { ...item, isCourseLocked: false }
+              : item
+          )
+        );
+        setSelectedReport((prev) =>
+          prev && prev.courseId === courseId
+            ? { ...prev, isCourseLocked: false }
+            : prev
+        );
+        showToast(res.data?.message || "Đã gỡ khoá khóa học.");
+      } else {
+        showToast(res.errorMessage || "Không thể gỡ khoá.", "error");
+      }
+    } catch (err) {
+      showToast(err.response?.data?.errorMessage || "Lỗi kết nối máy chủ.", "error");
+    } finally {
+      setLockingId("");
     }
   };
 
@@ -311,8 +457,13 @@ export default function ReportManagement() {
                     <span className={`${styles.badge} ${styles.typeBadge}`}>
                       {getTypeLabel(report.contentType)}
                     </span>
+                    {report.contentType === "Course" && report.isCourseLocked && (
+                      <span className={styles.lockedBadge} style={{ marginLeft: 6 }}>
+                        <i className="fas fa-lock" /> Bị khoá
+                      </span>
+                    )}
                   </td>
-                  <td>{report.reason || "—"}</td>
+                  <td>{getReasonLabel(report.reason)}</td>
                   <td>{report.learnerName || "—"}</td>
                   <td>
                     <span className={`${styles.badge} ${getStatusClass(report.status)}`}>
@@ -325,18 +476,58 @@ export default function ReportManagement() {
                       <button className={styles.detailButton} onClick={() => openDetail(report)}>
                         <i className="fas fa-eye" /> Chi tiết
                       </button>
-                      <button
-                        className={styles.resolveButton}
-                        onClick={() => handleResolve(report.id)}
-                        disabled={resolvingId === report.id || report.status === "Resolved"}
-                      >
-                        {resolvingId === report.id ? (
-                          <i className="fas fa-spinner fa-spin" />
-                        ) : (
-                          <i className="fas fa-check" />
-                        )}
-                        {report.status === "Resolved" ? " Đã xử lý" : " Xử lý"}
-                      </button>
+
+                      {/* Nút Xem trước course */}
+                      {report.courseId && (
+                        <button
+                          className={styles.detailButton}
+                          onClick={() => setPreviewCourseId(report.courseId)}
+                          title="Xem trước khóa học bị báo cáo"
+                        >
+                          <i className="fas fa-search" /> Xem course
+                        </button>
+                      )}
+
+                      {/* Nút Lock — course report chưa bị lock, chưa resolved */}
+                      {report.contentType === "Course" && !report.isCourseLocked && report.status !== "Resolved" && (
+                        <button
+                          className={styles.lockButton}
+                          onClick={() => handleLock(report.id)}
+                          disabled={lockingId === report.id}
+                          title="Khoá khóa học và xử lý báo cáo"
+                        >
+                          {lockingId === report.id
+                            ? <i className="fas fa-spinner fa-spin" />
+                            : <i className="fas fa-lock" />}
+                        </button>
+                      )}
+
+                      {/* Nút Unlock — course đang bị lock */}
+                      {report.contentType === "Course" && report.isCourseLocked && report.courseId && (
+                        <button
+                          className={styles.unlockButton}
+                          onClick={() => handleUnlock(report.courseId)}
+                          disabled={lockingId === report.courseId}
+                          title="Gỡ khoá khóa học"
+                        >
+                          {lockingId === report.courseId
+                            ? <i className="fas fa-spinner fa-spin" />
+                            : <i className="fas fa-lock-open" />}
+                        </button>
+                      )}
+
+                      {/* Nút Resolve thông thường — material report hoặc course report đã unlock */}
+                      {report.status !== "Resolved" && !(report.contentType === "Course" && !report.isCourseLocked) && (
+                        <button
+                          className={styles.resolveButton}
+                          onClick={() => handleResolve(report.id)}
+                          disabled={resolvingId === report.id}
+                        >
+                          {resolvingId === report.id
+                            ? <i className="fas fa-spinner fa-spin" />
+                            : <i className="fas fa-check" />}
+                        </button>
+                      )}
                     </div>
                   </td>
                 </tr>
@@ -351,7 +542,18 @@ export default function ReportManagement() {
           report={selectedReport}
           onClose={() => setSelectedReport(null)}
           onResolve={handleResolve}
+          onLock={handleLock}
+          onUnlock={handleUnlock}
+          onPreview={(courseId) => setPreviewCourseId(courseId)}
           resolving={!!resolvingId}
+          locking={!!lockingId}
+        />
+      )}
+
+      {previewCourseId && (
+        <CoursePreviewModal
+          courseId={previewCourseId}
+          onClose={() => setPreviewCourseId(null)}
         />
       )}
 
