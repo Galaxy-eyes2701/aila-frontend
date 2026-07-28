@@ -10,6 +10,7 @@ import {
 } from "../../services/quizApi";
 import QuestionFormModal from "./QuestionFormModal";
 import BulkCreateQuizModal from "./BulkCreateQuizModal";
+import QuestionImportModal from "./QuestionImportModal";
 
 export default function QuizDetailModal({
   open,
@@ -32,6 +33,8 @@ export default function QuizDetailModal({
 
   const [questionModal, setQuestionModal] = useState(null);
   // null | { mode: "create" } | { mode: "edit", question }
+
+  const [importModalOpen, setImportModalOpen] = useState(false);
 
   useEffect(() => {
     if (!open || !material) return;
@@ -283,6 +286,16 @@ export default function QuizDetailModal({
                   type="button"
                   className={styles.secondaryButton}
                   disabled={!quizExists}
+                  onClick={() => setImportModalOpen(true)}
+                  title={!quizExists ? "Lưu cài đặt Quiz trước khi import" : ""}
+                >
+                  <i className="fas fa-file-import" /> Import từ Excel
+                </button>
+
+                <button
+                  type="button"
+                  className={styles.secondaryButton}
+                  disabled={!quizExists}
                   onClick={() => setQuestionModal({ mode: "create" })}
                 >
                   <i className="fas fa-plus" /> Thêm câu hỏi
@@ -394,6 +407,15 @@ export default function QuizDetailModal({
         onSuccess={() => {
           setBulkModalOpen(false);
           loadAll();
+        }}
+      />
+      <QuestionImportModal
+        open={importModalOpen}
+        quizMaterialId={material?.id}
+        onClose={() => setImportModalOpen(false)}
+        onImported={() => {
+          setImportModalOpen(false);
+          loadQuestions();
         }}
       />
     </div>

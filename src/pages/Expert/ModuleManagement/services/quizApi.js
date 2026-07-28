@@ -99,3 +99,49 @@ export const bulkCreateQuiz = async (materialId, payload) => {
   const response = await api.post(`/quiz-materials/${materialId}/bulk`, payload);
   return response.data;
 };
+
+// ===== Question Import =====
+
+/**
+ * Download file Excel template để import câu hỏi.
+ * Trả về Blob để frontend tạo link download.
+ */
+export const downloadImportTemplate = async (quizMaterialId) => {
+  const response = await api.get(
+    `/quiz-materials/${quizMaterialId}/questions/import-template`,
+    { responseType: "blob" },
+  );
+  return response;
+};
+
+/**
+ * Preview import file — parse và validate, KHÔNG lưu DB.
+ * @param {string} quizMaterialId
+ * @param {File} file - file .xlsx
+ */
+export const previewImportQuestions = async (quizMaterialId, file) => {
+  const formData = new FormData();
+  formData.append("file", file);
+  const response = await api.post(
+    `/quiz-materials/${quizMaterialId}/questions/import/preview`,
+    formData,
+    { headers: { "Content-Type": "multipart/form-data" } },
+  );
+  return response.data;
+};
+
+/**
+ * Confirm import — lưu tất cả dòng hợp lệ vào DB.
+ * @param {string} quizMaterialId
+ * @param {File} file - cùng file đã preview
+ */
+export const confirmImportQuestions = async (quizMaterialId, file) => {
+  const formData = new FormData();
+  formData.append("file", file);
+  const response = await api.post(
+    `/quiz-materials/${quizMaterialId}/questions/import/confirm`,
+    formData,
+    { headers: { "Content-Type": "multipart/form-data" } },
+  );
+  return response.data;
+};
