@@ -235,7 +235,16 @@ export default function LearnerProfile() {
       }
     } catch (err) {
       const c = err.response?.data?.errorCode;
-      setPwError(c === 'WRONG_PASSWORD' ? 'Mật khẩu hiện tại không đúng.' : 'Lỗi kết nối máy chủ. Vui lòng thử lại.');
+      setPwError(
+        c === "WRONG_PASSWORD"
+          ? "Mật khẩu hiện tại không đúng."
+          : c === "VALIDATION_ERROR"
+            ? "Mật khẩu mới không hợp lệ (phải đủ độ mạnh)."
+            : c === "ACCOUNT_INACTIVE"
+              ? "Tài khoản bị vô hiệu hóa."
+              : err.response?.data?.errorMessage ??
+              "Lỗi kết nối máy chủ. Vui lòng thử lại."
+      );
     } finally { setPwSaving(false); }
   };
 
