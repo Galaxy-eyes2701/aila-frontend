@@ -715,6 +715,20 @@
   color: #b45309;
 }
 
+/* Tag bị từ chối — màu đỏ đậm hơn, có thể gửi lại */
+.tagBtnRejected {
+  background: #fff1f1;
+  border-color: #f87171;
+  color: #b91c1c;
+  cursor: pointer;
+  border-style: dashed;
+}
+.tagBtnRejected:hover {
+  background: #fee2e2;
+  border-color: #ef4444;
+  color: #991b1b;
+}
+
 .tagStatusIcon {
   margin-left: 5px;
   font-size: 11px;

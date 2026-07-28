@@ -270,9 +270,9 @@ function CourseFormModal({ mode, initialData, categories, onClose, onSaved }) {
     if (tag.isPublished) { toggleTag(tag.id); return; }
     // Tag đang bị trùng code với ô nhập → không cho gửi xét duyệt, chỉ highlight
     if (duplicateTagCandidate?.id === tag.id) return;
-    // Chờ duyệt → chỉ hiện thông báo, không cho chọn
+    // Chờ duyệt → không làm gì
     if (tag.publishRequest?.status === 'Pending') return;
-    // Chưa gửi hoặc bị từ chối → mở modal gửi duyệt
+    // Chưa gửi hoặc bị từ chối → mở modal gửi (lại) yêu cầu duyệt
     setVerifyTag(tag);
     setVerifyNote('');
     setVerifyError('');
@@ -537,15 +537,28 @@ function CourseFormModal({ mode, initialData, categories, onClose, onSaved }) {
               ) : tags.length > 0 ? (
                 <div className={styles.tagPicker}>
                   {tags.map(tag => {
-                    const isPending   = !tag.isPublished && tag.publishRequest?.status === 'Pending';
+                    const status      = tag.publishRequest?.status; // 'Pending' | 'Rejected' | undefined
+                    const isPending   = !tag.isPublished && status === 'Pending';
+                    const isRejected  = !tag.isPublished && status === 'Rejected';
+                    const isUnpubNone = !tag.isPublished && !status; // chưa gửi bao giờ
                     const isUnpub     = !tag.isPublished;
                     const isSelected  = form.tagIds.includes(tag.id);
                     const isDuplicate = duplicateTagCandidate?.id === tag.id;
+                    const isOwner     = !!tag.createdById; // GET /tags/me chỉ trả tag của mình, createdById luôn có
+
                     let cls = styles.tagBtn;
                     if (isSelected)    cls += ` ${styles.tagBtnActive}`;
                     if (isDuplicate)   cls += ` ${styles.tagBtnDuplicate}`;
-                    else if (isPending)    cls += ` ${styles.tagBtnPending}`;
-                    else if (isUnpub) cls += ` ${styles.tagBtnUnpub}`;
+                    else if (isPending)   cls += ` ${styles.tagBtnPending}`;
+                    else if (isRejected)  cls += ` ${styles.tagBtnRejected}`;
+                    else if (isUnpubNone) cls += ` ${styles.tagBtnUnpub}`;
+
+                    const titleText = isDuplicate
+                      ? 'Tag trùng code với ô nhập — nhấn "Dùng tag này" để thêm'
+                      : isPending   ? 'Đang chờ duyệt — không thể chọn'
+                      : isRejected  ? 'Bị từ chối — nhấn để gửi lại yêu cầu'
+                      : isUnpubNone ? 'Chưa duyệt — nhấn để gửi yêu cầu xét duyệt'
+                      : undefined;
 
                     return (
                       <div key={tag.id} className={styles.tagBtnWrap}>
@@ -553,21 +566,17 @@ function CourseFormModal({ mode, initialData, categories, onClose, onSaved }) {
                           type="button"
                           className={cls}
                           onClick={() => handleTagClick(tag)}
-                          title={
-                            isDuplicate ? 'Tag trùng code với ô nhập — nhấn "Dùng tag này" để thêm'
-                            : isPending ? 'Đang chờ duyệt — không thể chọn'
-                            : isUnpub ? 'Chưa duyệt — nhấn để gửi yêu cầu xét duyệt'
-                            : undefined
-                          }
-                          aria-disabled={isUnpub && !isDuplicate}
+                          title={titleText}
+                          aria-disabled={isPending || isDuplicate}
                         >
                           {tag.name}
-                          {isDuplicate && <span className={styles.tagStatusIcon}><i className="fas fa-link" /></span>}
-                          {!isDuplicate && isPending && <span className={styles.tagStatusIcon}><i className="fas fa-clock" /></span>}
-                          {!isDuplicate && isUnpub && !isPending && <span className={styles.tagStatusIcon}><i className="fas fa-exclamation-circle" /></span>}
+                          {isDuplicate  && <span className={styles.tagStatusIcon}><i className="fas fa-link" /></span>}
+                          {!isDuplicate && isPending   && <span className={styles.tagStatusIcon}><i className="fas fa-clock" /></span>}
+                          {!isDuplicate && isRejected  && <span className={styles.tagStatusIcon}><i className="fas fa-times-circle" /></span>}
+                          {!isDuplicate && isUnpubNone && <span className={styles.tagStatusIcon}><i className="fas fa-exclamation-circle" /></span>}
                         </button>
 
-                        {/* Nút hủy yêu cầu (chỉ khi Pending và không phải duplicate) */}
+                        {/* Nút hủy yêu cầu — chỉ khi Pending */}
                         {!isDuplicate && isPending && (
                           <button
                             type="button"
@@ -579,8 +588,8 @@ function CourseFormModal({ mode, initialData, categories, onClose, onSaved }) {
                           </button>
                         )}
 
-                        {/* Nút xóa tag (chỉ khi chưa publish, chưa Pending, không phải duplicate) */}
-                        {!isDuplicate && isUnpub && !isPending && (
+                        {/* Nút xóa tag — chỉ owner, chỉ khi chưa gửi hoặc đã bị từ chối */}
+                        {!isDuplicate && isOwner && (isUnpubNone || isRejected) && (
                           <button
                             type="button"
                             className={`${styles.tagActionBtn} ${styles.tagActionBtnDanger}`}
@@ -617,13 +626,14 @@ function CourseFormModal({ mode, initialData, categories, onClose, onSaved }) {
         </form>
       </div>
 
-      {/* ── Modal gửi yêu cầu xét duyệt tag ── */}
+      {/* ── Modal gửi / gửi lại yêu cầu xét duyệt tag ── */}
       {verifyTag && (
         <div className={styles.overlay} onClick={e => e.target === e.currentTarget && setVerifyTag(null)}>
           <div className={styles.verifyModal}>
             <div className={styles.modalHeader}>
               <div className={styles.modalTitle}>
-                <i className="fas fa-paper-plane" /> Gửi yêu cầu xét duyệt
+                <i className="fas fa-paper-plane" />
+                {verifyTag.publishRequest?.status === 'Rejected' ? ' Gửi lại yêu cầu xét duyệt' : ' Gửi yêu cầu xét duyệt'}
               </div>
               <button className={styles.modalClose} onClick={() => setVerifyTag(null)} aria-label="Đóng">
                 <i className="fas fa-times" />
@@ -634,12 +644,24 @@ function CourseFormModal({ mode, initialData, categories, onClose, onSaved }) {
                 <span className={styles.tagPreviewName}>{verifyTag.name}</span>
                 <code className={styles.tagPreviewCode}>{verifyTag.code}</code>
               </div>
+
+              {/* Hiện lý do từ chối nếu đang gửi lại */}
+              {verifyTag.publishRequest?.status === 'Rejected' && verifyTag.publishRequest?.reviewComment && (
+                <div className={styles.infoBoxBlue} style={{ background: '#fef2f2', borderColor: '#fca5a5', color: '#b91c1c' }}>
+                  <i className="fas fa-times-circle" />
+                  <span><strong>Lý do từ chối trước đó:</strong> {verifyTag.publishRequest.reviewComment}</span>
+                </div>
+              )}
+
               <div className={styles.infoBoxBlue}>
                 <i className="fas fa-info-circle" />
                 Sau khi được admin duyệt, tag sẽ xuất hiện công khai và có thể gắn vào khóa học.
               </div>
               <div className={styles.formGroup}>
-                <label className={styles.formLabel}><i className="fas fa-comment-alt" /> Ghi chú cho admin <span className={styles.labelOptional}>(không bắt buộc)</span></label>
+                <label className={styles.formLabel}>
+                  <i className="fas fa-comment-alt" /> Ghi chú cho admin{' '}
+                  <span className={styles.labelOptional}>(không bắt buộc)</span>
+                </label>
                 <textarea
                   className={styles.formTextarea}
                   value={verifyNote}
@@ -659,7 +681,7 @@ function CourseFormModal({ mode, initialData, categories, onClose, onSaved }) {
               <button className={styles.btnSave} onClick={handleSendVerification} disabled={verifySaving}>
                 {verifySaving
                   ? <><span className={styles.spinner} /> Đang gửi...</>
-                  : <><i className="fas fa-paper-plane" /> Gửi yêu cầu</>}
+                  : <><i className="fas fa-paper-plane" /> {verifyTag.publishRequest?.status === 'Rejected' ? 'Gửi lại' : 'Gửi yêu cầu'}</>}
               </button>
             </div>
           </div>
