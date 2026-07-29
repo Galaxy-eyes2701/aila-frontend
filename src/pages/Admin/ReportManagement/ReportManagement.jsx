@@ -364,12 +364,12 @@ export default function ReportManagement() {
         <div className={styles.breadcrumb}>
           <Link to="/admin">Quản trị</Link>
           <i className="fas fa-chevron-right" />
-          <span>Review reported content</span>
+          <span>Báo cáo nội dung</span>
         </div>
 
         <section className={styles.headerBand}>
           <div>
-            <h1>Review reported content</h1>
+            <h1>Báo cáo nội dung</h1>
             <p className={styles.headerText}>
               Xem danh sách báo cáo và đánh dấu các báo cáo đã được xử lý.
             </p>

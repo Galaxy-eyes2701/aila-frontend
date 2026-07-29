@@ -11,6 +11,7 @@ import VideoDetailModal from "./components/LearningMaterial/VideoDetailModal";
 import DocumentDetailModal from "./components/LearningMaterial/DocumentDetailModal";
 import { getMaterialModalType } from "../../../constants/materialType";
 import QuizDetailModal from "./components/LearningMaterial/QuizDetailModal";
+import AIPracticeMaterialModal from "./components/LearningMaterial/AIPracticeMaterialModal";
 
 const emptyForm = {
   title: "",
@@ -35,6 +36,7 @@ export default function ModuleManagement() {
   const [selectedModule, setSelectedModule] = useState(null);
   const [materialDetailModal, setMaterialDetailModal] = useState(null);
   const [pendingCallback, setPendingCallback] = useState(null);
+  const [aiPracticeModal, setAiPracticeModal] = useState(null); // { title }
 
   const sortedModules = useMemo(
     () => [...modules].sort((a, b) => a.orderIndex - b.orderIndex),
@@ -345,17 +347,15 @@ export default function ModuleManagement() {
                       setMaterialModal(true);
                     },
                     onEditMaterial: (material, onDone) => {
-                      console.log(
-                        "materialTypeName:",
-                        material.materialTypeName,
-                        "| materialType:",
-                        material.materialType,
-                      );
+                      const type = getMaterialModalType(material);
                       setPendingCallback(() => onDone);
-                      setMaterialDetailModal({
-                        type: getMaterialModalType(material),
-                        material,
-                      });
+
+                      if (type === "AiPractice") {
+                        setAiPracticeModal({ mode: "edit", material });
+                        return;
+                      }
+
+                      setMaterialDetailModal({ type, material });
                     },
                     onMaterialDeleted: (success, message) => {
                       if (success) {
@@ -404,6 +404,43 @@ export default function ModuleManagement() {
               material,
             });
             fetchModules();
+          }}
+          onCreateAiPractice={({ title }) => {
+            setMaterialModal(false);
+            setAiPracticeModal({ mode: "create", title });
+            // Giữ selectedModule để AIPracticeMaterialModal dùng module.id
+          }}
+        />
+      )}
+
+      {aiPracticeModal && (
+        <AIPracticeMaterialModal
+          open={!!aiPracticeModal}
+          module={selectedModule}
+          material={
+            aiPracticeModal.mode === "edit" ? aiPracticeModal.material : null
+          }
+          initialTitle={
+            aiPracticeModal.mode === "create" ? aiPracticeModal.title : ""
+          }
+          onClose={() => {
+            setAiPracticeModal(null);
+            setSelectedModule(null);
+            pendingCallback?.();
+            setPendingCallback(null);
+          }}
+          onSuccess={() => {
+            const wasEdit = aiPracticeModal.mode === "edit";
+            setAiPracticeModal(null);
+            setSelectedModule(null);
+            pendingCallback?.();
+            setPendingCallback(null);
+            fetchModules();
+            showToast(
+              wasEdit
+                ? "Đã cập nhật học liệu Thực hành AI."
+                : "Đã tạo học liệu Thực hành AI.",
+            );
           }}
         />
       )}

@@ -7,6 +7,7 @@ export default function LearningMaterialModal({
   module,
   onClose,
   onCreated,
+  onCreateAiPractice,
 }) {
   const [title, setTitle] = useState("");
   const [materialType, setMaterialType] = useState("Video");
@@ -21,6 +22,19 @@ export default function LearningMaterialModal({
       setError("Tiêu đề không được để trống.");
       return;
     }
+
+    // Thực hành AI có luồng tạo riêng (Scenario, Difficulty, Step
+    // Guidance/Prompt Template, Scoring Criteria...) khác với 3 loại
+    // học liệu còn lại nên không gọi createLearningMaterial ở đây —
+    // chuyển sang modal riêng để điền đầy đủ thông tin.
+    if (materialType === "AiPractice") {
+      onCreateAiPractice({ title: title.trim() });
+      setTitle("");
+      setMaterialType("Video");
+      setError("");
+      return;
+    }
+
     setSaving(true);
     setError("");
     try {
@@ -32,7 +46,7 @@ export default function LearningMaterialModal({
       if (res.success) {
         setTitle("");
         setMaterialType("Video");
-        onCreated(res.data); // res.data phải có id + materialTypeName
+        onCreated(res.data); 
       } else {
         setError(res.errorMessage || "Không thể tạo học liệu.");
       }
@@ -75,9 +89,7 @@ export default function LearningMaterialModal({
             <option value="Video">Video</option>
             <option value="Document">Tài liệu</option>
             <option value="Quiz">Câu hỏi</option>
-            <option value="AiPractice" disabled>
-              Thực hành AI (sắp ra mắt)
-            </option>
+            <option value="AiPractice">Thực hành AI</option>
           </select>
         </div>
 
@@ -103,6 +115,10 @@ export default function LearningMaterialModal({
             {saving ? (
               <>
                 <i className="fas fa-spinner fa-spin" /> Đang tạo...
+              </>
+            ) : materialType === "AiPractice" ? (
+              <>
+                <i className="fas fa-arrow-right" /> Tiếp tục
               </>
             ) : (
               <>

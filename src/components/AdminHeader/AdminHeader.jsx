@@ -4,7 +4,7 @@ import useAuth from '../../hooks/useAuth';
 import styles from './AdminHeader.module.css';
 
 const NAV_LINKS = [
-  { label: 'Dashboard', href: '/admin/dashboard' },
+  { label: 'Bảng điều khiển', href: '/admin/dashboard' },
   { label: 'Người dùng', href: '/admin/users' },
   { label: 'Tags', href: '/admin/tags' },
   { label: 'Báo cáo', href: '/admin/reports' },

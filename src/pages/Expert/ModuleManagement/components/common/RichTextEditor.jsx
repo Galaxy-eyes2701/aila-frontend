@@ -18,8 +18,6 @@ export default function RichTextEditor({
   onChange,
   placeholder = "Nhập nội dung...",
   disabled = false,
-  // Tuỳ chọn: hàm async(file) => url, dùng khi cần upload ảnh lên server/CDN.
-  // Nếu không truyền, nút chèn ảnh sẽ hỏi trực tiếp URL ảnh.
   onImageUpload,
 }) {
   const fileInputRef = useRef(null);
