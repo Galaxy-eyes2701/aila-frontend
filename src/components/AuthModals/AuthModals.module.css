@@ -263,6 +263,19 @@
   font-size: 13px;
 }
 
+/* ── SUCCESS ── */
+.successMsg {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 11px 14px;
+  border-radius: var(--radius-sm);
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  color: #15803d;
+  font-size: 13px;
+}
+
 /* ── SPINNER ── */
 .spinner {
   width: 17px; height: 17px;
