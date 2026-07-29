@@ -10,6 +10,7 @@ const NAV_LINKS = [
   { label: 'Báo cáo', href: '/admin/reports' },
   { label: 'Danh mục', href: '/admin/categories' },
   { label: 'Bài viết', href: '/admin/blogs' },
+  { label: 'Gói đăng ký', href: '/admin/subscription-plans' },
 ];
 
 export default function AdminHeader() {

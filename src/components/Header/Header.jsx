@@ -8,6 +8,7 @@ const NAV_LINKS = [
   { label: 'Khóa học',            href: '/courses' },
   { label: 'Hướng dẫn',           href: '*' },
   { label: 'Tin tức',             href: '/blogs' },
+  { label: 'Gói đăng ký',         href: '/subscription-plans' },
   { label: 'Hỏi đáp',             href: '*' },
 ];
 

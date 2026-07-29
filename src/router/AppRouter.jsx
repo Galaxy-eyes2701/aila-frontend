@@ -37,6 +37,8 @@ import CoursesPage from "../pages/Learner/LearningProfile/CoursesPage";
 import QuizHistoryPage from "../pages/Learner/LearningProfile/QuizHistoryPage";
 import AiScenariosPage from "../pages/Learner/LearningProfile/AiScenariosPage";
 import BlogManagement from "../pages/Admin/BlogManagement/BlogManagement";
+import SubscriptionPlanManagement from "../pages/Admin/SubscriptionPlanManagement/SubscriptionPlanManagement";
+import SubscriptionPlans from "../pages/SubscriptionPlans/SubscriptionPlans";
 
 const router = createBrowserRouter([
   // ── Auth pages (không có Header) ─────────────────────────────
@@ -73,6 +75,9 @@ const router = createBrowserRouter([
               <a href="/admin/categories" style={{ padding: '14px 22px', background: '#7c3aed', color: '#fff', borderRadius: 12, textDecoration: 'none' }}>
                 Quản lý category
               </a>
+              <a href="/admin/subscription-plans" style={{ padding: '14px 22px', background: '#b45309', color: '#fff', borderRadius: 12, textDecoration: 'none' }}>
+                Quản lý gói đăng ký
+              </a>
             </div>
           </div>
         ),
@@ -96,6 +101,10 @@ const router = createBrowserRouter([
       {
         path: "blogs",
         element: <BlogManagement />,
+      },
+      {
+        path: "subscription-plans",
+        element: <SubscriptionPlanManagement />,
       },
     ],
   },
@@ -129,6 +138,7 @@ const router = createBrowserRouter([
       { path: "experts/:expertId", element: <PublicExpertProfile /> },
       { path: "blogs/:id", element: <BlogDetail /> },
       { path: 'blogs', element: <BlogList /> },
+      { path: 'subscription-plans', element: <SubscriptionPlans /> },
 
       // ── PROTECTED: Chỉ Learner đã đăng nhập ──
       {

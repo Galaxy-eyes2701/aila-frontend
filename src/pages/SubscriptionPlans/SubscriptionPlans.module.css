@@ -1,0 +1,295 @@
+.page {
+  min-height: 100vh;
+  background: #e8e9ff;
+}
+
+/* ── HERO ─────────────────────────────────────────────────────────────── */
+.hero {
+  background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
+  color: #fff;
+  padding: 52px 24px 48px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse at 20% 50%, rgba(79, 110, 247, 0.25) 0%, transparent 60%),
+    radial-gradient(ellipse at 80% 20%, rgba(168, 196, 255, 0.15) 0%, transparent 50%);
+  pointer-events: none;
+}
+
+.heroInner {
+  max-width: 660px;
+  margin: 0 auto;
+  position: relative;
+}
+
+.heroBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 20px;
+  padding: 5px 14px;
+  font-size: 0.76rem;
+  font-weight: 700;
+  margin-bottom: 16px;
+  backdrop-filter: blur(8px);
+}
+
+.hero h1 {
+  font-size: clamp(1.6rem, 4vw, 2.2rem);
+  font-weight: 800;
+  line-height: 1.25;
+  margin-bottom: 12px;
+}
+
+.hero h1 em {
+  font-style: normal;
+  color: #a8c4ff;
+}
+
+.hero p {
+  font-size: 0.95rem;
+  opacity: 0.85;
+  max-width: 520px;
+  margin: 0 auto;
+}
+
+/* ── CONTENT ──────────────────────────────────────────────────────────── */
+.content {
+  padding: 36px 0 64px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  align-items: stretch;
+  gap: 20px;
+}
+
+@media (min-width: 1024px) {
+  .grid {
+    grid-template-columns: repeat(auto-fit, minmax(300px, 340px));
+    justify-content: center;
+  }
+}
+
+/* ── CARD ─────────────────────────────────────────────────────────────── */
+.card {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: #fff;
+  border: 1px solid #d1d7dc;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+}
+
+.cardHead {
+  padding-bottom: 16px;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.cardName {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: #1c1d1f;
+  margin-bottom: 10px;
+}
+
+.cardPrice {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.priceValue {
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: #0056d2;
+  letter-spacing: -0.02em;
+}
+
+.priceUnit {
+  font-size: 0.82rem;
+  color: #6a6f73;
+  font-weight: 600;
+}
+
+.cardDesc {
+  margin-top: 14px;
+  font-size: 0.86rem;
+  line-height: 1.55;
+  color: #6a6f73;
+}
+
+.benefits {
+  list-style: none;
+  margin: 18px 0 22px;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  flex: 1;
+}
+
+.benefits li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.86rem;
+  color: #1c1d1f;
+}
+
+.benefits li i {
+  width: 26px;
+  height: 26px;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  background: #eef1fe;
+  color: #0056d2;
+  font-size: 0.72rem;
+}
+
+.benefitLabel {
+  color: #6a6f73;
+}
+
+.benefitValue {
+  margin-left: auto;
+  font-weight: 700;
+  text-align: right;
+}
+
+.buyButton {
+  width: 100%;
+  padding: 12px 18px;
+  border: none;
+  border-radius: 10px;
+  background: #0056d2;
+  color: #fff;
+  font-size: 0.9rem;
+  font-weight: 700;
+  transition: background 0.15s;
+}
+
+.buyButton:hover:not(:disabled) {
+  background: #003d99;
+}
+
+.buyButton:disabled {
+  background: #93b4e8;
+  cursor: not-allowed;
+}
+
+.buyButton:focus-visible {
+  outline: 3px solid rgba(0, 86, 210, 0.35);
+  outline-offset: 2px;
+}
+
+/* ── SKELETON ─────────────────────────────────────────────────────────── */
+.skeleton {
+  height: 340px;
+  border-radius: 16px;
+  background: linear-gradient(90deg, #e0e0e0 25%, #f0f0f0 50%, #e0e0e0 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s infinite;
+}
+
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* ── EMPTY / ERROR ────────────────────────────────────────────────────── */
+.emptyState {
+  text-align: center;
+  padding: 64px 20px;
+  background: #fff;
+  border: 1px solid #d1d7dc;
+  border-radius: 16px;
+}
+
+.emptyIcon {
+  font-size: 2.6rem;
+  color: #9ca3af;
+  margin-bottom: 14px;
+}
+
+.emptyState h2 {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #1c1d1f;
+  margin-bottom: 6px;
+}
+
+.emptyState p {
+  font-size: 0.86rem;
+  color: #6a6f73;
+}
+
+.errorBanner {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 16px 18px;
+  margin-bottom: 24px;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 12px;
+  color: #b91c1c;
+  font-size: 0.88rem;
+}
+
+.errorBanner p {
+  flex: 1;
+  min-width: 200px;
+  margin: 0;
+}
+
+.retryButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 16px;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  background: #fff;
+  color: #b91c1c;
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.retryButton:hover {
+  background: #fff1f2;
+}
+
+.footnote {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 28px;
+  font-size: 0.8rem;
+  color: #6a6f73;
+  text-align: center;
+}
