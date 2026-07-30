@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import styles from "./LearningMaterial.module.css";
-import { getVideoDetail, updateVideoDetail } from "../../services/videoApi";
+import { getVideoDetail, updateVideoDetail, resolveApiError } from "../../services/videoApi";
 import RichTextEditor from "../common/RichTextEditor";
 
 export default function VideoDetailModal({
@@ -43,7 +43,7 @@ export default function VideoDetailModal({
       setContent(data.content ?? "");
     } catch (err) {
       setError(
-        err.response?.data?.errorMessage ?? "Không thể tải Video Detail.",
+        resolveApiError(err).errorMessage ?? "Không thể tải Video Detail.",
       );
     } finally {
       setLoading(false);
@@ -80,7 +80,7 @@ export default function VideoDetailModal({
 
       onSuccess(response.data);
     } catch (err) {
-      setError(err.response?.data?.errorMessage ?? "Lỗi kết nối máy chủ.");
+      setError(resolveApiError(err).errorMessage ?? "Lỗi kết nối máy chủ.");
     } finally {
       setSaving(false);
     }

@@ -1,40 +1,31 @@
-import api from "../../../../utils/api";
-
-// ===== Quiz settings (Time limit / Passing score / Show correct answers) =====
+import api, { resolveApiError, normalizeApiResponse } from "../../../../utils/api";
+export { resolveApiError };
 
 export const getQuizDetail = async (materialId) => {
   const response = await api.get(`/quiz-materials/${materialId}`);
-  return response.data;
+  return normalizeApiResponse(response.data);
 };
 
 export const updateQuizDetail = async (materialId, payload) => {
   const response = await api.put(`/quiz-materials/${materialId}`, payload);
-  return response.data;
+  return normalizeApiResponse(response.data);
 };
 
 // ===== Questions =====
 
 export const getQuestions = async (quizMaterialId) => {
-  const response = await api.get(
-    `/quiz-materials/${quizMaterialId}/questions`,
-  );
-  return response.data;
+  const response = await api.get(`/quiz-materials/${quizMaterialId}/questions`);
+  return normalizeApiResponse(response.data);
 };
 
 export const createQuestion = async (quizMaterialId, payload) => {
-  const response = await api.post(
-    `/quiz-materials/${quizMaterialId}/questions`,
-    payload,
-  );
-  return response.data;
+  const response = await api.post(`/quiz-materials/${quizMaterialId}/questions`, payload);
+  return normalizeApiResponse(response.data);
 };
 
 export const updateQuestion = async (quizMaterialId, questionId, payload) => {
-  const response = await api.put(
-    `/quiz-materials/${quizMaterialId}/questions/${questionId}`,
-    payload,
-  );
-  return response.data;
+  const response = await api.put(`/quiz-materials/${quizMaterialId}/questions/${questionId}`, payload);
+  return normalizeApiResponse(response.data);
 };
 
 export const deleteQuestion = async (quizMaterialId, questionId) => {
@@ -45,38 +36,25 @@ export const deleteQuestion = async (quizMaterialId, questionId) => {
 };
 
 export const reorderQuestions = async (quizMaterialId, items) => {
-  const response = await api.put(
-    `/quiz-materials/${quizMaterialId}/questions/reorder`,
-    { items },
-  );
-  return response.data;
+  const response = await api.put(`/quiz-materials/${quizMaterialId}/questions/reorder`, { items });
+  return normalizeApiResponse(response.data);
 };
 
 // ===== Answer options =====
 
 export const getAnswerOptions = async (questionId) => {
   const response = await api.get(`/questions/${questionId}/answer-options`);
-  return response.data;
+  return normalizeApiResponse(response.data);
 };
 
 export const createAnswerOption = async (questionId, payload) => {
-  const response = await api.post(
-    `/questions/${questionId}/answer-options`,
-    payload,
-  );
-  return response.data;
+  const response = await api.post(`/questions/${questionId}/answer-options`, payload);
+  return normalizeApiResponse(response.data);
 };
 
-export const updateAnswerOption = async (
-  questionId,
-  answerOptionId,
-  payload,
-) => {
-  const response = await api.put(
-    `/questions/${questionId}/answer-options/${answerOptionId}`,
-    payload,
-  );
-  return response.data;
+export const updateAnswerOption = async (questionId, answerOptionId, payload) => {
+  const response = await api.put(`/questions/${questionId}/answer-options/${answerOptionId}`, payload);
+  return normalizeApiResponse(response.data);
 };
 
 export const deleteAnswerOption = async (questionId, answerOptionId) => {
@@ -87,17 +65,14 @@ export const deleteAnswerOption = async (questionId, answerOptionId) => {
 };
 
 export const reorderAnswerOptions = async (questionId, items) => {
-  const response = await api.put(
-    `/questions/${questionId}/answer-options/reorder`,
-    { items },
-  );
-  return response.data;
+  const response = await api.put(`/questions/${questionId}/answer-options/reorder`, { items });
+  return normalizeApiResponse(response.data);
 };
 
 // ===== Bulk create (Quiz settings + Questions + Answers cùng lúc) =====
 export const bulkCreateQuiz = async (materialId, payload) => {
   const response = await api.post(`/quiz-materials/${materialId}/bulk`, payload);
-  return response.data;
+  return normalizeApiResponse(response.data);
 };
 
 // ===== Question Import =====
@@ -127,7 +102,7 @@ export const previewImportQuestions = async (quizMaterialId, file) => {
     formData,
     { headers: { "Content-Type": "multipart/form-data" } },
   );
-  return response.data;
+  return normalizeApiResponse(response.data);
 };
 
 /**
@@ -143,5 +118,5 @@ export const confirmImportQuestions = async (quizMaterialId, file) => {
     formData,
     { headers: { "Content-Type": "multipart/form-data" } },
   );
-  return response.data;
+  return normalizeApiResponse(response.data);
 };

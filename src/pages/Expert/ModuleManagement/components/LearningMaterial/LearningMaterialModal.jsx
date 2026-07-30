@@ -1,6 +1,6 @@
 import { useState } from "react";
 import styles from "./LearningMaterial.module.css";
-import { createLearningMaterial } from "../../services/materialApi"; // ← đúng tên
+import { createLearningMaterial, resolveApiError } from "../../services/materialApi";
 
 export default function LearningMaterialModal({
   open,
@@ -23,10 +23,6 @@ export default function LearningMaterialModal({
       return;
     }
 
-    // Thực hành AI có luồng tạo riêng (Scenario, Difficulty, Step
-    // Guidance/Prompt Template, Scoring Criteria...) khác với 3 loại
-    // học liệu còn lại nên không gọi createLearningMaterial ở đây —
-    // chuyển sang modal riêng để điền đầy đủ thông tin.
     if (materialType === "AiPractice") {
       onCreateAiPractice({ title: title.trim() });
       setTitle("");
@@ -51,7 +47,7 @@ export default function LearningMaterialModal({
         setError(res.errorMessage || "Không thể tạo học liệu.");
       }
     } catch (err) {
-      setError(err.response?.data?.errorMessage || "Lỗi kết nối máy chủ.");
+      setError(resolveApiError(err).errorMessage || "Lỗi kết nối máy chủ.");
     } finally {
       setSaving(false);
     }
