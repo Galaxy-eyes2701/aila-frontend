@@ -42,7 +42,9 @@
   font-size: 14px;
   font-weight: 500;
   color: var(--text-muted);
-  transition: color var(--transition), background var(--transition);
+  transition:
+    color var(--transition),
+    background var(--transition);
 }
 
 .navLinks a:hover {
@@ -72,7 +74,9 @@
   font-size: 17px;
   border: none;
   cursor: pointer;
-  transition: background var(--transition), transform var(--transition);
+  transition:
+    background var(--transition),
+    transform var(--transition);
 }
 
 .bellBtn:hover {
@@ -102,7 +106,6 @@
 /* ── NOTIFICATION DROPDOWN ── */
 .noticeWrapper {
   position: relative;
-  padding-bottom: 12px;
 }
 
 .noticeDropdown {
@@ -117,10 +120,6 @@
   border: 1px solid var(--border);
   overflow: hidden;
   z-index: 200;
-}
-
-.noticeWrapper:hover .noticeDropdown {
-  display: block;
 }
 
 .noticeDropdownHeader {
@@ -168,7 +167,6 @@
 /* ── AVATAR DROPDOWN ── */
 .userMenu {
   position: relative;
-  padding-bottom: 12px; /* vùng nối tránh mất hover */
 }
 
 .avatar {
@@ -200,10 +198,6 @@
   z-index: 200;
 }
 
-.userMenu:hover .userDropdown {
-  display: block;
-}
-
 .userDropdown a,
 .userDropdown button {
   display: flex;
@@ -218,7 +212,9 @@
   border: none;
   cursor: pointer;
   text-decoration: none;
-  transition: background var(--transition), color var(--transition);
+  transition:
+    background var(--transition),
+    color var(--transition);
 }
 
 .userDropdown a:hover,
@@ -235,4 +231,101 @@
 .logoutBtn:hover {
   background: #fef2f2 !important;
   color: #dc2626 !important;
+}
+/* Toggle dropdown bằng JS thay vì :hover */
+.dropdownOpen {
+  display: block !important;
+}
+
+/* ===== Hamburger menu (chỉ hiện trên mobile) ===== */
+.menuToggle {
+  display: none;
+  width: 40px;
+  height: 40px;
+  border: none;
+  background: var(--primary-light);
+  color: var(--primary);
+  border-radius: var(--radius-sm);
+  font-size: 18px;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+/* ===== Responsive ===== */
+
+@media (max-width: 900px) {
+  .navContent {
+    gap: 16px;
+  }
+
+  .navLinks {
+    display: none;
+    position: absolute;
+    top: 68px;
+    left: 0;
+    right: 0;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0;
+    background: #fff;
+    border-bottom: 1px solid var(--border);
+    box-shadow: var(--shadow);
+    padding: 8px 0;
+    max-height: calc(100vh - 68px);
+    overflow-y: auto;
+  }
+
+  .navLinksOpen {
+    display: flex;
+  }
+
+  .navLinks li {
+    width: 100%;
+  }
+
+  .navLinks a {
+    display: block;
+    padding: 14px 24px;
+    border-radius: 0;
+  }
+
+  .menuToggle {
+    display: flex;
+  }
+
+  /* Dropdown thông báo & avatar: neo theo màn hình để không tràn ra ngoài
+     khi nút không nằm sát mép phải. */
+  .noticeDropdown,
+  .userDropdown {
+    position: fixed;
+    top: 68px;
+    right: 16px;
+    left: auto;
+  }
+
+  .noticeDropdown {
+    width: min(320px, calc(100vw - 32px));
+  }
+}
+
+@media (max-width: 480px) {
+  .logo {
+    font-size: 17px;
+  }
+
+  .navActions {
+    gap: 10px;
+  }
+
+  .bellBtn {
+    width: 36px;
+    height: 36px;
+    font-size: 15px;
+  }
+
+  .avatar {
+    width: 34px;
+    height: 34px;
+  }
 }

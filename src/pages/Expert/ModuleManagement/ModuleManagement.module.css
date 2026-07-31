@@ -674,3 +674,18 @@
     flex-direction: column-reverse;
   }
 }
+
+@media (max-width: 400px) {
+  .headerBand h1 {
+    font-size: 22px;
+  }
+
+  .summaryItem strong {
+    font-size: 22px;
+  }
+
+  .modal {
+    max-width: 100%;
+    border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+  }
+}

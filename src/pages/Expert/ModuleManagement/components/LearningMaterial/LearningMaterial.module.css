@@ -448,3 +448,86 @@
   border-color: #3b82f6;
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
 }
+
+/* ===== Responsive ===== */
+
+.formGroup input,
+.formGroup select,
+.formGroup textarea {
+  box-sizing: border-box;
+}
+
+@media (max-width: 640px) {
+  /* Danh sách học liệu: cho phép xuống dòng thay vì bị bóp/tràn ngang */
+  .item {
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .left {
+    min-width: 0;
+    flex: 1 1 100%;
+  }
+
+  .title {
+    overflow-wrap: anywhere;
+  }
+
+  .actions {
+    width: 100%;
+    justify-content: flex-end;
+  }
+
+  /* Modal: cho trượt lên từ đáy màn hình, chiếm full-width, giảm padding */
+  .modalOverlay {
+    align-items: flex-end;
+    padding: 0;
+  }
+
+  .modal {
+    max-width: 100%;
+    max-height: 92vh;
+    border-radius: 14px 14px 0 0;
+    padding: 18px;
+  }
+
+  .modalHeader h2 {
+    font-size: 16px;
+  }
+
+  /* Nút trong modal xếp chồng full-width thay vì nằm cạnh nhau bị bóp nhỏ */
+  .modalActions,
+  .modalFooter {
+    flex-direction: column-reverse;
+  }
+
+  .primaryButton,
+  .secondaryButton,
+  .saveOrderButton,
+  .addButton {
+    width: 100%;
+    justify-content: center;
+  }
+
+  /* Step indicator (wizard Thực hành AI) không bị tràn khi màn hình hẹp */
+  .stepIndicator {
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .dynamicListHeader {
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+}
+
+@media (max-width: 400px) {
+  .modal {
+    padding: 14px;
+  }
+
+  .modalHeader h2 {
+    font-size: 15px;
+  }
+}

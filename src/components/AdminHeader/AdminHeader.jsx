@@ -1,5 +1,5 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import useAuth from '../../hooks/useAuth';
 import styles from './AdminHeader.module.css';
 
@@ -17,6 +17,7 @@ export default function AdminHeader() {
   const { logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+  const [mobileOpen, setMobileOpen] = useState(false);
 
   const handleLogout = useCallback(() => {
     logout();
@@ -30,12 +31,13 @@ export default function AdminHeader() {
           Bình dân <span>Học AI</span>
         </Link>
 
-        <ul className={styles.navLinks}>
+        <ul className={`${styles.navLinks} ${mobileOpen ? styles.navLinksOpen : ''}`}>
           {NAV_LINKS.map((link) => (
             <li key={link.href}>
               <Link
                 to={link.href}
                 className={location.pathname === link.href ? styles.active : ''}
+                onClick={() => setMobileOpen(false)}
               >
                 {link.label}
               </Link>
@@ -48,6 +50,15 @@ export default function AdminHeader() {
             <i className="fas fa-sign-out-alt" /> Đăng xuất
           </button>
         </div>
+
+        <button
+          type="button"
+          className={styles.menuToggle}
+          onClick={() => setMobileOpen((o) => !o)}
+          aria-label="Mở menu"
+        >
+          <i className={`fas ${mobileOpen ? 'fa-times' : 'fa-bars'}`} />
+        </button>
       </div>
     </header>
   );

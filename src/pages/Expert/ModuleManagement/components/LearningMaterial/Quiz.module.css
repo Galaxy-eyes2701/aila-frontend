@@ -588,3 +588,48 @@
   color: #6b7280;
   margin: 0;
 }
+
+@media (max-width: 640px) {
+  .importReviewHeader {
+    display: none;
+  }
+
+  .importReviewRow {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 6px;
+    padding: 12px 14px;
+  }
+
+  /* Ép override width inline (50/110/70/80/flex:1) đang set trực tiếp trong JSX */
+  .importReviewRow > span {
+    width: 100% !important;
+  }
+
+  /* Thêm nhãn trước mỗi giá trị vì đã ẩn header trên mobile */
+  .importReviewRow > span:nth-child(1)::before {
+    content: "Dòng ";
+    font-weight: 600;
+    color: #6b7280;
+  }
+
+  .importReviewRow > span:nth-child(3)::before {
+    content: "Loại: ";
+    font-weight: 600;
+    color: #6b7280;
+    margin-right: 4px;
+  }
+
+  .importReviewRow > span:nth-child(4)::before {
+    content: "Số đáp án: ";
+    font-weight: 600;
+    color: #6b7280;
+  }
+
+  .importReviewRow > span:nth-child(5)::before {
+    content: "Trạng thái: ";
+    font-weight: 600;
+    color: #6b7280;
+    margin-right: 4px;
+  }
+}

@@ -446,3 +446,61 @@
   overflow: hidden;
   border: 1px solid var(--border);
 }
+
+/* ===== Responsive bổ sung ===== */
+
+@media (max-width: 900px) {
+  /* Hero đã gộp 1 cột và ẩn banner ở breakpoint này, nhưng padding 56px
+     vẫn còn để nguyên như bản desktop -> quá rộng, giảm lại cho vừa màn hình. */
+  .heroSection {
+    padding: 32px 24px;
+  }
+
+  .homeSection {
+    margin-top: 56px;
+  }
+}
+
+@media (max-width: 640px) {
+  .heroCopy h1 {
+    font-size: 30px;
+    letter-spacing: -0.5px;
+  }
+
+  .heroCopy p {
+    font-size: 14px;
+    max-width: 100%;
+  }
+
+  .heroStats {
+    gap: 20px;
+  }
+
+  .sectionTitle {
+    font-size: 21px;
+  }
+
+  /* Card khóa học: ép về 1 cột trên điện thoại thay vì để auto-fill
+     tự co (dễ ra 1 cột rất hẹp lệch tâm ở một số kích thước màn hình). */
+  .courseGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 420px) {
+  /* Màn hình rất nhỏ: 2 nút hero cạnh nhau dễ bị bóp chữ, xếp dọc cho chắc. */
+  .heroActions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .btnPrimary,
+  .btnSecondary {
+    justify-content: center;
+  }
+
+  .heroBadge {
+    font-size: 11px;
+    padding: 5px 12px;
+  }
+}
