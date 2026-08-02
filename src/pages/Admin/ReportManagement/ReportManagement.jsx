@@ -10,6 +10,11 @@ import {
   lockCourseFromReport,
   unlockCourse,
 } from "../services/reportApi";
+import {
+  getAdminReReviewRequests,
+  approveReReviewRequest,
+  rejectReReviewRequest,
+} from "../services/courseReviewApi";
 
 const STATUS_OPTIONS = [
   { value: "", label: "Tất cả trạng thái" },
@@ -66,6 +71,275 @@ function getStatusClass(status) {
 // không có field "reportType".
 function getTypeLabel(contentType) {
   return contentType === "Course" ? "Course report" : "Content report";
+}
+
+/* ── Re-Review Request Status helpers ─────────────────────── */
+const RR_STATUS_LABELS = { Pending: "Đang chờ", Approved: "Đã duyệt", Rejected: "Từ chối" };
+const RR_STATUS_CLASS  = { Pending: styles.statusPending, Approved: styles.statusResolved, Rejected: styles.statusRejected };
+
+/* ── ReReviewRequestsPanel ────────────────────────────────── */
+function ReReviewRequestsPanel({ onPreview, showToast }) {
+  const [requests,     setRequests]     = useState([]);
+  const [loading,      setLoading]      = useState(true);
+  const [error,        setError]        = useState("");
+  const [statusFilter, setStatusFilter] = useState("");
+  const [selectedReq,  setSelectedReq]  = useState(null); // request đang xử lý
+  const [comment,      setComment]      = useState("");
+  const [processing,   setProcessing]   = useState(false);
+  const [actionType,   setActionType]   = useState(null); // "approve" | "reject"
+
+  const fetchRequests = useCallback(async () => {
+    setLoading(true); setError("");
+    try {
+      const res = await getAdminReReviewRequests(statusFilter || undefined);
+      if (res.success) setRequests(res.data ?? []);
+      else setError(res.errorMessage || "Không thể tải danh sách.");
+    } catch (err) {
+      setError(err.response?.data?.errorMessage || "Lỗi kết nối máy chủ.");
+    } finally {
+      setLoading(false);
+    }
+  }, [statusFilter]);
+
+  useEffect(() => { fetchRequests(); }, [fetchRequests]);
+
+  const openAction = (req, type) => {
+    setSelectedReq(req);
+    setActionType(type);
+    setComment("");
+  };
+
+  const handleProcess = async () => {
+    if (actionType === "reject" && !comment.trim()) {
+      showToast("Vui lòng nhập lý do từ chối.", "error"); return;
+    }
+    setProcessing(true);
+    try {
+      const res = actionType === "approve"
+        ? await approveReReviewRequest(selectedReq.id, comment)
+        : await rejectReReviewRequest(selectedReq.id, comment);
+
+      if (res.success) {
+        showToast(actionType === "approve"
+          ? "Đã duyệt — khóa học đã được mở khoá và xuất bản lại."
+          : "Đã từ chối yêu cầu.");
+        setSelectedReq(null);
+        fetchRequests();
+      } else {
+        showToast(res.errorMessage || "Thao tác thất bại.", "error");
+      }
+    } catch (err) {
+      showToast(err.response?.data?.errorMessage || "Lỗi kết nối.", "error");
+    } finally {
+      setProcessing(false);
+    }
+  };
+
+  return (
+    <>
+      {/* Filter bar */}
+      <div className={styles.filterBar}>
+        <select
+          className={styles.filterSelect}
+          value={statusFilter}
+          onChange={e => setStatusFilter(e.target.value)}
+        >
+          <option value="">Tất cả trạng thái</option>
+          <option value="Pending">Đang chờ</option>
+          <option value="Approved">Đã duyệt</option>
+          <option value="Rejected">Từ chối</option>
+        </select>
+        <button className={styles.secondaryButton} onClick={fetchRequests} disabled={loading}>
+          <i className="fas fa-rotate-right" /> Tải lại
+        </button>
+      </div>
+
+      {/* Table */}
+      <div className={styles.tableWrapper}>
+        <table className={styles.table}>
+          <thead>
+            <tr>
+              <th>Khóa học</th>
+              <th>Expert</th>
+              <th>Lý do yêu cầu</th>
+              <th>Trạng thái</th>
+              <th>Ngày gửi</th>
+              <th>Hành động</th>
+            </tr>
+          </thead>
+          <tbody>
+            {loading && (
+              <tr className={styles.loadingRow}>
+                <td colSpan={6}>Đang tải...</td>
+              </tr>
+            )}
+            {!loading && error && (
+              <tr><td colSpan={6}>
+                <div className={styles.errorState}>
+                  <i className="fas fa-triangle-exclamation" />
+                  <p>{error}</p>
+                  <button className={styles.secondaryButton} onClick={fetchRequests}>Thử lại</button>
+                </div>
+              </td></tr>
+            )}
+            {!loading && !error && requests.length === 0 && (
+              <tr><td colSpan={6}>
+                <div className={styles.emptyState}>
+                  <i className="fas fa-inbox" />
+                  <p>Không có yêu cầu nào.</p>
+                </div>
+              </td></tr>
+            )}
+            {!loading && !error && requests.map(req => (
+              <tr key={req.id}>
+                <td>
+                  <div style={{ fontWeight: 600 }}>{req.courseName}</div>
+                  {req.isCourseLocked && (
+                    <span className={styles.lockedBadge} style={{ marginTop: 4, display: "inline-flex" }}>
+                      <i className="fas fa-lock" /> Đang bị khoá
+                    </span>
+                  )}
+                </td>
+                <td>
+                  <div>{req.expertName || "—"}</div>
+                  <div style={{ fontSize: 12, color: "#6b7280" }}>{req.expertEmail}</div>
+                </td>
+                <td style={{ maxWidth: 200 }}>
+                  <div style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}
+                       title={req.reason}>
+                    {req.reason}
+                  </div>
+                  {req.reviewComment && (
+                    <div style={{ fontSize: 12, color: "#6b7280", marginTop: 2 }}>
+                      Phản hồi: {req.reviewComment}
+                    </div>
+                  )}
+                </td>
+                <td>
+                  <span className={`${styles.badge} ${RR_STATUS_CLASS[req.status] ?? styles.statusPending}`}>
+                    {RR_STATUS_LABELS[req.status] ?? req.status}
+                  </span>
+                </td>
+                <td>{formatDate(req.createdAt)}</td>
+                <td>
+                  <div className={styles.actionsCell}>
+                    {req.courseId && (
+                      <button
+                        className={styles.detailButton}
+                        onClick={() => onPreview(req.courseId)}
+                        title="Xem trước khóa học"
+                      >
+                        <i className="fas fa-eye" /> Xem course
+                      </button>
+                    )}
+                    {req.status === "Pending" && (
+                      <>
+                        <button
+                          className={styles.resolveButton}
+                          onClick={() => openAction(req, "approve")}
+                          title="Phê duyệt — mở khoá và publish lại"
+                        >
+                          <i className="fas fa-check" /> Duyệt
+                        </button>
+                        <button
+                          className={styles.lockButton}
+                          onClick={() => openAction(req, "reject")}
+                          title="Từ chối yêu cầu"
+                        >
+                          <i className="fas fa-times" /> Từ chối
+                        </button>
+                      </>
+                    )}
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Action modal — Approve / Reject */}
+      {selectedReq && (
+        <div className={styles.modalOverlay} onClick={e => e.target === e.currentTarget && setSelectedReq(null)}>
+          <div className={styles.modal} style={{ maxWidth: 480 }}>
+            <div className={styles.modalHeader}>
+              <h2>
+                {actionType === "approve"
+                  ? <><i className="fas fa-check-circle" style={{ color: "#16a34a", marginRight: 8 }} />Phê duyệt yêu cầu</>
+                  : <><i className="fas fa-times-circle" style={{ color: "#dc2626", marginRight: 8 }} />Từ chối yêu cầu</>}
+              </h2>
+              <button className={styles.closeButton} onClick={() => setSelectedReq(null)}>
+                <i className="fas fa-times" />
+              </button>
+            </div>
+
+            <div style={{ padding: "0 0 16px" }}>
+              <div className={styles.metaItem} style={{ marginBottom: 12 }}>
+                <span className={styles.metaLabel}>Khóa học</span>
+                <div className={styles.metaValue}>{selectedReq.courseName}</div>
+              </div>
+              <div className={styles.metaItem} style={{ marginBottom: 12 }}>
+                <span className={styles.metaLabel}>Lý do yêu cầu của Expert</span>
+                <div className={styles.metaValue} style={{ fontWeight: 400, whiteSpace: "pre-wrap" }}>
+                  {selectedReq.reason}
+                </div>
+              </div>
+
+              {actionType === "approve" && (
+                <div style={{
+                  padding: "10px 14px",
+                  background: "#f0fdf4",
+                  border: "1px solid #bbf7d0",
+                  borderRadius: 8,
+                  color: "#15803d",
+                  fontSize: 13,
+                  marginBottom: 12,
+                }}>
+                  <i className="fas fa-info-circle" /> Sau khi duyệt, khóa học sẽ được <strong>mở khoá và xuất bản lại</strong> ngay lập tức.
+                </div>
+              )}
+
+              <div>
+                <label style={{ fontSize: 13, fontWeight: 600, color: "#374151", display: "block", marginBottom: 6 }}>
+                  {actionType === "approve" ? "Ghi chú cho Expert (không bắt buộc)" : "Lý do từ chối *"}
+                </label>
+                <textarea
+                  value={comment}
+                  onChange={e => setComment(e.target.value)}
+                  placeholder={actionType === "approve"
+                    ? "Nhắc nhở hoặc lưu ý thêm cho Expert..."
+                    : "Giải thích rõ lý do từ chối để Expert hiểu và cải thiện..."}
+                  rows={3}
+                  style={{
+                    width: "100%", padding: "9px 10px", border: "1px solid #d1d5db",
+                    borderRadius: 8, fontSize: 14, resize: "vertical", boxSizing: "border-box",
+                  }}
+                />
+              </div>
+            </div>
+
+            <div className={styles.modalActions}>
+              <button className={styles.secondaryButton} onClick={() => setSelectedReq(null)} disabled={processing}>
+                Hủy
+              </button>
+              <button
+                className={actionType === "approve" ? styles.resolveButton : styles.lockButton}
+                onClick={handleProcess}
+                disabled={processing}
+                style={{ padding: "9px 18px" }}
+              >
+                {processing
+                  ? <><i className="fas fa-spinner fa-spin" /> Đang xử lý...</>
+                  : actionType === "approve"
+                    ? <><i className="fas fa-check" /> Xác nhận duyệt</>
+                    : <><i className="fas fa-times" /> Xác nhận từ chối</>}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
+  );
 }
 
 function ReportDetailModal({ report, onClose, onResolve, onLock, onUnlock, onPreview, resolving, locking }) {
@@ -220,6 +494,9 @@ export default function ReportManagement() {
   const [resolvingId, setResolvingId] = useState("");
   const [lockingId, setLockingId] = useState("");
   const [previewCourseId, setPreviewCourseId] = useState(null);
+
+  // "reports" | "review-requests"
+  const [activeTab, setActiveTab] = useState("reports");
 
   const showToast = useCallback((message, type = "success") => {
     setToast({ message, type });
@@ -376,6 +653,32 @@ export default function ReportManagement() {
           </div>
         </section>
 
+        {/* ── TABS ────────────────────────────────────────────── */}
+        <div className={styles.pageTabs}>
+          <button
+            className={`${styles.pageTab} ${activeTab === "reports" ? styles.pageTabActive : ""}`}
+            onClick={() => setActiveTab("reports")}
+          >
+            <i className="fas fa-flag" /> Báo cáo nội dung
+          </button>
+          <button
+            className={`${styles.pageTab} ${activeTab === "review-requests" ? styles.pageTabActive : ""}`}
+            onClick={() => setActiveTab("review-requests")}
+          >
+            <i className="fas fa-file-signature" /> Yêu cầu mở lại khóa học
+          </button>
+        </div>
+
+        {/* ── TAB: RE-REVIEW REQUESTS ──────────────────────────── */}
+        {activeTab === "review-requests" && (
+          <ReReviewRequestsPanel
+            onPreview={setPreviewCourseId}
+            showToast={showToast}
+          />
+        )}
+
+        {/* ── TAB: REPORTS ─────────────────────────────────────── */}
+        {activeTab === "reports" && (<>
         <div className={styles.filterBar}>
           <select
             className={styles.filterSelect}
@@ -535,7 +838,9 @@ export default function ReportManagement() {
             </tbody>
           </table>
         </div>
-      </div>
+        </>)} {/* end tab reports */}
+
+      </div> {/* end container */}
 
       {selectedReport && (
         <ReportDetailModal

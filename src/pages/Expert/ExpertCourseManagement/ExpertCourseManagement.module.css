@@ -333,6 +333,13 @@
 }
 .actionBtnPreview:hover { background: #dcfce7; border-color: #4ade80; }
 
+.actionBtnReReview {
+  background: #fff7ed;
+  border-color: #fdba74;
+  color: #c2410c;
+}
+.actionBtnReReview:hover { background: #fed7aa; border-color: #f97316; }
+
 /* ── LOAD MORE ─────────────────────────────────────────────── */
 .loadMoreWrap {
   display: flex;
