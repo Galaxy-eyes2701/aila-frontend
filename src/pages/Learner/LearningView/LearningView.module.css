@@ -66,7 +66,7 @@
 
 .mainContainer {
   display: grid;
-  grid-template-columns: 1fr 340px;
+  grid-template-columns: 340px minmax(0, 1fr);
   gap: 24px;
   max-width: 1400px;
   margin: 0 auto;
