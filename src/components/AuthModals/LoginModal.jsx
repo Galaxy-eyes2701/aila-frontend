@@ -164,7 +164,12 @@ export default function LoginModal({ onClose, onSwitchToRegister, onLoginSuccess
                 <div className={styles.divider}>Hoặc</div>
 
                 <button type="button" className={styles.btnGoogle} onClick={handleGoogle}>
-                  <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google" />
+                  <svg width="18" height="18" viewBox="0 0 533.5 544.3" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+                    <path fill="#4285F4" d="M533.5 278.4c0-17.4-1.4-34.1-4.1-50.4H272v95.6h146.9c-6.3 33.9-25.1 62.7-53.7 81.8v68h86.7c50.8-46.8 80.6-115.7 80.6-195z"/>
+                    <path fill="#34A853" d="M272 544.3c72.6 0 133.7-24.1 178.2-65.6l-86.7-68c-24.1 16.2-55 25.7-91.5 25.7-70.4 0-130-47.5-151.3-111.2H33.9v69.9C78.2 488.4 169.1 544.3 272 544.3z"/>
+                    <path fill="#FBBC05" d="M120.7 323.2c-11.2-33.5-11.2-69.4 0-102.9V150.5H33.9c-37.7 73.9-37.7 161.4 0 235.3l86.8-62.6z"/>
+                    <path fill="#EA4335" d="M272 107.7c39.6 0 75.2 13.6 103.3 40.2l77.4-77.4C406.7 25 347.7 0 272 0 169.1 0 78.2 55.9 33.9 150.5l86.8 69.8C142 155.2 201.6 107.7 272 107.7z"/>
+                  </svg>
                   Đăng nhập bằng Google
                 </button>
 

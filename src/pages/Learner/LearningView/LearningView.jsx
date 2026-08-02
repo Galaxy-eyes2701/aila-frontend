@@ -234,6 +234,13 @@ export default function LearningView() {
       />
 
       <div className={styles.mainContainer}>
+        {/* Thanh điều hướng bài học bên trái */}
+        <LearningSidebar
+          modules={learningViewData?.modules}
+          currentMaterialId={currentMaterial?.id}
+          onSelectMaterial={(id) => fetchMaterialDetail(id)}
+        />
+
         {/* Khu vực phân tách định dạng hiển thị học liệu */}
         <LearningContent
           contentLoading={contentLoading}
@@ -254,13 +261,6 @@ export default function LearningView() {
             // Chuyển màn hình sang bài học mới
             fetchMaterialDetail(nextLessonId);
           }}
-        />
-
-        {/* Thanh điều hướng bài học bên phải */}
-        <LearningSidebar
-          modules={learningViewData?.modules}
-          currentMaterialId={currentMaterial?.id}
-          onSelectMaterial={(id) => fetchMaterialDetail(id)}
         />
       </div>
     </div>

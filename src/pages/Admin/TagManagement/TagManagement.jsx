@@ -66,7 +66,7 @@ function TagFormModal({ mode, initialData, onClose, onSaved }) {
     <div className={styles.modalOverlay} onClick={(e) => e.target === e.currentTarget && onClose()}>
       <div className={styles.modal}>
         <div className={styles.modalHeader}>
-          <h2>{mode === "edit" ? "Chỉnh sửa tag" : "Tạo system tag mới"}</h2>
+          <h2>{mode === "edit" ? "Chỉnh sửa tag" : "Tạo tag hệ thống mới"}</h2>
           <button className={styles.closeButton} onClick={onClose}>
             <i className="fas fa-times" />
           </button>
@@ -155,7 +155,7 @@ function ReviewTagModal({ request, detailLoading, reviewing, onClose, onSubmit }
     <div className={styles.modalOverlay} onClick={(e) => e.target === e.currentTarget && onClose()}>
       <div className={styles.modal}>
         <div className={styles.modalHeader}>
-          <h2>Review tag verification</h2>
+          <h2>Duyệt yêu cầu xác minh tag</h2>
           <button className={styles.closeButton} onClick={onClose}>
             <i className="fas fa-times" />
           </button>
@@ -212,7 +212,7 @@ function ReviewTagModal({ request, detailLoading, reviewing, onClose, onSubmit }
                     checked={decision === "Approved"}
                     onChange={() => setDecision("Approved")}
                   />
-                  <span>Approve</span>
+                  <span>Phê duyệt</span>
                 </label>
                 <label className={styles.optionItem}>
                   <input
@@ -222,7 +222,7 @@ function ReviewTagModal({ request, detailLoading, reviewing, onClose, onSubmit }
                     checked={decision === "Rejected"}
                     onChange={() => setDecision("Rejected")}
                   />
-                  <span>Reject</span>
+                  <span>Từ chối</span>
                 </label>
               </div>
             </div>
@@ -527,7 +527,7 @@ export default function TagManagement() {
                           onClick={() => handleOpenReview(request)}
                           disabled={reviewingRequestId === request.id}
                         >
-                          <i className="fas fa-check" /> Review
+                          <i className="fas fa-check" /> Duyệt
                         </button>
                       </div>
                     </td>
@@ -539,7 +539,7 @@ export default function TagManagement() {
         </div>
 
         <div className={styles.sectionHeader}>
-          <h2>System tags</h2>
+          <h2>Tags hệ thống</h2>
         </div>
 
         <div className={styles.tableWrapper}>
