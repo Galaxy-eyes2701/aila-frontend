@@ -10,16 +10,16 @@ const AVATAR_MAX_SIZE = 5 * 1024 * 1024;
 const LEARNER_TYPE_LABELS = {
   Student: 'Học sinh / Sinh viên',
   OfficeWorker: 'Nhân viên văn phòng',
-  Freelancer: 'Freelancer',
+  Freelancer: 'Người làm việc tự do',
   BusinessOwner: 'Chủ doanh nghiệp',
   CivilServant: 'Công chức / Viên chức',
   Retired: 'Hưu trí',
 };
 
 const KNOWLEDGE_LEVEL_LABELS = {
-  Beginner: 'Mới bắt đầu',
-  Intermediate: 'Trung cấp',
-  Advanced: 'Nâng cao',
+  Beginner: 'Người mới bắt đầu',
+  Intermediate: 'Người có kiến thức cơ bản',
+  Advanced: 'Người có kiến thức nâng cao',
 };
 
 function getInitials(fullName) {
@@ -319,9 +319,6 @@ export default function LearnerProfile() {
                       <i className="fas fa-calendar-alt" /> Tham gia 01/2026
                     </span>
                   </div>
-                  <span className={styles.verifiedBadge}>
-                    <i className="fas fa-check-circle" /> Đã xác thực
-                  </span>
                 </div>
                 <div className={styles.headerActions}>
                   <button className={styles.btnPrimary} onClick={handleEditStart}>
@@ -371,18 +368,13 @@ export default function LearnerProfile() {
                       <div className={styles.fieldRow}>
                         <div className={styles.fieldItemFull}>
                           <label className={styles.fieldLabel}>EMAIL</label>
-                          <div className={`${styles.fieldBox} ${styles.fieldBoxRow}`}>
-                            <span>{profile.email}</span>
-                            <span className={styles.verifiedTag}>
-                              <i className="fas fa-check" /> Xác thực
-                            </span>
-                          </div>
+                          <div className={styles.fieldBox}>{profile.email}</div>
                         </div>
                       </div>
 
                       <div className={styles.fieldRow}>
                         <div className={styles.fieldItemFull}>
-                          <label className={styles.fieldLabel}>TRÌNH ĐỘ KIẾN THỨC</label>
+                          <label className={styles.fieldLabel}>Mức độ hiểu biết về AI</label>
                           <div className={styles.fieldBox}>
                             {profile.learner.knowledgeLevel
                               ? KNOWLEDGE_LEVEL_LABELS[profile.learner.knowledgeLevel]
@@ -444,7 +436,7 @@ export default function LearnerProfile() {
 
                       <div className={styles.fieldRow}>
                         <div className={styles.fieldItemFull}>
-                          <label className={styles.fieldLabel}>TRÌNH ĐỘ KIẾN THỨC</label>
+                          <label className={styles.fieldLabel}>Mức độ hiểu biết về AI</label>
                           <select
                             className={styles.fieldBox}
                             value={form.knowledgeLevel}
@@ -578,22 +570,6 @@ export default function LearnerProfile() {
                       </div>
                     </div>
                   )}
-
-                  <div className={styles.securityDivider} />
-
-                  {/* Email xác thực */}
-                  <div className={styles.securityItem}>
-                    <div className={`${styles.securityIconWrap} ${styles.securityIconGreen}`}>
-                      <i className="fas fa-envelope" />
-                    </div>
-                    <div className={styles.securityInfo}>
-                      <div className={styles.securityTitle}>Email xác thực</div>
-                      <div className={styles.securitySuccess}>
-                        <i className="fas fa-check-circle" /> Đã xác thực
-                      </div>
-                      <div className={styles.securityEmail}>{profile.email}</div>
-                    </div>
-                  </div>
 
                 </div>
               </div>
