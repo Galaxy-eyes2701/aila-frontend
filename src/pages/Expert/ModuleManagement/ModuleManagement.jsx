@@ -179,7 +179,15 @@ export default function ModuleManagement() {
 
     setBusyId(module.id);
     try {
-      await api.delete(`/courses/${courseId}/modules/${module.id}`);
+      const res = await api.delete(`/courses/${courseId}/modules/${module.id}`);
+      if (!res.data?.success) {
+        showToast(
+          res.data?.errorMessage || "Không thể xóa chương.",
+          "error",
+        );
+        return;
+      }
+
       setModules((current) => current.filter((item) => item.id !== module.id));
       setHasOrderChanges(true);
       showToast("Đã xóa chương.");
