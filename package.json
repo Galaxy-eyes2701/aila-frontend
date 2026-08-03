@@ -9,6 +9,9 @@
     "build": "vite build",
     "preview": "vite preview"
   },
+  "engines": {
+    "node": ">=20.18.0"
+  },
   "dependencies": {
     "@tiptap/extension-color": "^3.27.4",
     "@tiptap/extension-highlight": "^3.27.4",
