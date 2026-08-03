@@ -1,15 +1,15 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate, useOutletContext } from 'react-router-dom';
-import useAuth from '../../hooks/useAuth';
-import { resolveApiError } from '../../utils/api';
-import { hasValidSession } from '../../utils/token';
+import useAuth from '../../../hooks/useAuth';
+import { resolveApiError } from '../../../utils/api';
+import { hasValidSession } from '../../../utils/token';
 import {
   PLAN_UNAVAILABLE_MESSAGE,
   formatDuration,
   formatLimit,
   formatPrice,
-} from '../../utils/subscriptionPlan';
-import Toast from '../../components/Toast/Toast';
+} from '../../../utils/subscriptionPlan';
+import Toast from '../../../components/Toast/Toast';
 import {
   getPublicSubscriptionPlanById,
   getPublicSubscriptionPlans,
