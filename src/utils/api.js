@@ -1,8 +1,8 @@
 import axios from "axios";
 
 const api = axios.create({
- // baseURL: "https://localhost:7124/api",
- baseURL: "https://api.aila.io.vn/api",
+  baseURL: "https://localhost:7124/api",
+ //baseURL: "https://api.aila.io.vn/api",
 });
 
 // Nhãn tiếng Việt cho tên field backend trả về trong message lỗi

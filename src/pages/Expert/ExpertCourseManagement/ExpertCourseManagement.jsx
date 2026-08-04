@@ -184,7 +184,11 @@ export default function ExpertCourseManagement() {
               <CourseRow key={course.id} course={course}
                 onEdit={handleEdit} onPublish={handlePublish}
                 onUnpublish={handleUnpublish} onPreview={setPreviewCourseId}
-                onReReview={setReReviewCourse} />
+                onReReview={setReReviewCourse}
+                onLockedPublish={() => showToast(
+                  'Khóa học đang bị khoá do vi phạm nội quy. Vui lòng nhấn "Yêu cầu mở lại" để gửi yêu cầu xem xét.',
+                  'error'
+                )} />
             ))}
           </div>
         )}

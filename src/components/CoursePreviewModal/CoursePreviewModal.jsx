@@ -320,12 +320,18 @@ function PreviewOverview({ course }) {
 }
 
 /* ── Main Modal ───────────────────────────────────────────────────────────── */
-export default function CoursePreviewModal({ courseId, onClose }) {
+export default function CoursePreviewModal({ courseId, onClose, materialPreviewEndpoint }) {
   const [course,          setCourse]          = useState(null);
   const [loading,         setLoading]         = useState(true);
   const [error,           setError]           = useState('');
   const [currentMaterial, setCurrentMaterial] = useState(null);
   const [contentLoading,  setContentLoading]  = useState(false);
+
+  // Mặc định dùng Expert endpoint; admin truyền vào override
+  const getMaterialUrl = (mId) =>
+    materialPreviewEndpoint
+      ? materialPreviewEndpoint(courseId, mId)
+      : `/experts/me/courses/${courseId}/materials/${mId}/preview`;
 
   const fetchCourse = useCallback(async () => {
     setLoading(true); setError('');
@@ -355,7 +361,7 @@ export default function CoursePreviewModal({ courseId, onClose }) {
     setContentLoading(true);
     setCurrentMaterial(null);
     try {
-      const res = await api.get(`/experts/me/courses/${courseId}/materials/${materialId}/preview`);
+      const res = await api.get(getMaterialUrl(materialId));
       if (res.data.success) setCurrentMaterial(res.data.data);
     } catch { /* silent */ }
     finally   { setContentLoading(false); }

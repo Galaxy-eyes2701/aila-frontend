@@ -30,3 +30,12 @@ export async function unlockCourse(courseId) {
   const res = await api.patch(`/admin/courses/${courseId}/unlock`);
   return res.data;
 }
+
+/**
+ * Admin từ chối (bác bỏ) báo cáo — nội dung không vi phạm.
+ * Status DB vẫn là Resolved (domain constraint).
+ */
+export async function dismissAdminReport(reportId, note) {
+  const res = await api.patch(`/admin/reports/${reportId}/dismiss`, { note: note || null });
+  return res.data;
+}

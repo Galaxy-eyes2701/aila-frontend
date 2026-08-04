@@ -9,6 +9,7 @@ import {
   resolveAdminReport,
   lockCourseFromReport,
   unlockCourse,
+  dismissAdminReport,
 } from "../services/reportApi";
 import {
   getAdminReReviewRequests,
@@ -77,6 +78,50 @@ function getTypeLabel(contentType) {
 const RR_STATUS_LABELS = { Pending: "Đang chờ", Approved: "Đã duyệt", Rejected: "Từ chối" };
 const RR_STATUS_CLASS  = { Pending: styles.statusPending, Approved: styles.statusResolved, Rejected: styles.statusRejected };
 
+/* ── DismissModal — admin từ chối báo cáo kèm ghi chú ────── */
+function DismissModal({ report, onClose, onConfirm }) {
+  const [note, setNote] = useState("");
+  return (
+    <div className={styles.modalOverlay} onClick={e => e.target === e.currentTarget && onClose()}>
+      <div className={styles.modal} style={{ maxWidth: 460 }}>
+        <div className={styles.modalHeader}>
+          <h2><i className="fas fa-times-circle" style={{ color: "#dc2626", marginRight: 8 }} />Từ chối báo cáo</h2>
+          <button className={styles.closeButton} onClick={onClose}><i className="fas fa-times" /></button>
+        </div>
+        <div style={{ padding: "4px 0 16px" }}>
+          <p style={{ fontSize: 14, color: "#374151", marginBottom: 12 }}>
+            Từ chối báo cáo đồng nghĩa với việc nội dung <strong>không vi phạm</strong> và
+            báo cáo sẽ được đánh dấu đã xử lý (Resolved).
+          </p>
+          <label style={{ fontSize: 13, fontWeight: 600, color: "#374151", display: "block", marginBottom: 6 }}>
+            Ghi chú cho hồ sơ <span style={{ fontWeight: 400, color: "#9ca3af" }}>(không bắt buộc)</span>
+          </label>
+          <textarea
+            value={note}
+            onChange={e => setNote(e.target.value)}
+            placeholder="Lý do từ chối báo cáo này..."
+            rows={3}
+            style={{
+              width: "100%", padding: "9px 10px", border: "1px solid #d1d5db",
+              borderRadius: 8, fontSize: 14, resize: "vertical", boxSizing: "border-box",
+            }}
+          />
+        </div>
+        <div className={styles.modalActions}>
+          <button className={styles.secondaryButton} onClick={onClose}>Hủy</button>
+          <button
+            className={styles.lockButton}
+            onClick={() => onConfirm(note.trim() || null)}
+            style={{ padding: "9px 18px" }}
+          >
+            <i className="fas fa-times-circle" /> Xác nhận từ chối
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 /* ── ReReviewRequestsPanel ────────────────────────────────── */
 function ReReviewRequestsPanel({ onPreview, showToast }) {
   const [requests,     setRequests]     = useState([]);
@@ -87,6 +132,7 @@ function ReReviewRequestsPanel({ onPreview, showToast }) {
   const [comment,      setComment]      = useState("");
   const [processing,   setProcessing]   = useState(false);
   const [actionType,   setActionType]   = useState(null); // "approve" | "reject"
+  const [reasonPopup,  setReasonPopup]  = useState(null); // { reason, reviewComment }
 
   const fetchRequests = useCallback(async () => {
     setLoading(true); setError("");
@@ -205,10 +251,19 @@ function ReReviewRequestsPanel({ onPreview, showToast }) {
                   <div style={{ fontSize: 12, color: "#6b7280" }}>{req.expertEmail}</div>
                 </td>
                 <td style={{ maxWidth: 200 }}>
-                  <div style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}
-                       title={req.reason}>
+                  <button
+                    onClick={() => setReasonPopup({ reason: req.reason, reviewComment: req.reviewComment })}
+                    style={{
+                      background: "none", border: "none", padding: 0, cursor: "pointer",
+                      color: "#2563eb", fontSize: 13, fontWeight: 600, textAlign: "left",
+                      textDecoration: "underline", textUnderlineOffset: 3,
+                      overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+                      maxWidth: 200, display: "block",
+                    }}
+                    title="Nhấn để xem đầy đủ"
+                  >
                     {req.reason}
-                  </div>
+                  </button>
                   {req.reviewComment && (
                     <div style={{ fontSize: 12, color: "#6b7280", marginTop: 2 }}>
                       Phản hồi: {req.reviewComment}
@@ -338,16 +393,44 @@ function ReReviewRequestsPanel({ onPreview, showToast }) {
           </div>
         </div>
       )}
+
+      {/* ── Reason Popup ── */}
+      {reasonPopup && (
+        <div className={styles.modalOverlay} onClick={() => setReasonPopup(null)}>
+          <div className={styles.modal} style={{ maxWidth: 500 }} onClick={e => e.stopPropagation()}>
+            <div className={styles.modalHeader}>
+              <h2><i className="fas fa-comment-alt" style={{ marginRight: 8 }} />Lý do yêu cầu</h2>
+              <button className={styles.closeButton} onClick={() => setReasonPopup(null)}>
+                <i className="fas fa-times" />
+              </button>
+            </div>
+            <div className={styles.descriptionBox} style={{ marginBottom: reasonPopup.reviewComment ? 12 : 0 }}>
+              {reasonPopup.reason}
+            </div>
+            {reasonPopup.reviewComment && (
+              <div style={{ marginTop: 8 }}>
+                <div className={styles.metaLabel} style={{ marginBottom: 6 }}>Phản hồi admin</div>
+                <div className={styles.descriptionBox} style={{ color: "#dc2626" }}>
+                  {reasonPopup.reviewComment}
+                </div>
+              </div>
+            )}
+            <div className={styles.modalActions}>
+              <button className={styles.secondaryButton} onClick={() => setReasonPopup(null)}>Đóng</button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }
 
-function ReportDetailModal({ report, onClose, onResolve, onLock, onUnlock, onPreview, resolving, locking }) {
+function ReportDetailModal({ report, onClose, onResolve, onLock, onUnlock, onPreview, onDismiss, resolving, locking }) {
   if (!report) return null;
 
-  const isCourseReport = report.contentType === "Course";
-  const isLocked       = !!report.isCourseLocked;
-  const isResolved     = report.status === "Resolved";
+  const hasCourse  = !!report.courseId;   // cả course report lẫn content report đều có courseId
+  const isLocked   = !!report.isCourseLocked;
+  const isResolved = report.status === "Resolved";
 
   return (
     <div className={styles.modalOverlay} onClick={(e) => e.target === e.currentTarget && onClose()}>
@@ -388,7 +471,7 @@ function ReportDetailModal({ report, onClose, onResolve, onLock, onUnlock, onPre
             <span className={styles.metaLabel}>Khóa học</span>
             <div className={styles.metaValue}>
               <span>{report.courseName || "—"}</span>
-              {isCourseReport && isLocked && (
+              {isLocked && (
                 <span className={styles.lockedBadge} style={{ marginLeft: 8 }}>
                   <i className="fas fa-lock" /> Đang bị khoá
                 </span>
@@ -426,8 +509,8 @@ function ReportDetailModal({ report, onClose, onResolve, onLock, onUnlock, onPre
             Đóng
           </button>
 
-          {/* Nút Lock — chỉ hiện với course report chưa bị lock và chưa resolved */}
-          {isCourseReport && !isLocked && !isResolved && (
+          {/* Nút Lock — có courseId, chưa bị lock, chưa resolved */}
+          {hasCourse && !isLocked && !isResolved && (
             <button
               className={styles.lockButton}
               onClick={() => onLock(report.id)}
@@ -441,8 +524,8 @@ function ReportDetailModal({ report, onClose, onResolve, onLock, onUnlock, onPre
             </button>
           )}
 
-          {/* Nút Unlock — chỉ hiện khi course đang bị lock */}
-          {isCourseReport && isLocked && report.courseId && (
+          {/* Nút Unlock — course đang bị lock */}
+          {hasCourse && isLocked && report.courseId && (
             <button
               className={styles.unlockButton}
               onClick={() => onUnlock(report.courseId)}
@@ -456,8 +539,8 @@ function ReportDetailModal({ report, onClose, onResolve, onLock, onUnlock, onPre
             </button>
           )}
 
-          {/* Nút Resolve thông thường — chỉ hiện khi chưa resolved và không lock */}
-          {!isResolved && !(isCourseReport && !isLocked) && (
+          {/* Nút Resolve — khi không có course hoặc course đã bị lock */}
+          {!isResolved && !(hasCourse && !isLocked) && (
             <button
               className={styles.resolveButton}
               onClick={() => onResolve(report.id)}
@@ -468,6 +551,17 @@ function ReportDetailModal({ report, onClose, onResolve, onLock, onUnlock, onPre
               ) : (
                 <><i className="fas fa-check" /> Đánh dấu đã xử lý</>
               )}
+            </button>
+          )}
+
+          {/* Nút Từ chối — bất kỳ report Pending nào */}
+          {!isResolved && (
+            <button
+              className={styles.unlockButton}
+              onClick={() => onDismiss(report.id)}
+              disabled={resolving}
+            >
+              <i className="fas fa-times-circle" /> Từ chối báo cáo
             </button>
           )}
 
@@ -494,6 +588,9 @@ export default function ReportManagement() {
   const [resolvingId, setResolvingId] = useState("");
   const [lockingId, setLockingId] = useState("");
   const [previewCourseId, setPreviewCourseId] = useState(null);
+
+  // null | { reportId, reportCourseName }
+  const [dismissModal, setDismissModal] = useState(null);
 
   // "reports" | "review-requests"
   const [activeTab, setActiveTab] = useState("reports");
@@ -635,6 +732,34 @@ export default function ReportManagement() {
     }
   };
 
+  const handleDismissConfirm = async (note) => {
+    if (!dismissModal) return;
+    const { reportId } = dismissModal;
+    setDismissModal(null);
+    setResolvingId(reportId);
+    try {
+      const res = await dismissAdminReport(reportId, note);
+      if (res.success) {
+        const nextStatus = res.data?.status || "Resolved";
+        setReports((prev) => prev.map((item) =>
+          item.id === reportId ? { ...item, status: nextStatus } : item
+        ));
+        setSelectedReport((prev) =>
+          prev && prev.id === reportId
+            ? { ...prev, status: nextStatus, resolvedAt: res.data?.resolvedAt }
+            : prev
+        );
+        showToast(res.data?.message || "Đã từ chối báo cáo.");
+      } else {
+        showToast(res.errorMessage || "Không thể từ chối báo cáo.", "error");
+      }
+    } catch (err) {
+      showToast(err.response?.data?.errorMessage || "Lỗi kết nối máy chủ.", "error");
+    } finally {
+      setResolvingId("");
+    }
+  };
+
   return (
     <div className={styles.page}>
       <div className="container">
@@ -760,7 +885,7 @@ export default function ReportManagement() {
                     <span className={`${styles.badge} ${styles.typeBadge}`}>
                       {getTypeLabel(report.contentType)}
                     </span>
-                    {report.contentType === "Course" && report.isCourseLocked && (
+                    {report.isCourseLocked && (
                       <span className={styles.lockedBadge} style={{ marginLeft: 6 }}>
                         <i className="fas fa-lock" /> Bị khoá
                       </span>
@@ -780,19 +905,19 @@ export default function ReportManagement() {
                         <i className="fas fa-eye" /> Chi tiết
                       </button>
 
-                      {/* Nút Xem trước course */}
+                      {/* Nút Xem trước course — hiện khi có courseId (cả course lẫn content report) */}
                       {report.courseId && (
                         <button
                           className={styles.detailButton}
                           onClick={() => setPreviewCourseId(report.courseId)}
-                          title="Xem trước khóa học bị báo cáo"
+                          title="Xem trước khóa học liên quan"
                         >
                           <i className="fas fa-search" /> Xem course
                         </button>
                       )}
 
-                      {/* Nút Lock — course report chưa bị lock, chưa resolved */}
-                      {report.contentType === "Course" && !report.isCourseLocked && report.status !== "Resolved" && (
+                      {/* Nút Lock — có courseId, chưa bị lock, chưa resolved */}
+                      {report.courseId && !report.isCourseLocked && report.status !== "Resolved" && (
                         <button
                           className={styles.lockButton}
                           onClick={() => handleLock(report.id)}
@@ -806,7 +931,7 @@ export default function ReportManagement() {
                       )}
 
                       {/* Nút Unlock — course đang bị lock */}
-                      {report.contentType === "Course" && report.isCourseLocked && report.courseId && (
+                      {report.courseId && report.isCourseLocked && (
                         <button
                           className={styles.unlockButton}
                           onClick={() => handleUnlock(report.courseId)}
@@ -819,8 +944,8 @@ export default function ReportManagement() {
                         </button>
                       )}
 
-                      {/* Nút Resolve thông thường — material report hoặc course report đã unlock */}
-                      {report.status !== "Resolved" && !(report.contentType === "Course" && !report.isCourseLocked) && (
+                      {/* Nút Resolve — hiện khi không có courseId hoặc course đã bị lock */}
+                      {report.status !== "Resolved" && !(report.courseId && !report.isCourseLocked) && (
                         <button
                           className={styles.resolveButton}
                           onClick={() => handleResolve(report.id)}
@@ -829,6 +954,17 @@ export default function ReportManagement() {
                           {resolvingId === report.id
                             ? <i className="fas fa-spinner fa-spin" />
                             : <i className="fas fa-check" />}
+                        </button>
+                      )}
+
+                      {/* Nút Từ chối — Pending report */}
+                      {report.status !== "Resolved" && (
+                        <button
+                          className={styles.unlockButton}
+                          onClick={() => setDismissModal({ reportId: report.id })}
+                          title="Từ chối — nội dung không vi phạm"
+                        >
+                          <i className="fas fa-times-circle" />
                         </button>
                       )}
                     </div>
@@ -850,6 +986,7 @@ export default function ReportManagement() {
           onLock={handleLock}
           onUnlock={handleUnlock}
           onPreview={(courseId) => setPreviewCourseId(courseId)}
+          onDismiss={(reportId) => setDismissModal({ reportId })}
           resolving={!!resolvingId}
           locking={!!lockingId}
         />
@@ -859,6 +996,16 @@ export default function ReportManagement() {
         <CoursePreviewModal
           courseId={previewCourseId}
           onClose={() => setPreviewCourseId(null)}
+          materialPreviewEndpoint={(courseId, materialId) =>
+            `/admin/courses/${courseId}/materials/${materialId}/preview`}
+        />
+      )}
+
+      {dismissModal && (
+        <DismissModal
+          report={dismissModal}
+          onClose={() => setDismissModal(null)}
+          onConfirm={handleDismissConfirm}
         />
       )}
 

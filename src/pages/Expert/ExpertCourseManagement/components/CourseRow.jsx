@@ -10,7 +10,7 @@ const LEVEL_LABELS = {
   Advanced:     'Nâng cao',
 };
 
-export default function CourseRow({ course, onEdit, onPublish, onUnpublish, onPreview, onReReview }) {
+export default function CourseRow({ course, onEdit, onPublish, onUnpublish, onPreview, onReReview, onLockedPublish }) {
   const isPublished = course.isPublished;
   const isLocked    = !!course.isPublicationLocked;
   const [busy, setBusy] = useState(false);
@@ -101,14 +101,16 @@ export default function CourseRow({ course, onEdit, onPublish, onUnpublish, onPr
           </button>
         ) : (
           <button
-            className={`${styles.actionBtn} ${styles.actionBtnSuccess}`}
-            onClick={handlePublishToggle}
-            disabled={busy || isLocked}
-            title={isLocked ? 'Khóa học đang bị khoá, không thể xuất bản' : 'Xuất bản khóa học'}
+            className={`${styles.actionBtn} ${isLocked ? styles.actionBtnWarning : styles.actionBtnSuccess}`}
+            onClick={isLocked ? () => onLockedPublish?.() : handlePublishToggle}
+            disabled={busy}
+            title={isLocked ? 'Khóa học đang bị khoá — nhấn để xem thông tin' : 'Xuất bản khóa học'}
           >
             {busy
               ? <span className={styles.spinner} />
-              : <><i className="fas fa-globe" /> Xuất bản</>}
+              : isLocked
+                ? <><i className="fas fa-lock" /> Bị khoá</>
+                : <><i className="fas fa-globe" /> Xuất bản</>}
           </button>
         )}
 
