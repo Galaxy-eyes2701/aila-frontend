@@ -6,7 +6,7 @@ const FALLBACK_THUMB = 'https://images.unsplash.com/photo-1677442135703-1787eea5
 
 const LEVEL_LABELS = {
   Beginner:     'Mới bắt đầu',
-  Intermediate: 'Trung cấp',
+  Intermediate: 'Trình độ cơ bản',
   Advanced:     'Nâng cao',
 };
 
@@ -58,7 +58,7 @@ export default function CourseRow({ course, onEdit, onPublish, onUnpublish, onPr
             <span><i className="fas fa-tag" /> {course.category.name}</span>
           )}
           <span><i className="fas fa-clock" /> {course.durationHours}h</span>
-          <span><i className="fas fa-layer-group" /> {course.totalModules ?? 0} module</span>
+          <span><i className="fas fa-layer-group" /> {course.totalModules ?? 0} học phần</span>
           <span><i className="fas fa-book-open" /> {course.totalMaterials ?? 0} bài</span>
         </div>
       </div>
@@ -75,7 +75,9 @@ export default function CourseRow({ course, onEdit, onPublish, onUnpublish, onPr
         <button
           className={styles.actionBtn}
           onClick={() => onEdit(course)}
-          title="Chỉnh sửa thông tin"
+          disabled={isPublished}
+          title={isPublished ? 'Hãy ẩn khóa học trước khi chỉnh sửa' : 'Chỉnh sửa thông tin'}
+          style={isPublished ? { opacity: 0.5, cursor: 'not-allowed' } : {}}
         >
           <i className="fas fa-pen" /> Sửa
         </button>

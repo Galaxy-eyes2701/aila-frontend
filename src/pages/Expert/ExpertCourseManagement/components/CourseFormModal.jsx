@@ -4,9 +4,9 @@ import styles from '../ExpertCourseManagement.module.css';
 
 const FALLBACK_THUMB = 'https://images.unsplash.com/photo-1677442135703-1787eea5ce01?w=480&q=75';
 const LEVELS = [
-  { value: 'Beginner',     label: 'Mới bắt đầu' },
-  { value: 'Intermediate', label: 'Trung cấp'   },
-  { value: 'Advanced',     label: 'Nâng cao'    },
+  { value: 'Beginner',     label: 'Mới bắt đầu'      },
+  { value: 'Intermediate', label: 'Trình độ cơ bản'  },
+  { value: 'Advanced',     label: 'Nâng cao'          },
 ];
 const CODE_PATTERN = /^[a-z0-9]+(-[a-z0-9]+)*$/;
 

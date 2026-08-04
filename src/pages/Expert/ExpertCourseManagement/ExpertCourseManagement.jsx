@@ -75,6 +75,10 @@ export default function ExpertCourseManagement() {
   };
 
   const handleEdit = course => {
+    if (course.isPublished) {
+      showToast('Hãy ẩn khóa học trước khi chỉnh sửa.', 'error');
+      return;
+    }
     setEditingCourse({
       id: course.id, name: course.name,
       categoryId: course.category?.id ?? '', level: course.level,

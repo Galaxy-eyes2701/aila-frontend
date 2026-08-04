@@ -6,7 +6,7 @@ import styles from './CourseList.module.css';
 const LEVELS = [
   { value: 'all',       label: 'Tất cả',        sub: 'Mọi trình độ',       num: 'LEVEL 0' },
   { value: 'Beginner',  label: 'Mới bắt đầu',   sub: 'Chưa biết gì về AI', num: 'LEVEL 1' },
-  { value: 'Intermediate', label: 'Trung cấp',  sub: 'Đã có kinh nghiệm',  num: 'LEVEL 2' },
+  { value: 'Intermediate', label: 'Trình độ cơ bản',  sub: 'Đã có kinh nghiệm',  num: 'LEVEL 2' },
   { value: 'Advanced',  label: 'Nâng cao',       sub: 'Chuyên sâu',         num: 'LEVEL 3' },
 ];
 
@@ -26,7 +26,7 @@ function durCat(h) {
 function LevelBadge({ level }) {
   const map = {
     Beginner:     { label: 'Mới bắt đầu', cls: styles.lvBegin },
-    Intermediate: { label: 'Trung cấp',   cls: styles.lvInter },
+    Intermediate: { label: 'Trình độ cơ bản',   cls: styles.lvInter },
     Advanced:     { label: 'Nâng cao',    cls: styles.lvAdv   },
   };
   const info = map[level] ?? { label: level, cls: '' };
@@ -58,7 +58,7 @@ function CourseCard({ course, onClick }) {
         <div className={styles.ccardMeta}>
           <LevelBadge level={course.level} />
           <span className={styles.lvTxt}>
-            {{ Beginner: 'Mới bắt đầu', Intermediate: 'Trung cấp', Advanced: 'Nâng cao' }[course.level] ?? course.level}
+            {{ Beginner: 'Mới bắt đầu', Intermediate: 'Trình độ cơ bản', Advanced: 'Nâng cao' }[course.level] ?? course.level}
           </span>
         </div>
         {course.tags?.length > 0 && (

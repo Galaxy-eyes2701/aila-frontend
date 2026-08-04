@@ -9,7 +9,7 @@ import styles from './CourseDetail.module.css';
 
 const LEVEL_LABELS = {
   Beginner:     'Mới bắt đầu',
-  Intermediate: 'Trung cấp',
+  Intermediate: 'Trình độ cơ bản',
   Advanced:     'Nâng cao',
 };
 
@@ -28,7 +28,7 @@ function ModuleItem({ module, index, initialOpen }) {
         aria-expanded={open}
       >
         <div className={styles.modInfo}>
-          <span className={styles.modNum}>MODULE {String(index + 1).padStart(2, '0')}</span>
+          <span className={styles.modNum}>HỌC PHẦN {String(index + 1).padStart(2, '0')}</span>
           <span className={styles.modTitle}>{module.title}</span>
         </div>
         <div className={styles.modRight}>
@@ -290,7 +290,7 @@ export default function CourseDetail() {
             <div className={styles.curriculumHeader}>
               <h2 className={styles.sectionTitle} style={{ marginBottom: 0 }}>Nội dung khóa học</h2>
               <span className={styles.curriculumMeta}>
-                {course.totalModules} module · {totalMaterials} bài học · {course.durationHours}h
+                {course.totalModules} học phần · {totalMaterials} bài học · {course.durationHours}h
               </span>
             </div>
             {course.modules.length > 0 ? (
