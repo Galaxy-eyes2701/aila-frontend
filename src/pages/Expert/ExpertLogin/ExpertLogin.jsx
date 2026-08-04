@@ -2,19 +2,45 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import api from '../../../utils/api';
 import useAuth from '../../../hooks/useAuth';
+import ResetPasswordFlow from '../../../components/AuthModals/ResetPassword/ResetPasswordFlow';
+import { RESET_SUCCESS_MESSAGE } from '../../../components/AuthModals/ResetPassword/constants';
 import styles from './ExpertLogin.module.css';
+
+const PANELS = { LOGIN: 'login', RESET: 'reset' };
 
 export default function ExpertLogin() {
   const navigate = useNavigate();
   const { login } = useAuth();
+  const [panel, setPanel]     = useState(PANELS.LOGIN);
   const [form, setForm]       = useState({ email: '', password: '' });
   const [error, setError]     = useState('');
+  const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
   const [showPwd, setShowPwd] = useState(false);
 
   const handleChange = (e) => {
     setError('');
     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+  };
+
+  /* ── QUÊN MẬT KHẨU ── */
+  const openReset = () => {
+    setPanel(PANELS.RESET);
+    setError('');
+    setSuccess('');
+  };
+
+  const backToLogin = () => {
+    setPanel(PANELS.LOGIN);
+    setError('');
+  };
+
+  /** Đổi mật khẩu xong: về form đăng nhập, điền sẵn email để đăng nhập ngay. */
+  const handleResetDone = (email) => {
+    setPanel(PANELS.LOGIN);
+    setForm({ email, password: '' });
+    setError('');
+    setSuccess(RESET_SUCCESS_MESSAGE);
   };
 
   const handleSubmit = async (e) => {
@@ -26,6 +52,7 @@ export default function ExpertLogin() {
 
     setLoading(true);
     setError('');
+    setSuccess('');
     try {
       const res = await api.post('/auth/expert/login', {
         email:    form.email.trim().toLowerCase(),
@@ -54,6 +81,20 @@ export default function ExpertLogin() {
     }
   };
 
+  if (panel === PANELS.RESET) {
+    return (
+      <div className={styles.page}>
+        <div className={`${styles.card} ${styles.cardFlush}`}>
+          <ResetPasswordFlow
+            initialEmail={form.email}
+            onBackToLogin={backToLogin}
+            onDone={handleResetDone}
+          />
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className={styles.page}>
       <div className={styles.card}>
@@ -68,6 +109,14 @@ export default function ExpertLogin() {
         </p>
 
         <form className={styles.form} onSubmit={handleSubmit} noValidate>
+          {/* Thông báo đổi mật khẩu thành công */}
+          {success && (
+            <div className={styles.success} role="alert">
+              <i className="fas fa-circle-check" />
+              {success}
+            </div>
+          )}
+
           {/* Email */}
           <div className={styles.inputGroup}>
             <label className={styles.label} htmlFor="email">Email</label>
@@ -116,6 +165,13 @@ export default function ExpertLogin() {
                 <i className={`fas ${showPwd ? 'fa-eye-slash' : 'fa-eye'}`} />
               </button>
             </div>
+          </div>
+
+          {/* Quên mật khẩu */}
+          <div className={styles.forgotRow}>
+            <button type="button" className={styles.forgotLink} onClick={openReset}>
+              Quên mật khẩu?
+            </button>
           </div>
 
           {/* Error */}
