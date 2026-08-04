@@ -1,4 +1,4 @@
-import api from '../../../utils/api';
+import api from '../../../../utils/api';
 
 /** GET /api/subscription-plans — công khai, không cần token. BE đã lọc Active + sắp xếp sẵn. */
 export async function getPublicSubscriptionPlans() {

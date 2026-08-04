@@ -4,7 +4,7 @@ import {
   createAIPracticeMaterial,
   getAIPracticeMaterialDetail,
   updateAIPracticeMaterial,
-} from "../../services/aiPracticeApi";
+} from "../../services/AipracticeApi";
 
 // Khớp với AILA.Domain.Entities.AIPracticeMaterial (AddPromptTemplate /
 // AddStepGuidance) — Easy = Prompt Template, Medium = Step Guidance,
