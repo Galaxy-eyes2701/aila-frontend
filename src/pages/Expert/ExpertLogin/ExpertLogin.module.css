@@ -26,6 +26,10 @@
   background: linear-gradient(90deg, #10b981 0%, var(--primary) 100%);
 }
 
+/* Khi nhúng ResetPasswordFlow: bỏ padding của card vì các bước tự mang padding riêng
+   (modalHeader / modalBody trong AuthModals.module.css). */
+.cardFlush { padding: 0; }
+
 .iconWrap {
   width: 56px;
   height: 56px;
@@ -135,6 +139,37 @@
 }
 
 .adminLink a:hover { text-decoration: underline; }
+
+.forgotRow {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: -8px;
+}
+
+.forgotLink {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: inherit;
+  color: #059669;
+}
+
+.forgotLink:hover { text-decoration: underline; }
+
+.success {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  border-radius: var(--radius-sm);
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  color: #15803d;
+  font-size: 13.5px;
+}
 
 .error {
   display: flex;
