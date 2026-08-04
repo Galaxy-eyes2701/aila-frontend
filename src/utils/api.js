@@ -1,9 +1,9 @@
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: "https://localhost:7124/api",
+  //baseURL: "https://localhost:7124/api",
+  baseURL: "https://api.aila.io.vn/api",
   withCredentials: true,
- //baseURL: "https://api.aila.io.vn/api",
 });
 
 // Nhãn tiếng Việt cho tên field backend trả về trong message lỗi
@@ -137,7 +137,11 @@ api.interceptors.response.use(
     originalRequest._retry = true;
 
     try {
-      const refreshResponse = await api.post("/auth/refresh", {}, { skipAuth: true });
+      const refreshResponse = await api.post(
+        "/auth/refresh",
+        {},
+        { skipAuth: true },
+      );
       const newAccessToken = refreshResponse?.data?.data?.accessToken;
 
       if (!newAccessToken) {
@@ -152,7 +156,7 @@ api.interceptors.response.use(
       clearAuthSession();
       return Promise.reject(refreshError);
     }
-  }
+  },
 );
 
 export default api;
