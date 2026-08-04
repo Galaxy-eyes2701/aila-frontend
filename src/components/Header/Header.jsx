@@ -12,7 +12,7 @@ const NAV_LINKS = [
   { label: "Hỏi đáp", href: "*" },
 ];
 
-const DEFAULT_AVATAR = "https://i.pravatar.cc/80";
+import { DEFAULT_AVATAR } from "../../constants/defaultAvatar";
 
 export default function Header({ onLoginClick }) {
   const { user, logout } = useAuth();
@@ -44,6 +44,7 @@ export default function Header({ onLoginClick }) {
       document.removeEventListener("touchstart", handleClickOutside);
     };
   }, []);
+
   useEffect(() => {
     if (!user) {
       setAvatarUrl(DEFAULT_AVATAR);
@@ -59,15 +60,25 @@ export default function Header({ onLoginClick }) {
           if (res.data.success && res.data.data.avatarUrl) {
             url = res.data.data.avatarUrl;
           }
+        } else if (user.role === "Expert") {
+          const res = await api.get("/experts/me/profile");
+          if (res.data.success && res.data.data.avatarUrl) {
+            url = res.data.data.avatarUrl;
+          }
         }
 
-        setAvatarUrl(url);
+        setAvatarUrl(url || DEFAULT_AVATAR);
       } catch {
         setAvatarUrl(DEFAULT_AVATAR);
       }
     };
 
     fetchAvatar();
+
+    window.addEventListener("profile-updated", fetchAvatar);
+    return () => {
+      window.removeEventListener("profile-updated", fetchAvatar);
+    };
   }, [user]);
 
   useEffect(() => {

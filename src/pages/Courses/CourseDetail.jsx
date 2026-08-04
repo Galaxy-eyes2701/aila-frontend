@@ -13,8 +13,8 @@ const LEVEL_LABELS = {
   Advanced:     'Nâng cao',
 };
 
+import { DEFAULT_AVATAR } from '../../constants/defaultAvatar';
 const FALLBACK_THUMB = 'https://images.unsplash.com/photo-1677442135703-1787eea5ce01?w=800&q=75';
-const DEFAULT_AVATAR  = 'https://i.pravatar.cc/80';
 
 /** Accordion module item */
 function ModuleItem({ module, index, initialOpen }) {

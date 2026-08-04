@@ -1,7 +1,12 @@
 import { createContext, useState, useCallback } from 'react';
+import api from '../utils/api';
 import { normalizeRole } from '../utils/role';
 
 const AuthContext = createContext();
+
+function clearRefreshTokenCookie() {
+  document.cookie = 'refreshToken=; Path=/; Max-Age=0; SameSite=Lax';
+}
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(() => {
@@ -37,11 +42,18 @@ export function AuthProvider({ children }) {
     setUser(normalizedUser);
   }, []);
 
-  const logout = useCallback(() => {
+  const logout = useCallback(async () => {
+    try {
+      await api.post('/auth/logout');
+    } catch {
+      // Dù BE logout lỗi, vẫn clear local session để tránh giữ trạng thái đăng nhập sai.
+    }
+
     localStorage.removeItem('accessToken');
     localStorage.removeItem('user');
     localStorage.removeItem('role');
     localStorage.removeItem('adminLoggedIn');
+    clearRefreshTokenCookie();
     setUser(null);
   }, []);
 

@@ -175,11 +175,10 @@ export default function Home() {
               )}
             </div>
 
-            <div className={styles.heroStats}>
-              <div><strong>25+</strong>Khóa học</div>
-              <div><strong>5k+</strong>Học viên</div>
-              <div><strong>98%</strong>Hài lòng</div>
-            </div>
+            
+              <p className={styles.heroSubtitle}>
+              Hệ thống học AI được thiết kế để bạn tiếp cận nhanh, học tập theo dự án thực tế và áp dụng ngay trong công việc.
+            </p>
           </div>
 
           {/* Banner slider */}

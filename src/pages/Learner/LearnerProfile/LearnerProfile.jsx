@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import api from '../../../utils/api';
+import { DEFAULT_AVATAR } from '../../../constants/defaultAvatar';
 import LearningSections from '../LearningProfile/LearningSections';
 import styles from './LearnerProfile.module.css';
 
@@ -150,6 +151,7 @@ export default function LearnerProfile() {
       const res = await api.post('/profile/avatar', formData);
       if (res.data.success) {
         setProfile(prev => ({ ...prev, avatarUrl: res.data.data.avatarUrl }));
+        window.dispatchEvent(new CustomEvent('profile-updated'));
       } else {
         setAvatarError(res.data.errorMessage || 'Cập nhật ảnh đại diện thất bại.');
       }
@@ -299,10 +301,12 @@ export default function LearnerProfile() {
                   onClick={openAvatarModal}
                   aria-label="Xem hoặc đổi ảnh đại diện"
                 >
-                  {profile.avatarUrl
-                    ? <img className={styles.avatarImg} src={profile.avatarUrl} alt={profile.fullName} />
-                    : <div className={styles.avatarInitials}>{getInitials(profile.fullName)}</div>
-                  }
+                  <img
+                    className={styles.avatarImg}
+                    src={profile.avatarUrl || DEFAULT_AVATAR}
+                    alt={profile.fullName || 'User'}
+                    onError={(e) => { e.target.src = DEFAULT_AVATAR; }}
+                  />
                   <div className={styles.avatarOnline} />
                   <div className={styles.avatarHoverOverlay}>
                     <i className="fas fa-camera" />
@@ -593,10 +597,12 @@ export default function LearnerProfile() {
 
                   <div className={styles.avatarModalBody}>
                     <div className={styles.avatarPreviewWrap}>
-                      {profile.avatarUrl
-                        ? <img className={styles.avatarPreviewImg} src={profile.avatarUrl} alt={profile.fullName} />
-                        : <div className={styles.avatarPreviewInitials}>{getInitials(profile.fullName)}</div>
-                      }
+                      <img
+                        className={styles.avatarPreviewImg}
+                        src={profile.avatarUrl || DEFAULT_AVATAR}
+                        alt={profile.fullName || 'User'}
+                        onError={(e) => { e.target.src = DEFAULT_AVATAR; }}
+                      />
                       {avatarUploading && (
                         <div className={styles.avatarLoadingOverlay}>
                           <i className="fas fa-spinner fa-spin" />

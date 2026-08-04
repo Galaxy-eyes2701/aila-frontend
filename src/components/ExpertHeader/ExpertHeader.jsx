@@ -4,7 +4,7 @@ import useAuth from "../../hooks/useAuth";
 import api from "../../utils/api";
 import styles from "./ExpertHeader.module.css";
 
-const DEFAULT_AVATAR = "https://i.pravatar.cc/80";
+import { DEFAULT_AVATAR } from "../../constants/defaultAvatar";
 
 // Nav links dành riêng cho Expert
 const EXPERT_NAV_LINKS = [
@@ -47,13 +47,21 @@ export default function ExpertHeader() {
     const fetch = async () => {
       try {
         const res = await api.get("/experts/me/profile");
-        if (res.data.success && res.data.data.avatarUrl)
+        if (res.data.success && res.data.data.avatarUrl) {
           setAvatarUrl(res.data.data.avatarUrl);
+        } else {
+          setAvatarUrl(DEFAULT_AVATAR);
+        }
       } catch {
-        /* giữ default */
+        setAvatarUrl(DEFAULT_AVATAR);
       }
     };
     fetch();
+
+    window.addEventListener("profile-updated", fetch);
+    return () => {
+      window.removeEventListener("profile-updated", fetch);
+    };
   }, [user]);
 
   useEffect(() => {

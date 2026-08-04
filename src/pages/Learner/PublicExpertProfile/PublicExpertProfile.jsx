@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import api from '../../../utils/api';
 import styles from './PublicExpertProfile.module.css';
 
-const DEFAULT_AVATAR = 'https://i.pravatar.cc/80';
+import { DEFAULT_AVATAR } from '../../../constants/defaultAvatar';
 const FALLBACK_THUMB  = 'https://images.unsplash.com/photo-1677442135703-1787eea5ce01?w=480&q=75';
 
 const LEVEL_LABELS = {

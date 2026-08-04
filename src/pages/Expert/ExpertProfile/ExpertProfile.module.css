@@ -264,20 +264,41 @@
 .skeletonAvatar { width: 108px; height: 108px; border-radius: 50%; margin: 0 auto 20px; }
 .skeletonText   { height: 14px; border-radius: 6px; margin-bottom: 10px; }
 
-/* ── EDIT BUTTON ── */
+/* ── HEADER ACTIONS ── */
+.headerActions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.secondaryBtn,
 .editBtn {
   display: inline-flex;
   align-items: center;
   gap: 7px;
   padding: 8px 18px;
   border-radius: var(--radius-sm);
-  background: var(--primary-light);
-  color: var(--primary);
   font-size: 13px;
   font-weight: 600;
   border: none;
   cursor: pointer;
   transition: background var(--transition), transform var(--transition);
+}
+
+.secondaryBtn {
+  background: #f3f4f6;
+  color: var(--text);
+}
+
+.secondaryBtn:hover {
+  background: #e5e7eb;
+  transform: translateY(-1px);
+}
+
+.editBtn {
+  background: var(--primary-light);
+  color: var(--primary);
 }
 
 .editBtn:hover {

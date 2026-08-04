@@ -2,6 +2,7 @@ import axios from "axios";
 
 const api = axios.create({
   baseURL: "https://localhost:7124/api",
+  withCredentials: true,
  //baseURL: "https://api.aila.io.vn/api",
 });
 
@@ -99,6 +100,13 @@ export function normalizeApiResponse(payload) {
   };
 }
 
+function clearAuthSession() {
+  localStorage.removeItem("accessToken");
+  localStorage.removeItem("user");
+  localStorage.removeItem("role");
+  localStorage.removeItem("adminLoggedIn");
+}
+
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem("accessToken");
   config.headers = config.headers || {};
@@ -112,5 +120,39 @@ api.interceptors.request.use((config) => {
   }
   return config;
 });
+
+api.interceptors.response.use(
+  (response) => response,
+  async (error) => {
+    const originalRequest = error?.config;
+    const shouldTryRefresh =
+      error?.response?.status === 401 &&
+      !originalRequest?._retry &&
+      !originalRequest?.skipAuth;
+
+    if (!shouldTryRefresh) {
+      return Promise.reject(error);
+    }
+
+    originalRequest._retry = true;
+
+    try {
+      const refreshResponse = await api.post("/auth/refresh", {}, { skipAuth: true });
+      const newAccessToken = refreshResponse?.data?.data?.accessToken;
+
+      if (!newAccessToken) {
+        clearAuthSession();
+        return Promise.reject(error);
+      }
+
+      localStorage.setItem("accessToken", newAccessToken);
+      originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
+      return api(originalRequest);
+    } catch (refreshError) {
+      clearAuthSession();
+      return Promise.reject(refreshError);
+    }
+  }
+);
 
 export default api;

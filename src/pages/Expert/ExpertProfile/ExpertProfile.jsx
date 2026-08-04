@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import api from '../../../utils/api';
+import { DEFAULT_AVATAR } from '../../../constants/defaultAvatar';
 import styles from './ExpertProfile.module.css';
 
 /* ── Skeleton ─────────────────────────────────────────────────────────────── */
@@ -37,6 +38,165 @@ function Toast({ message, type, onClose }) {
     <div className={`${styles.toast} ${styles[type]}`}>
       <i className={`fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'}`} />
       {message}
+    </div>
+  );
+}
+
+/* ── Password Modal ─────────────────────────────────────────────────────── */
+function PasswordModal({ onClose, onSaved }) {
+  const [form, setForm] = useState({
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: '',
+  });
+  const [saving, setSaving] = useState(false);
+  const [modalError, setModalError] = useState('');
+
+  const handleChange = (e) => {
+    setModalError('');
+    const { name, value } = e.target;
+    setForm((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!form.currentPassword.trim()) {
+      setModalError('Vui lòng nhập mật khẩu hiện tại.');
+      return;
+    }
+    if (!form.newPassword.trim()) {
+      setModalError('Vui lòng nhập mật khẩu mới.');
+      return;
+    }
+    if (form.newPassword.length < 8) {
+      setModalError('Mật khẩu mới phải có ít nhất 8 ký tự.');
+      return;
+    }
+    if (form.newPassword !== form.confirmPassword) {
+      setModalError('Mật khẩu xác nhận không khớp.');
+      return;
+    }
+
+    setSaving(true);
+    setModalError('');
+    try {
+      const res = await api.put('/profile/change-password', {
+        currentPassword: form.currentPassword,
+        newPassword: form.newPassword,
+      });
+
+      if (res.data.success) {
+        onSaved();
+      } else {
+        const errorCode = res.data.errorCode;
+        setModalError(
+          errorCode === 'WRONG_PASSWORD'
+            ? 'Mật khẩu hiện tại không đúng.'
+            : errorCode === 'VALIDATION_ERROR'
+              ? 'Mật khẩu mới không hợp lệ.'
+              : errorCode === 'ACCOUNT_INACTIVE'
+                ? 'Tài khoản đã bị vô hiệu hóa.'
+                : res.data.errorMessage || 'Đổi mật khẩu thất bại.'
+        );
+      }
+    } catch (err) {
+      const errorCode = err.response?.data?.errorCode;
+      setModalError(
+        errorCode === 'WRONG_PASSWORD'
+          ? 'Mật khẩu hiện tại không đúng.'
+          : errorCode === 'VALIDATION_ERROR'
+            ? 'Mật khẩu mới không hợp lệ.'
+            : errorCode === 'ACCOUNT_INACTIVE'
+              ? 'Tài khoản đã bị vô hiệu hóa.'
+              : err.response?.data?.errorMessage || 'Lỗi kết nối. Vui lòng thử lại.'
+      );
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleOverlayClick = (e) => {
+    if (e.target === e.currentTarget) onClose();
+  };
+
+  return (
+    <div className={styles.modalOverlay} onClick={handleOverlayClick}>
+      <div className={styles.modal}>
+        <div className={styles.modalHeader}>
+          <div className={styles.modalTitle}>
+            <i className="fas fa-key" />
+            Đổi mật khẩu
+          </div>
+          <button className={styles.modalClose} onClick={onClose} aria-label="Đóng">
+            <i className="fas fa-times" />
+          </button>
+        </div>
+
+        <form onSubmit={handleSubmit}>
+          <div className={styles.modalBody}>
+            <div className={styles.formGroup}>
+              <label className={styles.formLabel}>
+                <i className="fas fa-lock" /> Mật khẩu hiện tại
+              </label>
+              <input
+                name="currentPassword"
+                type="password"
+                className={styles.formInput}
+                value={form.currentPassword}
+                onChange={handleChange}
+                placeholder="Nhập mật khẩu hiện tại"
+                autoFocus
+              />
+            </div>
+
+            <div className={styles.formGroup}>
+              <label className={styles.formLabel}>
+                <i className="fas fa-lock" /> Mật khẩu mới
+              </label>
+              <input
+                name="newPassword"
+                type="password"
+                className={styles.formInput}
+                value={form.newPassword}
+                onChange={handleChange}
+                placeholder="Ít nhất 8 ký tự"
+              />
+            </div>
+
+            <div className={styles.formGroup}>
+              <label className={styles.formLabel}>
+                <i className="fas fa-check-circle" /> Xác nhận mật khẩu mới
+              </label>
+              <input
+                name="confirmPassword"
+                type="password"
+                className={styles.formInput}
+                value={form.confirmPassword}
+                onChange={handleChange}
+                placeholder="Nhập lại mật khẩu mới"
+              />
+            </div>
+
+            {modalError && (
+              <div className={styles.modalError}>
+                <i className="fas fa-exclamation-circle" />
+                {modalError}
+              </div>
+            )}
+          </div>
+
+          <div className={styles.modalFooter}>
+            <button type="button" className={styles.btnCancel} onClick={onClose}>
+              Huỷ
+            </button>
+            <button type="submit" className={styles.btnSave} disabled={saving}>
+              {saving
+                ? <><span className={styles.saveSpinner} /> Đang lưu...</>
+                : <><i className="fas fa-save" /> Lưu mật khẩu</>}
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
   );
 }
@@ -81,6 +241,7 @@ function EditModal({ profile, onClose, onSaved }) {
       });
 
       if (res.data.success) {
+        window.dispatchEvent(new CustomEvent('profile-updated'));
         onSaved();       // đóng modal + reload profile
       } else {
         setModalError(res.data.errorMessage || 'Cập nhật thất bại.');
@@ -222,6 +383,7 @@ export default function ExpertProfile() {
   const [loading, setLoading] = useState(true);
   const [error, setError]     = useState('');
   const [showEdit, setShowEdit] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const [toast, setToast]       = useState(null); // { message, type }
 
   const fetchProfile = useCallback(async () => {
@@ -253,6 +415,11 @@ export default function ExpertProfile() {
     setShowEdit(false);
     setToast({ message: 'Cập nhật hồ sơ thành công!', type: 'success' });
     fetchProfile(); // reload dữ liệu mới
+  };
+
+  const handlePasswordSaved = () => {
+    setShowPassword(false);
+    setToast({ message: 'Đổi mật khẩu thành công!', type: 'success' });
   };
 
   return (
@@ -289,9 +456,9 @@ export default function ExpertProfile() {
               <div className={styles.avatarWrap}>
                 <img
                   className={styles.avatar}
-                  src={profile.avatarUrl || 'https://i.pravatar.cc/120'}
+                  src={profile.avatarUrl || DEFAULT_AVATAR}
                   alt={profile.fullName}
-                  onError={(e) => { e.target.src = 'https://i.pravatar.cc/120'; }}
+                  onError={(e) => { e.target.src = DEFAULT_AVATAR; }}
                 />
                 <div className={styles.avatarBadge}>
                   <i className="fas fa-check" />
@@ -331,13 +498,20 @@ export default function ExpertProfile() {
                 <div className={styles.infoCardTitle}>
                   <i className="fas fa-id-card" /> Thông tin chi tiết
                 </div>
-                {/* Nút Edit */}
-                <button
-                  className={styles.editBtn}
-                  onClick={() => setShowEdit(true)}
-                >
-                  <i className="fas fa-pen" /> Chỉnh sửa
-                </button>
+                <div className={styles.headerActions}>
+                  <button
+                    className={styles.secondaryBtn}
+                    onClick={() => setShowPassword(true)}
+                  >
+                    <i className="fas fa-key" /> Đổi mật khẩu
+                  </button>
+                  <button
+                    className={styles.editBtn}
+                    onClick={() => setShowEdit(true)}
+                  >
+                    <i className="fas fa-pen" /> Chỉnh sửa
+                  </button>
+                </div>
               </div>
 
               <div className={styles.fieldGrid}>
@@ -385,6 +559,13 @@ export default function ExpertProfile() {
           profile={profile}
           onClose={() => setShowEdit(false)}
           onSaved={handleSaved}
+        />
+      )}
+
+      {showPassword && (
+        <PasswordModal
+          onClose={() => setShowPassword(false)}
+          onSaved={handlePasswordSaved}
         />
       )}
 
