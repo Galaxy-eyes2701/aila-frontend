@@ -468,7 +468,7 @@ export default function ExpertProfile() {
               <div className={styles.fullName}>{profile.fullName}</div>
 
               <div className={styles.rolePill}>
-                <i className="fas fa-chalkboard-teacher" /> Expert
+                <i className="fas fa-chalkboard-teacher" /> Chuyên gia
               </div>
 
               <div className={styles.emailRow}>

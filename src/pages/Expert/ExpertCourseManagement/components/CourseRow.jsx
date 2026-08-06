@@ -87,7 +87,7 @@ export default function CourseRow({ course, onEdit, onPublish, onUnpublish, onPr
           className={styles.actionBtn}
           title="Quản lý module & bài học"
         >
-          <i className="fas fa-list-ul" /> Module
+          <i className="fas fa-list-ul" /> Học phần
         </Link>
 
         {isPublished ? (

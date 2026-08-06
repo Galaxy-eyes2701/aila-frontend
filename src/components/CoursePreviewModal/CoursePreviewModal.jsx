@@ -373,7 +373,7 @@ export default function CoursePreviewModal({ courseId, onClose, materialPreviewE
 
         <div className={styles.previewBanner}>
           <i className="fas fa-eye" />
-          CHẾ ĐỘ XEM TRƯỚC — Mô phỏng giao diện học viên. Không tạo enrollment, tiến độ hay kết quả quiz.
+          CHẾ ĐỘ XEM TRƯỚC — Mô phỏng giao diện học viên. Không tham gia khóa học, tiến độ hay kết quả câu hỏi.
           <button className={styles.closeBannerBtn} onClick={onClose} aria-label="Đóng">
             <i className="fas fa-times" /> Đóng xem trước
           </button>

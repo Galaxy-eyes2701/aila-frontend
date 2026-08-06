@@ -71,13 +71,13 @@ export default function ModuleManagement() {
         setHasOrderChanges(false);
       } else {
         setPageError(
-          res.data.errorMessage || "Không thể tải danh sách chương.",
+          res.data.errorMessage || "Không thể tải danh sách học phần.",
         );
       }
     } catch (error) {
       if (error.response?.status === 401) navigate("/expert/login");
       else if (error.response?.status === 403)
-        setPageError("Bạn không có quyền quản lý chương của khóa học này.");
+        setPageError("Bạn không có quyền quản lý học phần của khóa học này.");
       else if (error.response?.status === 404)
         setPageError("Không tìm thấy khóa học.");
       else setPageError("Lỗi kết nối máy chủ. Vui lòng thử lại.");
@@ -128,7 +128,7 @@ export default function ModuleManagement() {
     event.preventDefault();
     const title = form.title.trim();
     if (!title) {
-      setFormError("Tiêu đề chương không được để trống.");
+      setFormError("Tiêu đề học phần không được để trống.");
       return;
     }
 
@@ -152,14 +152,14 @@ export default function ModuleManagement() {
             );
 
       if (!res.data.success) {
-        setFormError(res.data.errorMessage || "Không thể lưu chương.");
+        setFormError(res.data.errorMessage || "Không thể lưu học phần.");
         return;
       }
 
       closeModal(true);
       await fetchModules();
       showToast(
-        mode === "create" ? "Đã tạo chương mới." : "Đã cập nhật chương.",
+        mode === "create" ? "Đã tạo học phần mới." : "Đã cập nhật học phần.",
       );
     } catch (error) {
       setFormError(
@@ -173,7 +173,7 @@ export default function ModuleManagement() {
 
   const handleDelete = async (module) => {
     const confirmed = window.confirm(
-      `Xóa chương "${module.title}"? Tất cả học liệu bên trong sẽ bị xóa theo.`,
+      `Xóa học phần "${module.title}"? Tất cả học liệu bên trong sẽ bị xóa theo.`,
     );
     if (!confirmed) return;
 
@@ -182,7 +182,7 @@ export default function ModuleManagement() {
       const res = await api.delete(`/courses/${courseId}/modules/${module.id}`);
       if (!res.data?.success) {
         showToast(
-          res.data?.errorMessage || "Không thể xóa chương.",
+          res.data?.errorMessage || "Không thể xóa học phần.",
           "error",
         );
         return;
@@ -190,10 +190,10 @@ export default function ModuleManagement() {
 
       setModules((current) => current.filter((item) => item.id !== module.id));
       setHasOrderChanges(true);
-      showToast("Đã xóa chương.");
+      showToast("Đã xóa học phần.");
     } catch (error) {
       showToast(
-        error.response?.data?.errorMessage || "Không thể xóa chương.",
+        error.response?.data?.errorMessage || "Không thể xóa học phần.",
         "error",
       );
     } finally {
@@ -231,10 +231,10 @@ export default function ModuleManagement() {
       });
       if (res.data.success) {
         setHasOrderChanges(false);
-        showToast("Đã lưu thứ tự chương.");
+        showToast("Đã lưu thứ tự học phần.");
       } else {
         showToast(
-          res.data.errorMessage || "Không thể lưu thứ tự chương.",
+          res.data.errorMessage || "Không thể lưu thứ tự học phần.",
           "error",
         );
       }
@@ -254,27 +254,27 @@ export default function ModuleManagement() {
         <div className={styles.breadcrumb}>
           <Link to="/expert/profile">Chuyên gia</Link>
           <i className="fas fa-chevron-right" />
-          <span>Quản lý chương</span>
+          <span>Quản lý học phần</span>
         </div>
 
         <section className={styles.headerBand}>
           <div>
             <p className={styles.eyebrow}>Mã khóa học: {courseId}</p>
-            <h1>Quản lý chương khóa học</h1>
+            <h1>Quản lý học phần khóa học</h1>
             <p className={styles.headerText}>
-              Tạo chương học, cập nhật nội dung, công khai và sắp xếp thứ tự học
+              Tạo học phần học, cập nhật nội dung, công khai và sắp xếp thứ tự học
               tập cho khóa học.
             </p>
           </div>
           <button className={styles.primaryButton} onClick={openCreateModal}>
             <i className="fas fa-plus" />
-            Thêm chương
+            Thêm học phần
           </button>
         </section>
 
-        <section className={styles.summaryGrid} aria-label="Thống kê chương">
+        <section className={styles.summaryGrid} aria-label="Thống kê học phần">
           <div className={styles.summaryItem}>
-            <span>Tổng chương</span>
+            <span>Tổng học phần</span>
             <strong>{modules.length}</strong>
           </div>
           <div className={styles.summaryItem}>
@@ -286,7 +286,7 @@ export default function ModuleManagement() {
         <section className={styles.panel}>
           <div className={styles.panelHeader}>
             <div>
-              <h2>Danh sách chương</h2>
+              <h2>Danh sách học phần</h2>
               <p>Sắp xếp theo thứ tự hiển thị trong khóa học.</p>
             </div>
             <div className={styles.panelActions}>
@@ -314,7 +314,7 @@ export default function ModuleManagement() {
           {!loading && pageError && (
             <div className={styles.emptyState}>
               <i className="fas fa-triangle-exclamation" />
-              <h3>Không thể tải chương</h3>
+              <h3>Không thể tải học phần</h3>
               <p>{pageError}</p>
               <button className={styles.secondaryButton} onClick={fetchModules}>
                 Thử lại
@@ -325,14 +325,14 @@ export default function ModuleManagement() {
           {!loading && !pageError && sortedModules.length === 0 && (
             <div className={styles.emptyState}>
               <i className="fas fa-layer-group" />
-              <h3>Chưa có chương nào</h3>
-              <p>Tạo chương đầu tiên để bắt đầu xây dựng nội dung khóa học.</p>
+              <h3>Chưa có học phần nào</h3>
+              <p>Tạo học phần đầu tiên để bắt đầu xây dựng nội dung khóa học.</p>
               <button
                 className={styles.primaryButton}
                 onClick={openCreateModal}
               >
                 <i className="fas fa-plus" />
-                Thêm chương
+                Thêm học phần
               </button>
             </div>
           )}
