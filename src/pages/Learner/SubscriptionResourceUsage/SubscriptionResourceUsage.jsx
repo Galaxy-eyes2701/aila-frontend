@@ -257,7 +257,7 @@ export default function SubscriptionResourceUsage() {
                     <i className="fas fa-user-lock" aria-hidden="true" />
                   </div>
                   <div className={styles.infoItemText}>
-                    <h4>Quản lý tài khoản cá nhân (BR-01)</h4>
+                    <h4>Quản lý tài khoản cá nhân</h4>
                     <p>
                       Bạn chỉ có thể theo dõi và xem hạn mức tài nguyên áp dụng cho chính tài khoản
                       đã đăng nhập của mình.
@@ -269,7 +269,7 @@ export default function SubscriptionResourceUsage() {
                     <i className="fas fa-sliders" aria-hidden="true" />
                   </div>
                   <div className={styles.infoItemText}>
-                    <h4>Xác định theo gói đăng ký (BR-02)</h4>
+                    <h4>Xác định theo gói đăng ký</h4>
                     <p>
                       Định ngạch tài nguyên được tự động cập nhật theo gói đăng ký đang hoạt động của
                       bạn hoặc hạn mức mặc định nền tảng.
@@ -281,7 +281,7 @@ export default function SubscriptionResourceUsage() {
                     <i className="fas fa-arrow-trend-up" aria-hidden="true" />
                   </div>
                   <div className={styles.infoItemText}>
-                    <h4>Khấu trừ tài nguyên hoạt động (BR-03)</h4>
+                    <h4>Khấu trừ tài nguyên hoạt động</h4>
                     <p>
                       Tài nguyên sẽ được trừ dần khi bạn thực hiện các hoạt động học tập như hỏi đáp
                       AI Token, thực hành kịch bản AI hoặc gửi bài cho chuyên gia.

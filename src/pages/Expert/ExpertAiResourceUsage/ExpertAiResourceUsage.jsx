@@ -23,12 +23,11 @@ export default function ExpertAiResourceUsage() {
       if (res.success) {
         setData(res.data);
       } else {
-        // AF-01 — Resource info unavailable
-        setError(res.errorMessage || "Thông tin sử dụng tài nguyên AI tạm thời không khả dụng (AF-01).");
+        setError(res.errorMessage || "Thông tin sử dụng tài nguyên AI tạm thời không khả dụng.");
       }
     } catch (err) {
       const { errorMessage } = resolveApiError(err);
-      setError(errorMessage || "Thông tin sử dụng tài nguyên AI tạm thời không khả dụng (AF-01). Vui lòng thử lại.");
+      setError(errorMessage || "Thông tin sử dụng tài nguyên AI tạm thời không khả dụng. Vui lòng thử lại.");
     } finally {
       setLoading(false);
     }
@@ -100,12 +99,12 @@ export default function ExpertAiResourceUsage() {
 
       {/* ── Main Container ── */}
       <div className={styles.container}>
-        {/* AF-01 Error Banner */}
+        {/* Error Banner */}
         {error && (
           <div className={styles.errorBanner} role="alert">
             <i className="fas fa-triangle-exclamation" aria-hidden="true" />
             <div className={styles.errorContent}>
-              <strong>Tạm thời không truy xuất được dữ liệu (AF-01)</strong>
+              <strong>Tạm thời không truy xuất được dữ liệu</strong>
               <p>{error}</p>
             </div>
             <button type="button" className={styles.retryBtn} onClick={fetchUsage}>
@@ -153,11 +152,11 @@ export default function ExpertAiResourceUsage() {
                 </div>
               </div>
 
-              {/* 3 Metrics Cards Grid (BR-01) */}
+              {/* 3 Metrics Cards Grid */}
               <div className={styles.metricsGrid}>
                 <div className={styles.metricBox}>
                   <span className={styles.metricLabel}>
-                    <i className="fas fa-shield-halved" /> Định Ngạch Được Cấp (BR-01)
+                    <i className="fas fa-shield-halved" /> Định Ngạch Được Cấp
                   </span>
                   <span className={styles.metricValue}>{formatNumber(data.allocatedTokens)}</span>
                   <span className={styles.metricSub}>AI Tokens</span>
@@ -165,7 +164,7 @@ export default function ExpertAiResourceUsage() {
 
                 <div className={styles.metricBox}>
                   <span className={styles.metricLabel}>
-                    <i className="fas fa-fire-flame-curved" /> Đã Tiêu Thụ (BR-01)
+                    <i className="fas fa-fire-flame-curved" /> Đã Tiêu Thụ
                   </span>
                   <span className={styles.metricValue}>{formatNumber(data.consumedTokens)}</span>
                   <span className={styles.metricSub}>AI Tokens</span>
@@ -173,7 +172,7 @@ export default function ExpertAiResourceUsage() {
 
                 <div className={styles.metricBox}>
                   <span className={styles.metricLabel}>
-                    <i className="fas fa-wallet" /> Số Dư Còn Lại (BR-01)
+                    <i className="fas fa-wallet" /> Số Dư Còn Lại
                   </span>
                   <span className={`${styles.metricValue} ${styles.metricValueRemaining}`}>
                     {formatNumber(data.remainingTokens)}
@@ -195,7 +194,7 @@ export default function ExpertAiResourceUsage() {
             <div className={styles.infoBox}>
               <h3 className={styles.sectionTitle}>
                 <i className="fas fa-circle-info" aria-hidden="true" />
-                Quy tắc sử dụng tài nguyên AI (Business Rules)
+                Quy tắc sử dụng tài nguyên AI
               </h3>
               <ul className={styles.infoList}>
                 <li className={styles.infoItem}>
@@ -203,7 +202,7 @@ export default function ExpertAiResourceUsage() {
                     <i className="fas fa-chart-pie" aria-hidden="true" />
                   </div>
                   <div className={styles.infoItemText}>
-                    <h4>Hiển thị tài nguyên minh bạch (BR-01)</h4>
+                    <h4>Hiển thị tài nguyên minh bạch</h4>
                     <p>
                       Hệ thống hiển thị chính xác định ngạch được cấp, lượng AI Token đã sử dụng và
                       số dư khả dụng của Chuyên gia.
@@ -216,10 +215,10 @@ export default function ExpertAiResourceUsage() {
                     <i className="fas fa-sliders" aria-hidden="true" />
                   </div>
                   <div className={styles.infoItemText}>
-                    <h4>Xác định định ngạch (BR-02)</h4>
+                    <h4>Xác định định ngạch</h4>
                     <p>
-                      Định ngạch được xác định từ cấu hình riêng của tài khoản Chuyên gia
-                      (Account-specific configuration); nếu không có sẽ áp dụng chính sách toàn cục.
+                      Định ngạch được xác định từ cấu hình riêng của tài khoản Chuyên gia;
+                      nếu không có sẽ áp dụng chính sách toàn cục.
                     </p>
                   </div>
                 </li>
@@ -229,7 +228,7 @@ export default function ExpertAiResourceUsage() {
                     <i className="fas fa-lock" aria-hidden="true" />
                   </div>
                   <div className={styles.infoItemText}>
-                    <h4>Cấu hình bởi Quản trị viên (BR-03)</h4>
+                    <h4>Cấu hình bởi Quản trị viên</h4>
                     <p>
                       Tài nguyên AI Token dành cho Chuyên gia không tự động gia hạn. Định ngạch bổ sung
                       được cấp trực tiếp qua cấu hình của Admin.

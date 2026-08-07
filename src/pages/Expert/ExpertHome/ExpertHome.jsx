@@ -228,7 +228,7 @@ export default function ExpertHome() {
               <p className={styles.heroSpecialty}>{profile.specialty}</p>
             )}
             <p className={styles.heroSub}>
-              Bảng điều khiển tổng quan hiệu suất & mức độ tương tác của học viên (UC-65).
+              Bảng điều khiển tổng quan hiệu suất & mức độ tương tác của học viên.
             </p>
             <div className={styles.heroCtaRow}>
               <button
@@ -255,11 +255,11 @@ export default function ExpertHome() {
           </div>
         </section>
 
-        {/* ── UC-65 SCOPE CONTROL TOOLBAR ─────────────────────── */}
+        {/* ── SCOPE CONTROL TOOLBAR ─────────────────────── */}
         <div className={styles.filterCard}>
           <div className={styles.filterHeader}>
             <div className={styles.filterTitle}>
-              <i className="fas fa-sliders" /> Phạm vi báo cáo (Reporting Scope)
+              <i className="fas fa-sliders" /> Phạm vi báo cáo
             </div>
             {dashLoading && (
               <span className={styles.statSub}>
@@ -269,9 +269,9 @@ export default function ExpertHome() {
           </div>
 
           <div className={styles.filterRow}>
-            {/* Filtering by Course (BR-03) */}
+            {/* Filtering by Course */}
             <div className={styles.filterGroup}>
-              <label className={styles.filterLabel}>Khóa học (Course)</label>
+              <label className={styles.filterLabel}>Khóa học</label>
               <select
                 className={styles.filterSelect}
                 value={courseId}
@@ -284,9 +284,9 @@ export default function ExpertHome() {
               </select>
             </div>
 
-            {/* Filtering by Reporting Period (BR-02, BR-03) */}
+            {/* Filtering by Reporting Period */}
             <div className={styles.filterGroup}>
-              <label className={styles.filterLabel}>Khoảng thời gian (Period)</label>
+              <label className={styles.filterLabel}>Khoảng thời gian</label>
               <select
                 className={styles.filterSelect}
                 value={reportingPeriod}
@@ -323,7 +323,7 @@ export default function ExpertHome() {
             )}
           </div>
 
-          {/* Scope Validation Error Callout (AF-03) */}
+          {/* Scope Validation Error Callout */}
           {scopeError && (
             <div className={styles.scopeError} role="alert">
               <i className="fas fa-circle-exclamation" /> {scopeError}
@@ -331,12 +331,12 @@ export default function ExpertHome() {
           )}
         </div>
 
-        {/* ── AF-01: NO PUBLISHED COURSES STATE ────────────────── */}
+        {/* ── NO PUBLISHED COURSES STATE ────────────────── */}
         {dashboard && !dashboard.hasPublishedCourses && (
           <div className={styles.emptyState}>
             <div className={styles.emptyIcon}><i className="fas fa-book-bookmark" /></div>
             <h3>{dashboard.message || "Bạn chưa có khóa học nào được xuất bản."}</h3>
-            <p>Sau khi xuất bản khóa học, số liệu phân tích hiệu suất và lượt tương tác học viên sẽ hiển thị tại đây (AF-01).</p>
+            <p>Sau khi xuất bản khóa học, số liệu phân tích hiệu suất và lượt tương tác học viên sẽ hiển thị tại đây.</p>
             <button
               className={styles.btnPrimary}
               onClick={() => navigate('/expert/courses')}
@@ -346,15 +346,15 @@ export default function ExpertHome() {
           </div>
         )}
 
-        {/* ── AF-02: NO ANALYTICS DATA CALLOUT ─────────────────── */}
+        {/* ── NO ANALYTICS DATA CALLOUT ─────────────────── */}
         {dashboard && dashboard.hasPublishedCourses && !dashboard.hasData && (
           <div className={styles.noDataCallout} role="status">
             <i className="fas fa-circle-info" />
-            <span>{dashboard.message || "Không có dữ liệu thống kê trong khoảng thời gian đã chọn (AF-02)."}</span>
+            <span>{dashboard.message || "Không có dữ liệu thống kê trong khoảng thời gian đã chọn."}</span>
           </div>
         )}
 
-        {/* ── AGGREGATED STATS GRID (BR-04, BR-05) ────────────── */}
+        {/* ── AGGREGATED STATS GRID ────────────── */}
         {dashboard && dashboard.hasPublishedCourses && (
           <>
             <div className={styles.statsGrid}>
@@ -406,7 +406,7 @@ export default function ExpertHome() {
             <div className={styles.chartCard}>
               <div className={styles.chartHeader}>
                 <h3 className={styles.sectionTitle}>
-                  <i className="fas fa-chart-column" /> Xu hướng tương tác (Engagement Trends)
+                  <i className="fas fa-chart-column" /> Xu hướng tương tác
                 </h3>
                 <div className={styles.chartLegend}>
                   <span className={styles.legendItem}>
@@ -451,7 +451,7 @@ export default function ExpertHome() {
             <div className={styles.chartCard}>
               <div className={styles.chartHeader}>
                 <h3 className={styles.sectionTitle}>
-                  <i className="fas fa-table-list" /> Hiệu suất theo khóa học (Course Performance)
+                  <i className="fas fa-table-list" /> Hiệu suất theo khóa học
                 </h3>
               </div>
 
