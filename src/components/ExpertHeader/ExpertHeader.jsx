@@ -10,6 +10,7 @@ import { DEFAULT_AVATAR } from "../../constants/defaultAvatar";
 const EXPERT_NAV_LINKS = [
   { label: "Trang chủ", href: "/expert" },
   { label: "Quản lý khóa học", href: "/expert/courses" },
+  { label: "Tài nguyên AI", href: "/expert/ai-resource-usage" },
 ];
 
 export default function ExpertHeader() {
@@ -171,6 +172,9 @@ export default function ExpertHeader() {
             <div className={`${styles.userDropdown} ${userMenuOpen ? styles.dropdownOpen : ''}`}>
               <Link to="/expert/profile" onClick={() => setUserMenuOpen(false)}>
                 <i className="fas fa-user" /> Hồ sơ cá nhân
+              </Link>
+              <Link to="/expert/ai-resource-usage" onClick={() => setUserMenuOpen(false)}>
+                <i className="fas fa-bolt" /> Tài nguyên AI
               </Link>
               <button
                 className={styles.logoutBtn}

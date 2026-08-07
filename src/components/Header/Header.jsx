@@ -199,6 +199,11 @@ export default function Header({ onLoginClick }) {
                   <Link to="/profile" onClick={() => setUserMenuOpen(false)}>
                     <i className="fas fa-user" /> Hồ sơ cá nhân
                   </Link>
+                  {user.role === "Learner" && (
+                    <Link to="/profile/subscription-usage" onClick={() => setUserMenuOpen(false)}>
+                      <i className="fas fa-chart-pie" /> Tài nguyên đăng ký
+                    </Link>
+                  )}
                   <button
                     className={styles.logoutBtn}
                     onClick={() => {

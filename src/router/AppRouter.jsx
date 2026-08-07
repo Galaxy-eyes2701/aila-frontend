@@ -16,6 +16,7 @@ import ExpertProfile from "../pages/Expert/ExpertProfile/ExpertProfile";
 import ExpertHome from "../pages/Expert/ExpertHome/ExpertHome";
 import ExpertCourseManagement from "../pages/Expert/ExpertCourseManagement/ExpertCourseManagement";
 import ModuleManagement from "../pages/Expert/ModuleManagement/ModuleManagement";
+import ExpertAiResourceUsage from "../pages/Expert/ExpertAiResourceUsage/ExpertAiResourceUsage";
 import Notifications from "../pages/Notifications/Notifications";
 import CourseList from "../pages/Courses/CourseList";
 import CourseDetail from "../pages/Courses/CourseDetail";
@@ -39,6 +40,7 @@ import AiScenariosPage from "../pages/Learner/LearningProfile/AiScenariosPage";
 import BlogManagement from "../pages/Admin/BlogManagement/BlogManagement";
 import SubscriptionPlanManagement from "../pages/Admin/SubscriptionPlanManagement/SubscriptionPlanManagement";
 import SubscriptionPlans from "../pages/Learner/SubscriptionPlans/SubscriptionPlans";
+import SubscriptionResourceUsage from "../pages/Learner/SubscriptionResourceUsage/SubscriptionResourceUsage";
 
 const router = createBrowserRouter([
   // ── Auth pages (không có Header) ─────────────────────────────
@@ -122,6 +124,7 @@ const router = createBrowserRouter([
       { path: "profile", element: <ExpertProfile /> },
       { path: "courses", element: <ExpertCourseManagement /> },
       { path: "courses/:courseId/modules", element: <ModuleManagement /> },
+      { path: "ai-resource-usage", element: <ExpertAiResourceUsage /> },
       { path: "notifications", element: <Notifications /> },
     ],
   },
@@ -170,6 +173,14 @@ const router = createBrowserRouter([
         element: (
           <LearnerProtectedRoute>
             <AiScenariosPage />
+          </LearnerProtectedRoute>
+        ),
+      },
+      {
+        path: "profile/subscription-usage",
+        element: (
+          <LearnerProtectedRoute>
+            <SubscriptionResourceUsage />
           </LearnerProtectedRoute>
         ),
       },

@@ -40,6 +40,9 @@ export default function LearningSections({ profile }) {
           <h2 className={styles.sectionTitle}>
             <i className="fas fa-chart-simple" /> Tổng quan
           </h2>
+          <Link to="/profile/subscription-usage" className={styles.viewAll}>
+            <i className="fas fa-bolt" /> Xem sử dụng tài nguyên <i className="fas fa-arrow-right" />
+          </Link>
         </div>
         <SummaryStats summary={summary} aiScenarioCount={aiScenarioHistory.length} />
       </section>
