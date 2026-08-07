@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { DIFFICULTY_LABEL } from "../../constants/expertEvaluation";
+import { DIFFICULTY_LABEL } from "../../../constants/expertEvaluation";
 import styles from "./ScenarioPanel.module.css";
 
 /**

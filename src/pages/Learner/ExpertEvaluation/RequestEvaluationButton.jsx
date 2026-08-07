@@ -1,6 +1,6 @@
 import { useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import ConfirmModal from "../../../components/ExpertEvaluation/ConfirmModal";
+import ConfirmModal from "../../ExpertEvaluation/components/ConfirmModal";
 import Toast from "../../../components/Toast/Toast";
 import useModalA11y from "../../../hooks/useModalA11y";
 import { resolveApiError } from "../../../utils/api";

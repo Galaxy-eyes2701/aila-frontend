@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import Pagination from "../../../components/Pagination/Pagination";
-import RequestStatusBadge from "../../../components/ExpertEvaluation/RequestStatusBadge";
+import RequestStatusBadge from "../../ExpertEvaluation/components/RequestStatusBadge";
 import {
   DEFAULT_PAGE_SIZE,
   REQUEST_STATUS,

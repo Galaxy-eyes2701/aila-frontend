@@ -1,7 +1,7 @@
 import {
   REQUEST_STATUS_ICON,
   REQUEST_STATUS_LABEL,
-} from "../../constants/expertEvaluation";
+} from "../../../constants/expertEvaluation";
 import styles from "./RequestStatusBadge.module.css";
 
 /**

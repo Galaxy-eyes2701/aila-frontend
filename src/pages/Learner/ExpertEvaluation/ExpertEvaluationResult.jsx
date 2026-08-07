@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import AiEvaluationCard from "../../../components/ExpertEvaluation/AiEvaluationCard";
-import ConversationThread from "../../../components/ExpertEvaluation/ConversationThread";
-import ExpertResultCard from "../../../components/ExpertEvaluation/ExpertResultCard";
-import RequestStatusBadge from "../../../components/ExpertEvaluation/RequestStatusBadge";
-import ScenarioPanel from "../../../components/ExpertEvaluation/ScenarioPanel";
+import AiEvaluationCard from "../../ExpertEvaluation/components/AiEvaluationCard";
+import ConversationThread from "../../ExpertEvaluation/components/ConversationThread";
+import ExpertResultCard from "../../ExpertEvaluation/components/ExpertResultCard";
+import RequestStatusBadge from "../../ExpertEvaluation/components/RequestStatusBadge";
+import ScenarioPanel from "../../ExpertEvaluation/components/ScenarioPanel";
 import { REQUEST_STATUS } from "../../../constants/expertEvaluation";
 import { resolveApiError } from "../../../utils/api";
 import { getLearnerEvaluation } from "../../../utils/expertEvaluationApi";

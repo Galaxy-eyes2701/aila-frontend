@@ -1,11 +1,11 @@
 import { useCallback, useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import AiEvaluationCard from "../../../components/ExpertEvaluation/AiEvaluationCard";
-import ConfirmModal from "../../../components/ExpertEvaluation/ConfirmModal";
-import ConversationThread from "../../../components/ExpertEvaluation/ConversationThread";
-import ExpertResultCard from "../../../components/ExpertEvaluation/ExpertResultCard";
-import RequestStatusBadge from "../../../components/ExpertEvaluation/RequestStatusBadge";
-import ScenarioPanel from "../../../components/ExpertEvaluation/ScenarioPanel";
+import AiEvaluationCard from "../../ExpertEvaluation/components/AiEvaluationCard";
+import ConfirmModal from "../../ExpertEvaluation/components/ConfirmModal";
+import ConversationThread from "../../ExpertEvaluation/components/ConversationThread";
+import ExpertResultCard from "../../ExpertEvaluation/components/ExpertResultCard";
+import RequestStatusBadge from "../../ExpertEvaluation/components/RequestStatusBadge";
+import ScenarioPanel from "../../ExpertEvaluation/components/ScenarioPanel";
 import Toast from "../../../components/Toast/Toast";
 import {
   EVALUATION_LIMITS,

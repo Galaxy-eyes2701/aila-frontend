@@ -1,4 +1,4 @@
-import { formatDateTime, formatRelativeTime } from "../../utils/expertEvaluationFormat";
+import { formatDateTime, formatRelativeTime } from "../../../utils/expertEvaluationFormat";
 import styles from "./ConversationThread.module.css";
 
 /**

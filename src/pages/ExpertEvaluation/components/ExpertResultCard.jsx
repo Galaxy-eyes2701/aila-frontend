@@ -1,7 +1,7 @@
 import {
   formatDateTime,
   formatScore,
-} from "../../utils/expertEvaluationFormat";
+} from "../../../utils/expertEvaluationFormat";
 import styles from "./ExpertResultCard.module.css";
 
 /**
