@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
+import { Link } from "react-router-dom";
 import styles from "./AccountResourceLimitManagement.module.css";
 
 import {
@@ -11,60 +12,55 @@ import CreateOverrideModal from "./CreateOverrideModal";
 import OverrideDetailModal from "./OverrideDetailModal";
 import EditOverrideModal from "./EditOverrideModal";
 
+const ACCOUNT_TYPE_LABELS = {
+  Learner: { label: "Học viên", cls: styles.roleLearner, icon: "fa-user" },
+  Expert: { label: "Chuyên gia", cls: styles.roleExpert, icon: "fa-user-tie" },
+  Admin: { label: "Quản trị viên", cls: styles.roleAdmin, icon: "fa-user-shield" },
+};
+
 export default function AccountResourceLimitManagement() {
   const [loading, setLoading] = useState(false);
-
+  const [savingPolicies, setSavingPolicies] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
-
   const [successMessage, setSuccessMessage] = useState("");
 
   const [selectedAccount, setSelectedAccount] = useState(null);
-
   const [selectedOverride, setSelectedOverride] = useState(null);
 
   const [showCreateModal, setShowCreateModal] = useState(false);
-
   const [showDetailModal, setShowDetailModal] = useState(false);
-
   const [showEditModal, setShowEditModal] = useState(false);
 
   const [policies, setPolicies] = useState([]);
-
   const [accountPage, setAccountPage] = useState(null);
-
   const [keyword, setKeyword] = useState("");
-
+  const [searchKeyword, setSearchKeyword] = useState("");
   const [pageIndex, setPageIndex] = useState(0);
+  const [pageSize] = useState(10);
 
-  const [pageSize, setPageSize] = useState(10);
+  const [activeTab, setActiveTab] = useState("all"); // 'all' | 'policies' | 'accounts'
 
   function clearMessage() {
     setErrorMessage("");
-
     setSuccessMessage("");
   }
 
   async function loadPolicies() {
     try {
       setLoading(true);
-
       clearMessage();
-
       const response = await getDefaultResourceLimitPolicies();
 
       if (!response.success) {
         setErrorMessage(
           response.errorMessage ?? "Không thể tải chính sách tài nguyên",
         );
-
         return;
       }
-
       setPolicies(response.data ?? []);
     } catch (error) {
       setErrorMessage(
-        error.response?.data?.errorMessage ??
-          "Có lỗi xảy ra khi tải chính sách",
+        error.response?.data?.errorMessage ?? "Có lỗi xảy ra khi tải chính sách",
       );
     } finally {
       setLoading(false);
@@ -73,19 +69,16 @@ export default function AccountResourceLimitManagement() {
 
   function updatePolicyValue(index, field, value) {
     const clone = [...policies];
-
     clone[index] = {
       ...clone[index],
-      [field]: Number(value),
+      [field]: Math.max(0, Number(value) || 0),
     };
-
     setPolicies(clone);
   }
 
   async function savePolicies() {
     try {
-      setLoading(true);
-
+      setSavingPolicies(true);
       clearMessage();
 
       const response = await updateDefaultResourceLimitPolicies(policies);
@@ -94,31 +87,27 @@ export default function AccountResourceLimitManagement() {
         setErrorMessage(
           response.errorMessage ?? "Cập nhật chính sách thất bại",
         );
-
         return;
       }
 
-      setSuccessMessage("Cập nhật chính sách thành công");
+      setSuccessMessage("Cập nhật chính sách mặc định thành công!");
     } catch (error) {
       setErrorMessage(
-        error.response?.data?.errorMessage ?? "Có lỗi xảy ra khi cập nhật",
+        error.response?.data?.errorMessage ?? "Có lỗi xảy ra khi cập nhật chính sách",
       );
     } finally {
-      setLoading(false);
+      setSavingPolicies(false);
     }
   }
 
   async function loadAccounts() {
     try {
       setLoading(true);
-
       clearMessage();
 
       const response = await getOverrideEligibleAccounts({
-        keyword,
-
+        keyword: searchKeyword,
         pageIndex,
-
         pageSize,
       });
 
@@ -126,14 +115,13 @@ export default function AccountResourceLimitManagement() {
         setErrorMessage(
           response.errorMessage ?? "Không thể tải danh sách tài khoản",
         );
-
         return;
       }
 
       setAccountPage(response.data);
     } catch (error) {
       setErrorMessage(
-        error.response?.data?.errorMessage ?? "Có lỗi xảy ra khi tải tài khoản",
+        error.response?.data?.errorMessage ?? "Có lỗi xảy ra khi tải danh sách tài khoản",
       );
     } finally {
       setLoading(false);
@@ -146,7 +134,18 @@ export default function AccountResourceLimitManagement() {
 
   useEffect(() => {
     loadAccounts();
-  }, [pageIndex, pageSize]);
+  }, [pageIndex, searchKeyword]);
+
+  function handleSearchSubmit(e) {
+    e.preventDefault();
+    setPageIndex(0);
+    setSearchKeyword(keyword.trim());
+  }
+
+  function handleRefreshAll() {
+    loadPolicies();
+    loadAccounts();
+  }
 
   function handleManageAccount(account) {
     setSelectedAccount(account);
@@ -158,315 +157,519 @@ export default function AccountResourceLimitManagement() {
     }
   }
 
+  // Calculate summary metrics
+  const overrideCount = useMemo(() => {
+    return accountPage?.items?.filter((acc) => acc.hasOverride).length ?? 0;
+  }, [accountPage]);
+
   return (
-    <div className={styles.container}>
-      <h1 className={styles.title}>Quản lý giới hạn tài nguyên</h1>
-
-      {errorMessage && (
-        <div className={`${styles.message} ${styles.error}`}>
-          {errorMessage}
+    <div className={styles.page}>
+      <div className={styles.container}>
+        {/* Breadcrumb */}
+        <div className={styles.breadcrumb}>
+          <Link to="/admin">Quản trị</Link>
+          <i className="fas fa-chevron-right" aria-hidden="true" />
+          <span>Quản lý giới hạn tài nguyên</span>
         </div>
-      )}
 
-      {successMessage && (
-        <div className={`${styles.message} ${styles.success}`}>
-          {successMessage}
+        {/* Header Band */}
+        <div className={styles.headerBand}>
+          <div>
+            <div className={styles.headerTitleWrapper}>
+              <div className={styles.headerIcon}>
+                <i className="fas fa-sliders-h" />
+              </div>
+              <h1>Quản lý giới hạn tài nguyên</h1>
+            </div>
+            <p className={styles.headerText}>
+              Thiết lập định mức sử dụng AI & Chuyên gia mặc định theo từng nhóm tài khoản và cấu hình ghi đè linh hoạt cho các cá nhân.
+            </p>
+          </div>
+
+          <div className={styles.headerActions}>
+            <button
+              type="button"
+              className={styles.secondaryButton}
+              onClick={handleRefreshAll}
+              disabled={loading}
+            >
+              <i className={`fas fa-rotate-right ${loading ? "fa-spin" : ""}`} /> Tải lại dữ liệu
+            </button>
+          </div>
         </div>
-      )}
 
-      {loading && <div className={styles.loading}>Đang tải dữ liệu...</div>}
+        {/* Alert Notifications */}
+        {errorMessage && (
+          <div className={`${styles.alert} ${styles.errorAlert}`}>
+            <div className={styles.alertContent}>
+              <i className={`fas fa-circle-exclamation ${styles.alertIcon}`} />
+              <span>{errorMessage}</span>
+            </div>
+            <button className={styles.closeAlertBtn} onClick={() => setErrorMessage("")}>
+              <i className="fas fa-times" />
+            </button>
+          </div>
+        )}
 
-      {/* ==========================
-            UC-85
-            Default Policy
-        =========================== */}
+        {successMessage && (
+          <div className={`${styles.alert} ${styles.successAlert}`}>
+            <div className={styles.alertContent}>
+              <i className={`fas fa-circle-check ${styles.alertIcon}`} />
+              <span>{successMessage}</span>
+            </div>
+            <button className={styles.closeAlertBtn} onClick={() => setSuccessMessage("")}>
+              <i className="fas fa-times" />
+            </button>
+          </div>
+        )}
 
-      <section className={styles.section}>
-        <h2 className={styles.sectionTitle}>Cấu hình tài nguyên mặc định</h2>
+        {/* Overview Stats */}
+        <div className={styles.statRow}>
+          <div className={styles.statCard}>
+            <div className={`${styles.statIconBox} ${styles.iconBlue}`}>
+              <i className="fas fa-layer-group" />
+            </div>
+            <div className={styles.statContent}>
+              <span className={styles.statLabel}>Chính sách mặc định</span>
+              <strong className={styles.statValue}>{policies.length} nhóm</strong>
+            </div>
+          </div>
 
-        <p className={styles.description}>
-          Thiết lập giới hạn tài nguyên mặc định cho từng loại tài khoản.
-        </p>
+          <div className={styles.statCard}>
+            <div className={`${styles.statIconBox} ${styles.iconEmerald}`}>
+              <i className="fas fa-user-gear" />
+            </div>
+            <div className={styles.statContent}>
+              <span className={styles.statLabel}>Tài khoản ghi đè (Trang này)</span>
+              <strong className={styles.statValue}>{overrideCount} tài khoản</strong>
+            </div>
+          </div>
 
-        <PolicyTable
-          policies={policies}
-          onChange={updatePolicyValue}
-          onSave={savePolicies}
-        />
-      </section>
+          <div className={styles.statCard}>
+            <div className={`${styles.statIconBox} ${styles.iconPurple}`}>
+              <i className="fas fa-users" />
+            </div>
+            <div className={styles.statContent}>
+              <span className={styles.statLabel}>Tổng số tài khoản quản lý</span>
+              <strong className={styles.statValue}>{accountPage?.totalItems ?? 0}</strong>
+            </div>
+          </div>
+        </div>
 
-      {/* ==========================
-            UC-86
-            Override Account
-        =========================== */}
+        {/* Navigation Tabs */}
+        <div className={styles.tabNav}>
+          <button
+            type="button"
+            className={`${styles.tabItem} ${activeTab === "all" ? styles.activeTab : ""}`}
+            onClick={() => setActiveTab("all")}
+          >
+            <i className="fas fa-border-all" /> Tất cả cấu hình
+          </button>
+          <button
+            type="button"
+            className={`${styles.tabItem} ${activeTab === "policies" ? styles.activeTab : ""}`}
+            onClick={() => setActiveTab("policies")}
+          >
+            <i className="fas fa-sliders-h" /> Chính sách mặc định
+            <span className={styles.tabCountBadge}>{policies.length}</span>
+          </button>
+          <button
+            type="button"
+            className={`${styles.tabItem} ${activeTab === "accounts" ? styles.activeTab : ""}`}
+            onClick={() => setActiveTab("accounts")}
+          >
+            <i className="fas fa-user-shield" /> Ghi đè theo tài khoản
+            <span className={styles.tabCountBadge}>{accountPage?.totalItems ?? 0}</span>
+          </button>
+        </div>
 
-      <section className={styles.section}>
-        <h2 className={styles.sectionTitle}>
-          Ghi đè cấu hình tài nguyên tài khoản
-        </h2>
+        {/* Section 1: Default Policy */}
+        {(activeTab === "all" || activeTab === "policies") && (
+          <section className={styles.cardSection}>
+            <div className={styles.cardHeader}>
+              <div className={styles.cardHeaderMain}>
+                <div className={styles.cardHeaderIcon}>
+                  <i className="fas fa-sliders-h" />
+                </div>
+                <div>
+                  <h2 className={styles.cardTitle}>Cấu hình tài nguyên mặc định</h2>
+                  <p className={styles.cardSubtitle}>
+                    Thiết lập định mức giới hạn tài nguyên mặc định cho từng loại tài khoản trong hệ thống.
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={savePolicies}
+                disabled={savingPolicies || loading}
+                className={styles.primaryButton}
+              >
+                {savingPolicies ? (
+                  <>
+                    <i className="fas fa-spinner fa-spin" /> Đang lưu...
+                  </>
+                ) : (
+                  <>
+                    <i className="fas fa-floppy-disk" /> Lưu chính sách
+                  </>
+                )}
+              </button>
+            </div>
 
-        <p className={styles.description}>
-          Cho phép Admin thiết lập giới hạn riêng cho từng tài khoản.
-        </p>
+            <div className={styles.cardBody}>
+              <PolicyTable policies={policies} onChange={updatePolicyValue} />
+            </div>
+          </section>
+        )}
 
-        <AccountTable
-          page={accountPage}
-          keyword={keyword}
-          setKeyword={setKeyword}
-          pageIndex={pageIndex}
-          setPageIndex={setPageIndex}
-          onSearch={() => {
-            setPageIndex(0);
-            loadAccounts();
-          }}
-          onManage={handleManageAccount}
-        />
-      </section>
+        {/* Section 2: Account Overrides */}
+        {(activeTab === "all" || activeTab === "accounts") && (
+          <section className={styles.cardSection}>
+            <div className={styles.cardHeader}>
+              <div className={styles.cardHeaderMain}>
+                <div className={styles.cardHeaderIcon}>
+                  <i className="fas fa-user-gear" />
+                </div>
+                <div>
+                  <h2 className={styles.cardTitle}>Ghi đè cấu hình tài nguyên tài khoản</h2>
+                  <p className={styles.cardSubtitle}>
+                    Tìm kiếm tài khoản và thiết lập định mức sử dụng tài nguyên riêng lẻ vượt qua cấu hình mặc định.
+                  </p>
+                </div>
+              </div>
+            </div>
 
-      {showCreateModal && selectedAccount && (
-        <CreateOverrideModal
-          account={selectedAccount}
-          onClose={() => {
-            setShowCreateModal(false);
-          }}
-          onSuccess={() => {
-            setShowCreateModal(false);
+            <div className={styles.cardBody}>
+              <AccountTable
+                page={accountPage}
+                keyword={keyword}
+                setKeyword={setKeyword}
+                onSearch={handleSearchSubmit}
+                pageIndex={pageIndex}
+                setPageIndex={setPageIndex}
+                onManage={handleManageAccount}
+                loading={loading}
+              />
+            </div>
+          </section>
+        )}
 
-            setSelectedAccount(null);
+        {/* Modals */}
+        {showCreateModal && selectedAccount && (
+          <CreateOverrideModal
+            account={selectedAccount}
+            onClose={() => setShowCreateModal(false)}
+            onSuccess={() => {
+              setShowCreateModal(false);
+              setSelectedAccount(null);
+              loadAccounts();
+              setSuccessMessage("Tạo cấu hình tài nguyên riêng thành công!");
+            }}
+          />
+        )}
 
-            loadAccounts();
+        {showDetailModal && selectedAccount && (
+          <OverrideDetailModal
+            account={selectedAccount}
+            onClose={() => setShowDetailModal(false)}
+            onEdit={(data) => {
+              setSelectedOverride(data);
+              setShowDetailModal(false);
+              setShowEditModal(true);
+            }}
+            onSuccess={() => {
+              setShowDetailModal(false);
+              setSelectedAccount(null);
+              loadAccounts();
+              setSuccessMessage("Xóa cấu hình tài nguyên riêng thành công!");
+            }}
+          />
+        )}
 
-            setSuccessMessage("Tạo cấu hình tài nguyên thành công");
-          }}
-        />
-      )}
-
-      {showDetailModal && selectedAccount && (
-        <OverrideDetailModal
-          account={selectedAccount}
-          onClose={() => {
-            setShowDetailModal(false);
-          }}
-          onEdit={(data) => {
-            setSelectedOverride(data);
-
-            setShowDetailModal(false);
-
-            setShowEditModal(true);
-          }}
-          onSuccess={() => {
-            setShowDetailModal(false);
-
-            setSelectedAccount(null);
-
-            loadAccounts();
-
-            setSuccessMessage("Xóa cấu hình tài nguyên thành công");
-          }}
-        />
-      )}
-
-      {showEditModal && selectedAccount && selectedOverride && (
-        <EditOverrideModal
-          account={selectedAccount}
-          data={selectedOverride}
-          onClose={() => {
-            setShowEditModal(false);
-          }}
-          onSuccess={() => {
-            setShowEditModal(false);
-
-            setSelectedAccount(null);
-
-            setSelectedOverride(null);
-
-            loadAccounts();
-
-            setSuccessMessage("Cập nhật cấu hình tài nguyên thành công");
-          }}
-        />
-      )}
+        {showEditModal && selectedAccount && selectedOverride && (
+          <EditOverrideModal
+            account={selectedAccount}
+            data={selectedOverride}
+            onClose={() => setShowEditModal(false)}
+            onSuccess={() => {
+              setShowEditModal(false);
+              setSelectedAccount(null);
+              setSelectedOverride(null);
+              loadAccounts();
+              setSuccessMessage("Cập nhật cấu hình tài nguyên thành công!");
+            }}
+          />
+        )}
+      </div>
     </div>
   );
 }
 
-function PolicyTable({ policies, onChange, onSave }) {
+function PolicyTable({ policies, onChange }) {
+  if (!policies || policies.length === 0) {
+    return (
+      <div className={styles.emptyState}>
+        <i className={`fas fa-inbox ${styles.emptyIcon}`} />
+        <p>Chưa có chính sách tài nguyên nào.</p>
+      </div>
+    );
+  }
+
   return (
-    <div>
-      <div className={styles.tableWrapper}>
-        <table className={styles.table}>
-          <thead>
-            <tr>
-              <th>Loại tài khoản</th>
+    <div className={styles.tableWrapper}>
+      <table className={styles.table}>
+        <thead>
+          <tr>
+            <th>
+              <i className="fas fa-users-gear" /> Loại tài khoản
+            </th>
+            <th>
+              <i className="fas fa-microchip" /> Token AI (Hàng tháng)
+            </th>
+            <th>
+              <i className="fas fa-robot" /> Lượt thực hành AI
+            </th>
+            <th>
+              <i className="fas fa-user-tie" /> Yêu cầu đánh giá chuyên gia
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          {policies.map((item, index) => {
+            const roleConfig = ACCOUNT_TYPE_LABELS[item.accountType] || {
+              label: item.accountType,
+              cls: styles.roleLearner,
+              icon: "fa-user",
+            };
 
-              <th>Token AI</th>
-
-              <th>Lượt thực hành AI</th>
-
-              <th>Lượt yêu cầu đánh giá chuyên gia</th>
-            </tr>
-          </thead>
-
-          <tbody>
-            {policies.map((item, index) => (
+            return (
               <tr key={item.accountType}>
-                <td>{item.accountType}</td>
-
                 <td>
-                  <input
-                    type="number"
-                    value={item.aiTokenLimit}
-                    onChange={(e) =>
-                      onChange(index, "aiTokenLimit", e.target.value)
-                    }
-                    className={styles.input}
-                  />
+                  <span className={`${styles.roleBadge} ${roleConfig.cls}`}>
+                    <i className={`fas ${roleConfig.icon}`} /> {roleConfig.label}
+                  </span>
                 </td>
-
                 <td>
-                  <input
-                    type="number"
-                    value={item.aiPracticeScenarioLimit}
-                    onChange={(e) =>
-                      onChange(index, "aiPracticeScenarioLimit", e.target.value)
-                    }
-                    className={styles.input}
-                  />
+                  <div className={styles.numberInputWrapper}>
+                    <input
+                      type="number"
+                      min="0"
+                      value={item.aiTokenLimit}
+                      onChange={(e) =>
+                        onChange(index, "aiTokenLimit", e.target.value)
+                      }
+                      className={styles.numberInput}
+                    />
+                    <span className={styles.inputUnit}>Token</span>
+                  </div>
                 </td>
-
                 <td>
-                  <input
-                    type="number"
-                    value={item.expertEvaluationRequestLimit}
-                    onChange={(e) =>
-                      onChange(
-                        index,
-                        "expertEvaluationRequestLimit",
-                        e.target.value,
-                      )
-                    }
-                    className={styles.input}
-                  />
+                  <div className={styles.numberInputWrapper}>
+                    <input
+                      type="number"
+                      min="0"
+                      value={item.aiPracticeScenarioLimit}
+                      onChange={(e) =>
+                        onChange(
+                          index,
+                          "aiPracticeScenarioLimit",
+                          e.target.value,
+                        )
+                      }
+                      className={styles.numberInput}
+                    />
+                    <span className={styles.inputUnit}>Lượt</span>
+                  </div>
+                </td>
+                <td>
+                  <div className={styles.numberInputWrapper}>
+                    <input
+                      type="number"
+                      min="0"
+                      value={item.expertEvaluationRequestLimit}
+                      onChange={(e) =>
+                        onChange(
+                          index,
+                          "expertEvaluationRequestLimit",
+                          e.target.value,
+                        )
+                      }
+                      className={styles.numberInput}
+                    />
+                    <span className={styles.inputUnit}>Yêu cầu</span>
+                  </div>
                 </td>
               </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-
-      <button onClick={onSave} className={styles.primaryButton}>
-        Lưu thay đổi
-      </button>
+            );
+          })}
+        </tbody>
+      </table>
     </div>
   );
 }
 
 function AccountTable({
   page,
-
   keyword,
-
   setKeyword,
-
-  pageIndex,
-
-  setPageIndex,
-
   onSearch,
-
+  pageIndex,
+  setPageIndex,
   onManage,
+  loading,
 }) {
-  if (!page) {
-    return null;
-  }
-
   return (
     <div>
-      <div className={styles.searchContainer}>
-        <input
-          value={keyword}
-          onChange={(e) => setKeyword(e.target.value)}
-          placeholder="Tìm kiếm email, tên tài khoản..."
-          className={styles.searchInput}
-        />
-
-        <button onClick={onSearch} className={styles.primaryButton}>
-          Tìm kiếm
-        </button>
+      {/* Search & Filter Bar */}
+      <div className={styles.filterBar}>
+        <form onSubmit={onSearch} className={styles.searchForm}>
+          <div className={styles.searchInputWrapper}>
+            <i className="fas fa-search" />
+            <input
+              value={keyword}
+              onChange={(e) => setKeyword(e.target.value)}
+              placeholder="Tìm kiếm theo email, họ tên tài khoản..."
+              className={styles.searchInput}
+            />
+          </div>
+          <button type="submit" className={styles.primaryButton}>
+            <i className="fas fa-magnifying-glass" /> Tìm kiếm
+          </button>
+        </form>
       </div>
 
+      {/* Table */}
       <div className={styles.tableWrapper}>
         <table className={styles.table}>
           <thead>
             <tr>
-              <th>Email</th>
-
-              <th>Họ tên</th>
-
-              <th>Vai trò</th>
-
-              <th>Có cấu hình riêng</th>
-
-              <th>Thao tác</th>
+              <th>
+                <i className="fas fa-id-card" /> Tài khoản người dùng
+              </th>
+              <th>
+                <i className="fas fa-user-tag" /> Vai trò
+              </th>
+              <th>
+                <i className="fas fa-sliders" /> Trạng thái cấu hình
+              </th>
+              <th style={{ textAlign: "right" }}>
+                <i className="fas fa-ellipsis" /> Thao tác
+              </th>
             </tr>
           </thead>
-
           <tbody>
-            {page.items?.map((item) => (
-              <tr key={item.accountId}>
-                <td>{item.email}</td>
-
-                <td>{item.fullName ?? "-"}</td>
-
-                <td>{item.role}</td>
-
-                <td>{item.hasOverride ? "Có" : "Không"}</td>
-
-                <td>
-                  <button
-                    onClick={() => {
-                      onManage(item);
-                    }}
-                    className={styles.linkButton}
-                  >
-                    Quản lý
-                  </button>
+            {loading && (!page?.items || page.items.length === 0) ? (
+              <tr>
+                <td colSpan={4}>
+                  <div className={styles.loadingContainer}>
+                    <i className={`fas fa-spinner ${styles.spinner}`} />
+                    <span>Đang tải danh sách tài khoản...</span>
+                  </div>
                 </td>
               </tr>
-            ))}
+            ) : !page?.items || page.items.length === 0 ? (
+              <tr>
+                <td colSpan={4}>
+                  <div className={styles.emptyState}>
+                    <i className={`fas fa-user-slash ${styles.emptyIcon}`} />
+                    <p>Không tìm thấy tài khoản nào phù hợp.</p>
+                  </div>
+                </td>
+              </tr>
+            ) : (
+              page.items.map((item) => {
+                const initial = (item.fullName || item.email || "U")
+                  .charAt(0)
+                  .toUpperCase();
+                const roleConfig = ACCOUNT_TYPE_LABELS[item.role] || {
+                  label: item.role,
+                  cls: styles.roleLearner,
+                  icon: "fa-user",
+                };
+
+                return (
+                  <tr key={item.accountId}>
+                    <td>
+                      <div className={styles.accountCell}>
+                        <div className={styles.accountAvatar}>{initial}</div>
+                        <div className={styles.accountInfo}>
+                          <span className={styles.accountName}>
+                            {item.fullName || "Chưa cập nhật tên"}
+                          </span>
+                          <span className={styles.accountEmail}>{item.email}</span>
+                        </div>
+                      </div>
+                    </td>
+                    <td>
+                      <span className={`${styles.roleBadge} ${roleConfig.cls}`}>
+                        <i className={`fas ${roleConfig.icon}`} /> {roleConfig.label}
+                      </span>
+                    </td>
+                    <td>
+                      {item.hasOverride ? (
+                        <span
+                          className={`${styles.overrideStatusBadge} ${styles.hasOverride}`}
+                        >
+                          <i className="fas fa-check-circle" /> Cấu hình riêng
+                        </span>
+                      ) : (
+                        <span
+                          className={`${styles.overrideStatusBadge} ${styles.noOverride}`}
+                        >
+                          <i className="fas fa-minus-circle" /> Theo mặc định
+                        </span>
+                      )}
+                    </td>
+                    <td style={{ textAlign: "right" }}>
+                      <button
+                        type="button"
+                        onClick={() => onManage(item)}
+                        className={styles.actionButton}
+                      >
+                        <i className="fas fa-gear" /> Quản lý
+                      </button>
+                    </td>
+                  </tr>
+                );
+              })
+            )}
           </tbody>
         </table>
       </div>
 
-      <div className={styles.pagination}>
-        <button
-          disabled={page.pageNumber <= 0}
-          onClick={() => {
-            setPageIndex(pageIndex - 1);
-          }}
-          className={styles.pageButton}
-        >
-          Trước
-        </button>
+      {/* Pagination Controls */}
+      {page && page.totalPages > 0 && (
+        <div className={styles.paginationFooter}>
+          <div className={styles.pageSummary}>
+            Hiển thị <strong>{page.items?.length ?? 0}</strong> /{" "}
+            <strong>{page.totalItems}</strong> tài khoản
+          </div>
 
-        <span className={styles.pageInfo}>
-          Trang {page.pageNumber + 1}/{page.totalPages}
-        </span>
+          <div className={styles.pageControls}>
+            <button
+              type="button"
+              disabled={page.pageNumber <= 0 || loading}
+              onClick={() => setPageIndex(pageIndex - 1)}
+              className={styles.pageButton}
+            >
+              <i className="fas fa-chevron-left" /> Trước
+            </button>
 
-        <button
-          disabled={page.pageNumber + 1 >= page.totalPages}
-          onClick={() => {
-            setPageIndex(pageIndex + 1);
-          }}
-          className={styles.pageButton}
-        >
-          Sau
-        </button>
-      </div>
+            <span className={styles.pageIndicator}>
+              Trang {page.pageNumber + 1} / {page.totalPages}
+            </span>
 
-      <div className={styles.pageInfo}>
-        Hiển thị: {page.items?.length ?? 0} / {page.totalItems} tài khoản
-      </div>
+            <button
+              type="button"
+              disabled={page.pageNumber + 1 >= page.totalPages || loading}
+              onClick={() => setPageIndex(pageIndex + 1)}
+              className={styles.pageButton}
+            >
+              Sau <i className="fas fa-chevron-right" />
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
