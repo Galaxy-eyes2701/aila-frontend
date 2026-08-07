@@ -2,6 +2,8 @@ import { Link, useNavigate } from "react-router-dom";
 import { useEffect, useState, useRef } from "react";
 import useAuth from "../../hooks/useAuth";
 import api from "../../utils/api";
+import { getAssignedRequests } from "../../utils/expertEvaluationApi";
+import { REQUEST_STATUS } from "../../constants/expertEvaluation";
 import styles from "./ExpertHeader.module.css";
 
 import { DEFAULT_AVATAR } from "../../constants/defaultAvatar";
@@ -10,6 +12,12 @@ import { DEFAULT_AVATAR } from "../../constants/defaultAvatar";
 const EXPERT_NAV_LINKS = [
   { label: "Trang chủ", href: "/expert" },
   { label: "Quản lý khóa học", href: "/expert/courses" },
+  // `badge: "evaluations"` -> hiện số yêu cầu đang chờ chấm
+  {
+    label: "Yêu cầu đánh giá",
+    href: "/expert/evaluation-requests",
+    badge: "evaluations",
+  },
   { label: "Tài nguyên AI", href: "/expert/ai-resource-usage" },
 ];
 
@@ -90,6 +98,38 @@ export default function ExpertHeader() {
     };
   }, [user]);
 
+  // Badge "Yêu cầu đánh giá": chỉ cần totalItems nên gọi pageSize=1.
+  const [pendingEvaluations, setPendingEvaluations] = useState(0);
+
+  useEffect(() => {
+    if (!user) {
+      setPendingEvaluations(0);
+      return;
+    }
+
+    const fetchPendingEvaluations = async () => {
+      try {
+        const page = await getAssignedRequests({
+          status: REQUEST_STATUS.IN_PROGRESS,
+          pageIndex: 0,
+          pageSize: 1,
+        });
+        setPendingEvaluations(page?.totalItems ?? 0);
+      } catch {
+        setPendingEvaluations(0);
+      }
+    };
+
+    fetchPendingEvaluations();
+    window.addEventListener("evaluation-requests-updated", fetchPendingEvaluations);
+    return () => {
+      window.removeEventListener(
+        "evaluation-requests-updated",
+        fetchPendingEvaluations,
+      );
+    };
+  }, [user]);
+
   const handleLogout = () => {
     logout();
     navigate("/expert/login");
@@ -106,9 +146,19 @@ export default function ExpertHeader() {
         {/* Nav links */}
         {EXPERT_NAV_LINKS.length > 0 && (
           <ul className={`${styles.navLinks} ${mobileOpen ? styles.navLinksOpen : ''}`}>
-            {EXPERT_NAV_LINKS.map(({ label, href }) => (
+            {EXPERT_NAV_LINKS.map(({ label, href, badge }) => (
               <li key={label}>
-                <Link to={href} onClick={() => setMobileOpen(false)}>{label}</Link>
+                <Link to={href} onClick={() => setMobileOpen(false)}>
+                  {label}
+                  {badge === "evaluations" && pendingEvaluations > 0 && (
+                    <span
+                      className={styles.navBadge}
+                      aria-label={`${pendingEvaluations} yêu cầu đang chờ chấm`}
+                    >
+                      {pendingEvaluations}
+                    </span>
+                  )}
+                </Link>
               </li>
             ))}
           </ul>

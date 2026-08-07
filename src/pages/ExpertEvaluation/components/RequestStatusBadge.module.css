@@ -1,0 +1,49 @@
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  line-height: 1.3;
+  white-space: nowrap;
+}
+
+.badge i {
+  font-size: 0.75rem;
+}
+
+.sm {
+  padding: 4px 10px;
+  font-size: 0.75rem;
+}
+
+/* Pending — xám */
+.Pending {
+  background: #f1f5f9;
+  border-color: #dbe3ec;
+  color: #475569;
+}
+
+/* InProgress — vàng/cam */
+.InProgress {
+  background: #fff5e5;
+  border-color: #fcd9a0;
+  color: #b45309;
+}
+
+/* Completed — xanh lá */
+.Completed {
+  background: #e7f8ee;
+  border-color: #a7e0bf;
+  color: #15803d;
+}
+
+/* Cancelled — đỏ nhạt */
+.Cancelled {
+  background: #fdeeee;
+  border-color: #f5c2c2;
+  color: #b91c1c;
+}
