@@ -240,7 +240,7 @@ export default function AccountResourceLimitManagement() {
               <i className="fas fa-user-gear" />
             </div>
             <div className={styles.statContent}>
-              <span className={styles.statLabel}>Tài khoản ghi đè (Trang này)</span>
+              <span className={styles.statLabel}>Tài khoản ghi đè</span>
               <strong className={styles.statValue}>{overrideCount} tài khoản</strong>
             </div>
           </div>
