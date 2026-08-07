@@ -52,6 +52,24 @@
   background: var(--primary-light);
 }
 
+/* Badge đếm yêu cầu đánh giá đang chờ chấm */
+.navBadge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  margin-left: 6px;
+  padding: 0 5px;
+  border-radius: 999px;
+  background: #f59e0b;
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1;
+  vertical-align: middle;
+}
+
 .navActions {
   display: flex;
   align-items: center;
