@@ -1,16 +1,17 @@
-import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { useState, useCallback } from 'react';
-import useAuth from '../../hooks/useAuth';
-import styles from './AdminHeader.module.css';
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useState, useCallback } from "react";
+import useAuth from "../../hooks/useAuth";
+import styles from "./AdminHeader.module.css";
 
 const NAV_LINKS = [
-  { label: 'Bảng điều khiển', href: '/admin/dashboard' },
-  { label: 'Người dùng', href: '/admin/users' },
-  { label: 'Tags', href: '/admin/tags' },
-  { label: 'Báo cáo', href: '/admin/reports' },
-  { label: 'Danh mục', href: '/admin/categories' },
-  { label: 'Bài viết', href: '/admin/blogs' },
-  { label: 'Gói đăng ký', href: '/admin/subscription-plans' },
+  { label: "Bảng điều khiển", href: "/admin/dashboard" },
+  { label: "Người dùng", href: "/admin/users" },
+  { label: "Tags", href: "/admin/tags" },
+  { label: "Báo cáo", href: "/admin/reports" },
+  { label: "Danh mục", href: "/admin/categories" },
+  { label: "Bài viết", href: "/admin/blogs" },
+  { label: "Gói đăng ký", href: "/admin/subscription-plans" },
+  { label: "Tài nguyên", href: "/admin/resource-limit-management" },
 ];
 
 export default function AdminHeader() {
@@ -21,7 +22,7 @@ export default function AdminHeader() {
 
   const handleLogout = useCallback(() => {
     logout();
-    navigate('/admin/login');
+    navigate("/admin/login");
   }, [logout, navigate]);
 
   return (
@@ -31,12 +32,14 @@ export default function AdminHeader() {
           Bình dân <span>Học AI</span>
         </Link>
 
-        <ul className={`${styles.navLinks} ${mobileOpen ? styles.navLinksOpen : ''}`}>
+        <ul
+          className={`${styles.navLinks} ${mobileOpen ? styles.navLinksOpen : ""}`}
+        >
           {NAV_LINKS.map((link) => (
             <li key={link.href}>
               <Link
                 to={link.href}
-                className={location.pathname === link.href ? styles.active : ''}
+                className={location.pathname === link.href ? styles.active : ""}
                 onClick={() => setMobileOpen(false)}
               >
                 {link.label}
@@ -57,7 +60,7 @@ export default function AdminHeader() {
           onClick={() => setMobileOpen((o) => !o)}
           aria-label="Mở menu"
         >
-          <i className={`fas ${mobileOpen ? 'fa-times' : 'fa-bars'}`} />
+          <i className={`fas ${mobileOpen ? "fa-times" : "fa-bars"}`} />
         </button>
       </div>
     </header>

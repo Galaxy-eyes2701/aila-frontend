@@ -1,0 +1,104 @@
+.overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.35);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+
+.modal {
+    width: 450px;
+    background: white;
+    border-radius: 8px;
+    padding: 24px;
+}
+
+
+.title {
+    font-size: 20px;
+    font-weight: 600;
+    margin-bottom: 20px;
+}
+
+
+.error {
+    margin-bottom: 16px;
+    padding: 12px;
+    border-radius: 6px;
+    background: #fef2f2;
+    color: #b91c1c;
+}
+
+
+.formGroup {
+    margin-bottom: 16px;
+}
+
+
+.label {
+    display: block;
+    margin-bottom: 6px;
+    font-weight: 500;
+}
+
+
+.input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+}
+
+
+.disabledInput {
+    background: #f3f4f6;
+}
+
+
+.actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+}
+
+
+.cancelButton {
+    padding: 8px 16px;
+    border-radius: 6px;
+    border: 1px solid #d1d5db;
+    background: white;
+    cursor: pointer;
+}
+
+
+.primaryButton {
+    padding: 8px 16px;
+    border-radius: 6px;
+    border: none;
+    background: #2563eb;
+    color: white;
+    cursor: pointer;
+}
+
+
+.primaryButton:disabled,
+.cancelButton:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.deleteButton {
+    padding: 8px 16px;
+    border-radius: 6px;
+    border: none;
+    background: #dc2626;
+    color: white;
+    cursor: pointer;
+}
+
+.deleteButton:hover {
+    background: #b91c1c;
+}

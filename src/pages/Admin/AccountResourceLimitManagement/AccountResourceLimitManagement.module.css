@@ -1,0 +1,478 @@
+.container {
+    padding: 24px;
+    background: #ffffff;
+}
+
+
+.title {
+    font-size: 24px;
+    font-weight: 600;
+    margin-bottom: 24px;
+    color: #1f2937;
+}
+
+
+.message {
+    padding: 12px 16px;
+    border-radius: 6px;
+    margin-bottom: 16px;
+    font-size: 14px;
+}
+
+
+.error {
+    background-color: #fef2f2;
+    border: 1px solid #fecaca;
+    color: #b91c1c;
+}
+
+
+.success {
+    background-color: #f0fdf4;
+    border: 1px solid #bbf7d0;
+    color: #15803d;
+}
+
+
+.loading {
+    margin-bottom: 16px;
+    color: #6b7280;
+}
+
+
+
+/* TAB */
+
+.tabs {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 24px;
+}
+
+
+.tabButton {
+    padding: 10px 18px;
+    border-radius: 6px;
+    border: 1px solid #d1d5db;
+    background: white;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+
+.tabButton:hover {
+    background: #f3f4f6;
+}
+
+
+.activeTab {
+    background: #2563eb;
+    color: white;
+    border-color: #2563eb;
+}
+
+
+
+/* TABLE */
+
+.tableWrapper {
+    width: 100%;
+    overflow-x: auto;
+}
+
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+
+.table th {
+    background: #f3f4f6;
+    font-weight: 600;
+    padding: 12px;
+    border: 1px solid #e5e7eb;
+    text-align: left;
+}
+
+
+.table td {
+    padding: 12px;
+    border: 1px solid #e5e7eb;
+}
+
+
+.table tr:hover {
+    background: #f9fafb;
+}
+
+
+
+/* INPUT */
+
+.input {
+    width: 100%;
+    padding: 8px 10px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    outline: none;
+}
+
+
+.input:focus {
+    border-color: #2563eb;
+}
+
+
+
+/* BUTTON */
+
+.primaryButton {
+    margin-top: 16px;
+    padding: 10px 18px;
+    border-radius: 6px;
+    border: none;
+    background: #2563eb;
+    color: white;
+    cursor: pointer;
+}
+
+
+.primaryButton:hover {
+    background: #1d4ed8;
+}
+
+
+.secondaryButton {
+    padding: 8px 14px;
+    border-radius: 6px;
+    border: 1px solid #d1d5db;
+    background: white;
+    cursor: pointer;
+}
+
+
+.secondaryButton:hover {
+    background: #f3f4f6;
+}
+
+
+.linkButton {
+    color: #2563eb;
+    cursor: pointer;
+    background: transparent;
+    border: none;
+}
+
+
+.dangerButton {
+    color: #dc2626;
+    cursor: pointer;
+    background: transparent;
+    border: none;
+}
+
+
+
+/* SEARCH */
+
+.searchContainer {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+
+.searchInput {
+    width: 320px;
+    padding: 10px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+}
+
+
+
+/* PAGINATION */
+
+.pagination {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 20px;
+}
+
+
+.pageButton {
+    padding: 8px 14px;
+    border-radius: 6px;
+    border: 1px solid #d1d5db;
+    background: white;
+    cursor: pointer;
+}
+
+
+.pageButton:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+}
+
+
+.pageInfo {
+    color: #374151;
+    font-size: 14px;
+}
+
+
+
+/* MODAL SUPPORT */
+
+.overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.35);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+
+.modal {
+    width: 450px;
+    background: white;
+    border-radius: 8px;
+    padding: 24px;
+}
+
+
+.modalTitle {
+    font-size: 20px;
+    font-weight: 600;
+    margin-bottom: 20px;
+}
+
+
+.formGroup {
+    margin-bottom: 16px;
+}
+
+
+.formLabel {
+    display: block;
+    margin-bottom: 6px;
+    font-weight: 500;
+}
+
+
+.modalActions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-top: 20px;
+}
+
+.container {
+    padding: 24px;
+}
+
+
+.title {
+    font-size: 24px;
+    font-weight: 600;
+    margin-bottom: 24px;
+}
+
+
+.section {
+
+    background: white;
+
+    border-radius: 8px;
+
+    padding: 20px;
+
+    margin-bottom: 24px;
+
+    border: 1px solid #e5e7eb;
+
+}
+
+
+
+.sectionTitle {
+
+    font-size: 18px;
+
+    font-weight: 600;
+
+    margin-bottom: 8px;
+
+}
+
+
+
+.description {
+
+    color: #6b7280;
+
+    margin-bottom: 16px;
+
+}
+
+
+
+.message {
+
+    padding: 12px;
+
+    border-radius: 6px;
+
+    margin-bottom: 16px;
+
+}
+
+
+
+.error {
+
+    background: #fee2e2;
+
+    color: #b91c1c;
+
+}
+
+
+
+.success {
+
+    background: #dcfce7;
+
+    color: #15803d;
+
+}
+
+
+
+.loading {
+
+    margin-bottom: 16px;
+
+}
+
+
+
+.tableWrapper {
+
+    overflow-x: auto;
+
+}
+
+
+
+.table {
+
+    width:100%;
+
+    border-collapse:collapse;
+
+}
+
+
+
+.table th {
+
+    text-align:left;
+
+    padding:12px;
+
+    border-bottom:1px solid #ddd;
+
+}
+
+
+
+.table td {
+
+    padding:12px;
+
+    border-bottom:1px solid #eee;
+
+}
+
+
+
+.input {
+
+    width:100%;
+
+    padding:8px;
+
+    border:1px solid #ddd;
+
+    border-radius:4px;
+
+}
+
+
+
+.primaryButton {
+
+    margin-top:16px;
+
+    background:#2563eb;
+
+    color:white;
+
+    padding:8px 16px;
+
+    border-radius:6px;
+
+}
+
+
+
+.searchInput {
+
+    padding:8px;
+
+    border:1px solid #ddd;
+
+    border-radius:6px;
+
+    width:320px;
+
+}
+
+
+
+.pagination {
+
+    display:flex;
+
+    align-items:center;
+
+    gap:12px;
+
+    margin-top:16px;
+
+}
+
+
+
+.pageButton {
+
+    padding:6px 12px;
+
+    border:1px solid #ddd;
+
+    border-radius:6px;
+
+}
+
+
+
+.linkButton {
+
+    color:#2563eb;
+
+}

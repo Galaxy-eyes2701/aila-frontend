@@ -29,8 +29,8 @@ import ExpertProtectedRoute from "./ExpertProtectedRoute";
 import LearnerProtectedRoute from "./LearnerProtectedRoute";
 import LearningView from "../pages/Learner/LearningView/LearningView";
 import GoogleCallback from "../pages/Learner/GoogleCallback/GoogleCallback";
-import BlogList from '../pages/BlogList/BlogList';
-import PublicExpertProfile from '../pages/Learner/PublicExpertProfile/PublicExpertProfile';
+import BlogList from "../pages/BlogList/BlogList";
+import PublicExpertProfile from "../pages/Learner/PublicExpertProfile/PublicExpertProfile";
 import QuizTakingPage from "../pages/Learner/Quiz/QuizTakingPage";
 import QuizResultPage from "../pages/Learner/Quiz/QuizResultPage";
 import QuizResultDetailPage from "../pages/Learner/Quiz/QuizResultDetailPage";
@@ -41,12 +41,13 @@ import BlogManagement from "../pages/Admin/BlogManagement/BlogManagement";
 import SubscriptionPlanManagement from "../pages/Admin/SubscriptionPlanManagement/SubscriptionPlanManagement";
 import SubscriptionPlans from "../pages/Learner/SubscriptionPlans/SubscriptionPlans";
 import SubscriptionResourceUsage from "../pages/Learner/SubscriptionResourceUsage/SubscriptionResourceUsage";
+import AccountResourceLimitManagement from "../pages/Admin/AccountResourceLimitManagement/AccountResourceLimitManagement";
 
 const router = createBrowserRouter([
   // ── Auth pages (không có Header) ─────────────────────────────
   { path: "/admin/login", element: <AdminLogin /> },
   { path: "/expert/login", element: <ExpertLogin /> },
-  { path: '/auth/google/callback', element: <GoogleCallback /> },
+  { path: "/auth/google/callback", element: <GoogleCallback /> },
 
   // ── Admin ─────────────────────────────────────────────────────
   {
@@ -64,21 +65,85 @@ const router = createBrowserRouter([
           <div style={{ padding: 48 }}>
             <h2>Admin Dashboard</h2>
             <p>Chọn chức năng bên dưới để quản lý người dùng hoặc tags.</p>
-            <div style={{ display: 'flex', gap: 16, marginTop: 24, flexWrap: 'wrap' }}>
-              <a href="/admin/users" style={{ padding: '14px 22px', background: '#2563eb', color: '#fff', borderRadius: 12, textDecoration: 'none' }}>
+            <div
+              style={{
+                display: "flex",
+                gap: 16,
+                marginTop: 24,
+                flexWrap: "wrap",
+              }}
+            >
+              <a
+                href="/admin/users"
+                style={{
+                  padding: "14px 22px",
+                  background: "#2563eb",
+                  color: "#fff",
+                  borderRadius: 12,
+                  textDecoration: "none",
+                }}
+              >
                 Quản lý người dùng
               </a>
-              <a href="/admin/tags" style={{ padding: '14px 22px', background: '#1d4ed8', color: '#fff', borderRadius: 12, textDecoration: 'none' }}>
+              <a
+                href="/admin/tags"
+                style={{
+                  padding: "14px 22px",
+                  background: "#1d4ed8",
+                  color: "#fff",
+                  borderRadius: 12,
+                  textDecoration: "none",
+                }}
+              >
                 Quản lý tags
               </a>
-              <a href="/admin/reports" style={{ padding: '14px 22px', background: '#0f766e', color: '#fff', borderRadius: 12, textDecoration: 'none' }}>
+              <a
+                href="/admin/reports"
+                style={{
+                  padding: "14px 22px",
+                  background: "#0f766e",
+                  color: "#fff",
+                  borderRadius: 12,
+                  textDecoration: "none",
+                }}
+              >
                 Review reports
               </a>
-              <a href="/admin/categories" style={{ padding: '14px 22px', background: '#7c3aed', color: '#fff', borderRadius: 12, textDecoration: 'none' }}>
+              <a
+                href="/admin/categories"
+                style={{
+                  padding: "14px 22px",
+                  background: "#7c3aed",
+                  color: "#fff",
+                  borderRadius: 12,
+                  textDecoration: "none",
+                }}
+              >
                 Quản lý category
               </a>
-              <a href="/admin/subscription-plans" style={{ padding: '14px 22px', background: '#b45309', color: '#fff', borderRadius: 12, textDecoration: 'none' }}>
+              <a
+                href="/admin/subscription-plans"
+                style={{
+                  padding: "14px 22px",
+                  background: "#b45309",
+                  color: "#fff",
+                  borderRadius: 12,
+                  textDecoration: "none",
+                }}
+              >
                 Quản lý gói đăng ký
+              </a>
+              <a
+                href="/admin/resource-limit-management"
+                style={{
+                  padding: "14px 22px",
+                  background: "#b45309",
+                  color: "#fff",
+                  borderRadius: 12,
+                  textDecoration: "none",
+                }}
+              >
+                Quản lý giới hạn tài nguyên
               </a>
             </div>
           </div>
@@ -107,6 +172,10 @@ const router = createBrowserRouter([
       {
         path: "subscription-plans",
         element: <SubscriptionPlanManagement />,
+      },
+      {
+        path: "resource-limit-management",
+        element: <AccountResourceLimitManagement />,
       },
     ],
   },
@@ -140,8 +209,8 @@ const router = createBrowserRouter([
       { path: "courses/:id", element: <CourseDetail /> },
       { path: "experts/:expertId", element: <PublicExpertProfile /> },
       { path: "blogs/:id", element: <BlogDetail /> },
-      { path: 'blogs', element: <BlogList /> },
-      { path: 'subscription-plans', element: <SubscriptionPlans /> },
+      { path: "blogs", element: <BlogList /> },
+      { path: "subscription-plans", element: <SubscriptionPlans /> },
 
       // ── PROTECTED: Chỉ Learner đã đăng nhập ──
       {
@@ -229,7 +298,6 @@ const router = createBrowserRouter([
 
       { path: "*", element: <PageNotFound /> },
     ],
-    
   },
 ]);
 
