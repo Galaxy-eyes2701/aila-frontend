@@ -1,0 +1,325 @@
+.page {
+  padding: 36px 0 72px;
+  min-height: 60vh;
+}
+
+.page > :global(.container) {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+/* ── Header ── */
+.header {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 24px;
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.backLink {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0;
+  background: none;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  transition: var(--transition);
+}
+
+.backLink:hover {
+  color: var(--primary);
+}
+
+.headerMain {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.pageTitle {
+  font-size: 1.5rem;
+  font-weight: 700;
+  line-height: 1.35;
+  color: var(--text);
+}
+
+.headerMeta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 22px;
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+}
+
+.headerMeta span {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+
+/* ── Thanh tiến trình ── */
+.progress {
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: 0;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px 24px;
+  box-shadow: var(--shadow-sm);
+}
+
+.progressStep {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  position: relative;
+  color: var(--text-muted);
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.progressStep:not(:last-child)::after {
+  content: "";
+  flex: 1;
+  height: 2px;
+  background: var(--border);
+  margin: 0 12px;
+}
+
+.progressDot {
+  flex-shrink: 0;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f1f5f9;
+  border: 2px solid var(--border);
+  font-size: 0.8125rem;
+  font-weight: 700;
+}
+
+.progressDone {
+  color: var(--primary-dark);
+}
+
+.progressDone .progressDot {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: #fff;
+}
+
+.progressDone:not(:last-child)::after {
+  background: var(--primary);
+}
+
+.progressLabel {
+  white-space: nowrap;
+}
+
+/* ── Lưới kết quả ── */
+.resultGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 22px;
+  align-items: stretch;
+}
+
+.waitingCard {
+  border-radius: var(--radius);
+  padding: 32px 24px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 200px;
+}
+
+.waitingCard i {
+  font-size: 1.875rem;
+  opacity: 0.7;
+}
+
+.waitingCard h3 {
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.waitingCard p {
+  font-size: 0.9375rem;
+  line-height: 1.65;
+  max-width: 340px;
+}
+
+.waitingNeutral {
+  background: #f8fafc;
+  border: 1px dashed #cbd5e1;
+  color: var(--text-muted);
+}
+
+.waitingActive {
+  background: #fffaf0;
+  border: 1px dashed #fcd9a0;
+  color: #b45309;
+}
+
+/* ── Trạng thái rỗng / lỗi ── */
+.emptyState {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 64px 24px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  box-shadow: var(--shadow-sm);
+}
+
+.emptyState i {
+  font-size: 2.75rem;
+  color: #cbd5e1;
+}
+
+.emptyState h2 {
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+
+.emptyState p {
+  color: var(--text-muted);
+  font-size: 0.9375rem;
+}
+
+.primaryBtn {
+  margin-top: 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 11px 22px;
+  border-radius: var(--radius-sm);
+  background: var(--primary);
+  color: #fff;
+  font-size: 0.9375rem;
+  font-weight: 700;
+  transition: var(--transition);
+}
+
+.primaryBtn:hover {
+  background: var(--primary-dark);
+}
+
+.errorBanner {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 18px 22px;
+  border-radius: var(--radius);
+  background: #fdf3f3;
+  border: 1px solid #f3c9c9;
+  color: #991b1b;
+}
+
+.errorBanner i {
+  font-size: 1.25rem;
+}
+
+.errorBanner strong {
+  display: block;
+  margin-bottom: 3px;
+}
+
+.errorBanner p {
+  font-size: 0.875rem;
+}
+
+.retryBtn {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 16px;
+  border-radius: var(--radius-sm);
+  background: #fff;
+  border: 1px solid #f3c9c9;
+  color: #991b1b;
+  font-weight: 700;
+  font-size: 0.875rem;
+  white-space: nowrap;
+}
+
+.retryBtn:hover {
+  background: #fceaea;
+}
+
+/* ── Skeleton ── */
+.skeletonHeader,
+.skeletonCard,
+.skeletonBlock {
+  border-radius: var(--radius);
+  background: linear-gradient(90deg, #eef0f4 25%, #f7f8fa 50%, #eef0f4 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s infinite;
+}
+
+.skeletonHeader {
+  height: 128px;
+}
+
+.skeletonGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 22px;
+}
+
+.skeletonCard {
+  height: 210px;
+}
+
+.skeletonBlock {
+  height: 320px;
+}
+
+@keyframes shimmer {
+  from {
+    background-position: 200% 0;
+  }
+  to {
+    background-position: -200% 0;
+  }
+}
+
+/* ── Responsive ── */
+@media (max-width: 900px) {
+  .resultGrid,
+  .skeletonGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .progress {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 14px;
+  }
+
+  .progressStep:not(:last-child)::after {
+    display: none;
+  }
+}

@@ -42,6 +42,9 @@ import SubscriptionPlanManagement from "../pages/Admin/SubscriptionPlanManagemen
 import SubscriptionPlans from "../pages/Learner/SubscriptionPlans/SubscriptionPlans";
 import SubscriptionResourceUsage from "../pages/Learner/SubscriptionResourceUsage/SubscriptionResourceUsage";
 import AccountResourceLimitManagement from "../pages/Admin/AccountResourceLimitManagement/AccountResourceLimitManagement";
+import EvaluationRequestList from "../pages/Expert/ExpertEvaluation/EvaluationRequestList";
+import EvaluationRequestDetail from "../pages/Expert/ExpertEvaluation/EvaluationRequestDetail";
+import ExpertEvaluationResult from "../pages/Learner/ExpertEvaluation/ExpertEvaluationResult";
 
 const router = createBrowserRouter([
   // ── Auth pages (không có Header) ─────────────────────────────
@@ -194,6 +197,12 @@ const router = createBrowserRouter([
       { path: "courses", element: <ExpertCourseManagement /> },
       { path: "courses/:courseId/modules", element: <ModuleManagement /> },
       { path: "ai-resource-usage", element: <ExpertAiResourceUsage /> },
+      // UC-63 / UC-64 — hàng chờ & chấm bài đánh giá
+      { path: "evaluation-requests", element: <EvaluationRequestList /> },
+      {
+        path: "evaluation-requests/:requestId",
+        element: <EvaluationRequestDetail />,
+      },
       { path: "notifications", element: <Notifications /> },
     ],
   },
@@ -258,6 +267,15 @@ const router = createBrowserRouter([
         element: (
           <LearnerProtectedRoute>
             <Notifications />
+          </LearnerProtectedRoute>
+        ),
+      },
+      // UC-30 — learner xem kết quả nhờ chuyên gia đánh giá
+      {
+        path: "learner/expert-evaluations/:requestId",
+        element: (
+          <LearnerProtectedRoute>
+            <ExpertEvaluationResult />
           </LearnerProtectedRoute>
         ),
       },
