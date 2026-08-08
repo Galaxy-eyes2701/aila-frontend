@@ -33,7 +33,7 @@ export default function AdminLogin() {
         localStorage.setItem('accessToken', data.accessToken);
         localStorage.setItem('adminLoggedIn', 'true');
         localStorage.setItem('role', 'Admin');
-        navigate('/admin/dashboard');
+        navigate('/admin/reports');
       } else {
         setError(res.data.errorMessage || 'Đăng nhập thất bại.');
       }
