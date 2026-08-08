@@ -15,6 +15,7 @@ import {
   getAdminReReviewRequests,
   approveReReviewRequest,
   rejectReReviewRequest,
+  getCourseReports,
 } from "../services/courseReviewApi";
 
 const STATUS_OPTIONS = [
@@ -123,7 +124,8 @@ function DismissModal({ report, onClose, onConfirm }) {
 }
 
 /* ── ReReviewRequestsPanel ────────────────────────────────── */
-function ReReviewRequestsPanel({ onPreview, showToast }) {  const [requests,     setRequests]     = useState([]);
+function ReReviewRequestsPanel({ onPreview, showToast }) {
+  const [requests,     setRequests]     = useState([]);
   const [loading,      setLoading]      = useState(true);
   const [error,        setError]        = useState("");
   const [statusFilter, setStatusFilter] = useState("");
@@ -132,6 +134,10 @@ function ReReviewRequestsPanel({ onPreview, showToast }) {  const [requests,    
   const [processing,   setProcessing]   = useState(false);
   const [actionType,   setActionType]   = useState(null); // "approve" | "reject"
   const [reasonPopup,  setReasonPopup]  = useState(null); // { reason, reviewComment }
+
+  // Lịch sử báo cáo của course đang được xét
+  const [courseReports,        setCourseReports]        = useState([]);
+  const [courseReportsLoading, setCourseReportsLoading] = useState(false);
 
   const fetchRequests = useCallback(async () => {
     setLoading(true); setError("");
@@ -152,6 +158,13 @@ function ReReviewRequestsPanel({ onPreview, showToast }) {  const [requests,    
     setSelectedReq(req);
     setActionType(type);
     setComment("");
+    // Fetch lịch sử báo cáo của course này
+    setCourseReports([]);
+    setCourseReportsLoading(true);
+    getCourseReports(req.courseId)
+      .then(res => { if (res.success) setCourseReports(res.data ?? []); })
+      .catch(() => {})
+      .finally(() => setCourseReportsLoading(false));
   };
 
   const handleProcess = async () => {
@@ -315,7 +328,7 @@ function ReReviewRequestsPanel({ onPreview, showToast }) {  const [requests,    
       {/* Action modal — Approve / Reject */}
       {selectedReq && (
         <div className={styles.modalOverlay} onClick={e => e.target === e.currentTarget && setSelectedReq(null)}>
-          <div className={styles.modal} style={{ maxWidth: 480 }}>
+          <div className={styles.modal} style={{ maxWidth: 560, maxHeight: "90vh", overflowY: "auto" }}>
             <div className={styles.modalHeader}>
               <h2>
                 {actionType === "approve"
@@ -337,6 +350,92 @@ function ReReviewRequestsPanel({ onPreview, showToast }) {  const [requests,    
                 <div className={styles.metaValue} style={{ fontWeight: 400, whiteSpace: "pre-wrap" }}>
                   {selectedReq.reason}
                 </div>
+              </div>
+
+              {/* ── Lịch sử báo cáo của course ── */}
+              <div style={{ marginBottom: 14 }}>
+                <div style={{
+                  fontSize: 13, fontWeight: 600, color: "#374151",
+                  marginBottom: 6, display: "flex", alignItems: "center", gap: 6,
+                }}>
+                  <i className="fas fa-flag" style={{ color: "#dc2626" }} />
+                  Lịch sử báo cáo của khóa học
+                  {!courseReportsLoading && (
+                    <span style={{
+                      background: courseReports.length > 0 ? "#fee2e2" : "#f3f4f6",
+                      color:      courseReports.length > 0 ? "#dc2626" : "#6b7280",
+                      borderRadius: 999, fontSize: 11, fontWeight: 700,
+                      padding: "1px 7px",
+                    }}>
+                      {courseReports.length}
+                    </span>
+                  )}
+                </div>
+
+                {courseReportsLoading ? (
+                  <div style={{ fontSize: 13, color: "#9ca3af", padding: "6px 0" }}>
+                    <i className="fas fa-spinner fa-spin" /> Đang tải...
+                  </div>
+                ) : courseReports.length === 0 ? (
+                  <div style={{
+                    fontSize: 13, color: "#6b7280", padding: "8px 12px",
+                    background: "#f9fafb", borderRadius: 8, border: "1px solid #e5e7eb",
+                  }}>
+                    Chưa có báo cáo nào cho khóa học này.
+                  </div>
+                ) : (
+                  <div style={{
+                    maxHeight: 180, overflowY: "auto",
+                    border: "1px solid #fecaca", borderRadius: 8,
+                    background: "#fff",
+                  }}>
+                    {courseReports.map((rpt, idx) => (
+                      <div key={rpt.id} style={{
+                        padding: "8px 12px",
+                        borderBottom: idx < courseReports.length - 1 ? "1px solid #fee2e2" : "none",
+                        fontSize: 13,
+                      }}>
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 8 }}>
+                          <div>
+                            <span style={{
+                              fontWeight: 600, color: "#b91c1c",
+                              marginRight: 6,
+                            }}>
+                              {getReasonLabel(rpt.reason)}
+                            </span>
+                            {rpt.contentType === "Learning Material" && rpt.materialName && (
+                              <span style={{ fontSize: 11, color: "#6b7280" }}>
+                                ({rpt.materialName})
+                              </span>
+                            )}
+                          </div>
+                          <div style={{ display: "flex", alignItems: "center", gap: 6, flexShrink: 0 }}>
+                            <span style={{
+                              fontSize: 11, padding: "2px 8px", borderRadius: 999, fontWeight: 600,
+                              background: rpt.status === "Resolved" ? "#dcfce7" : "#fef9c3",
+                              color:      rpt.status === "Resolved" ? "#16a34a" : "#a16207",
+                            }}>
+                              {rpt.status === "Resolved" ? "Đã xử lý" : "Đang chờ"}
+                            </span>
+                            <span style={{ fontSize: 11, color: "#9ca3af" }}>
+                              {formatDate(rpt.createdAt)}
+                            </span>
+                          </div>
+                        </div>
+                        {rpt.description && (
+                          <div style={{ color: "#4b5563", marginTop: 3, fontStyle: "italic" }}>
+                            "{rpt.description}"
+                          </div>
+                        )}
+                        {rpt.learnerName && (
+                          <div style={{ fontSize: 11, color: "#9ca3af", marginTop: 2 }}>
+                            Báo cáo bởi: {rpt.learnerName}
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
 
               {actionType === "approve" && (
