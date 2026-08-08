@@ -1,3 +1,4 @@
+import { useNavigate } from 'react-router-dom';
 import styles from './LearningMaterial.module.css';
 
 export default function LearningMaterialItem({
@@ -8,14 +9,24 @@ export default function LearningMaterialItem({
   onEdit,
   onDelete,
 }) {
+  const navigate = useNavigate();
   const type = material.materialTypeName ?? material.materialType ?? "";
 
   const icons = {
-    Video:      "fa-circle-play",
-    Document:   "fa-file-lines",
-    Quiz:       "fa-circle-question",
-    AiPractice: "fa-robot",
+    Video:         "fa-circle-play",
+    "Tài liệu":    "fa-file-lines",
+    Document:      "fa-file-lines",
+    "Bài kiểm tra":"fa-circle-question",
+    Quiz:          "fa-circle-question",
+    "Thực hành AI":"fa-robot",
+    AiPractice:    "fa-robot",
   };
+
+  // Backend có thể trả "Thực hành AI" (MaterialTypeName) hoặc "AiPractice" (enum string)
+  const isAiPractice =
+    type === "AiPractice" ||
+    type === "Thực hành AI" ||
+    material.materialType === 3; // MaterialType.AiPractice = 3
 
   return (
     <div className={styles.item}>
@@ -57,6 +68,16 @@ export default function LearningMaterialItem({
       </div>
 
       <div className={styles.actions}>
+        {isAiPractice && (
+          <button
+            className={styles.iconButton}
+            title="Chạy thử simulation"
+            onClick={() => navigate(`/expert/simulation/${material.id}`)}
+            style={{ color: "#16a34a" }}
+          >
+            <i className="fas fa-flask" />
+          </button>
+        )}
         <button className={styles.iconButton} onClick={() => onEdit(material)}>
           <i className="fas fa-pen" />
         </button>

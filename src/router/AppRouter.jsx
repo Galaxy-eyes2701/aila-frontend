@@ -45,6 +45,7 @@ import AccountResourceLimitManagement from "../pages/Admin/AccountResourceLimitM
 import EvaluationRequestList from "../pages/Expert/ExpertEvaluation/EvaluationRequestList";
 import EvaluationRequestDetail from "../pages/Expert/ExpertEvaluation/EvaluationRequestDetail";
 import ExpertEvaluationResult from "../pages/Learner/ExpertEvaluation/ExpertEvaluationResult";
+import ExpertSimulation from "../pages/Expert/ExpertSimulation/ExpertSimulation";
 
 const router = createBrowserRouter([
   // ── Auth pages (không có Header) ─────────────────────────────
@@ -204,6 +205,8 @@ const router = createBrowserRouter([
         element: <EvaluationRequestDetail />,
       },
       { path: "notifications", element: <Notifications /> },
+      // UC-60 — Expert chạy thử AI Practice Simulation
+      { path: "simulation/:materialId", element: <ExpertSimulation /> },
     ],
   },
 

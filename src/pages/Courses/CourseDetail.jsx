@@ -256,7 +256,7 @@ export default function CourseDetail() {
           <div className={styles.metaRow}>
             <span className={styles.metaItem}><i className="fas fa-layer-group" />{LEVEL_LABELS[course.level] ?? course.level}</span>
             <span className={styles.metaItem}><i className="fas fa-clock" />{course.durationHours}h học</span>
-            <span className={styles.metaItem}><i className="fas fa-book-open" />{course.totalModules} module · {course.totalMaterials} bài học</span>
+            <span className={styles.metaItem}><i className="fas fa-book-open" />{course.totalModules} học phần · {course.totalMaterials} bài học</span>
             <span className={styles.metaItem}><i className="fas fa-tag" />{course.category?.name}</span>
           </div>
         </div>
