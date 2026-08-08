@@ -123,8 +123,7 @@ function DismissModal({ report, onClose, onConfirm }) {
 }
 
 /* ── ReReviewRequestsPanel ────────────────────────────────── */
-function ReReviewRequestsPanel({ onPreview, showToast }) {
-  const [requests,     setRequests]     = useState([]);
+function ReReviewRequestsPanel({ onPreview, showToast }) {  const [requests,     setRequests]     = useState([]);
   const [loading,      setLoading]      = useState(true);
   const [error,        setError]        = useState("");
   const [statusFilter, setStatusFilter] = useState("");
@@ -588,6 +587,12 @@ export default function ReportManagement() {
   const [resolvingId, setResolvingId] = useState("");
   const [lockingId, setLockingId] = useState("");
   const [previewCourseId, setPreviewCourseId] = useState(null);
+  const [previewMaterialId, setPreviewMaterialId] = useState(null);
+
+  function openPreview(courseId, materialId = null) {
+    setPreviewCourseId(courseId);
+    setPreviewMaterialId(materialId ?? null);
+  }
 
   // null | { reportId, reportCourseName }
   const [dismissModal, setDismissModal] = useState(null);
@@ -797,7 +802,7 @@ export default function ReportManagement() {
         {/* ── TAB: RE-REVIEW REQUESTS ──────────────────────────── */}
         {activeTab === "review-requests" && (
           <ReReviewRequestsPanel
-            onPreview={setPreviewCourseId}
+            onPreview={(courseId) => openPreview(courseId, null)}
             showToast={showToast}
           />
         )}
@@ -905,14 +910,20 @@ export default function ReportManagement() {
                         <i className="fas fa-eye" /> Chi tiết
                       </button>
 
-                      {/* Nút Xem trước course — hiện khi có courseId (cả course lẫn content report) */}
+                      {/* Nút Xem trước course — content report → chỉ thẳng đến material bị report */}
                       {report.courseId && (
                         <button
                           className={styles.detailButton}
-                          onClick={() => setPreviewCourseId(report.courseId)}
-                          title="Xem trước khóa học liên quan"
+                          onClick={() => openPreview(
+                            report.courseId,
+                            report.materialId ?? null   // content report có materialId, course report = null
+                          )}
+                          title={report.materialId
+                            ? "Xem trước nội dung bị report trong khóa học"
+                            : "Xem trước khóa học"}
                         >
-                          <i className="fas fa-search" /> Xem course
+                          <i className="fas fa-search" />
+                          {report.materialId ? "Xem nội dung" : "Xem course"}
                         </button>
                       )}
 
@@ -985,7 +996,7 @@ export default function ReportManagement() {
           onResolve={handleResolve}
           onLock={handleLock}
           onUnlock={handleUnlock}
-          onPreview={(courseId) => setPreviewCourseId(courseId)}
+          onPreview={(courseId) => openPreview(courseId, selectedReport?.materialId ?? null)}
           onDismiss={(reportId) => setDismissModal({ reportId })}
           resolving={!!resolvingId}
           locking={!!lockingId}
@@ -995,9 +1006,10 @@ export default function ReportManagement() {
       {previewCourseId && (
         <CoursePreviewModal
           courseId={previewCourseId}
-          onClose={() => setPreviewCourseId(null)}
-          materialPreviewEndpoint={(courseId, materialId) =>
-            `/admin/courses/${courseId}/materials/${materialId}/preview`}
+          initialMaterialId={previewMaterialId}
+          onClose={() => { setPreviewCourseId(null); setPreviewMaterialId(null); }}
+          materialPreviewEndpoint={(cId, mId) =>
+            `/admin/courses/${cId}/materials/${mId}/preview`}
         />
       )}
 
