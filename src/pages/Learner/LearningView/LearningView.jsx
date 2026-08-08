@@ -245,6 +245,7 @@ export default function LearningView() {
         <LearningContent
           contentLoading={contentLoading}
           currentMaterial={currentMaterial}
+          enrollmentId={learningViewData?.progress?.enrollmentId}
           onComplete={handleCompleteMaterial}
           hasNextLesson={!!nextLessonId}
           onNextLesson={async () => {

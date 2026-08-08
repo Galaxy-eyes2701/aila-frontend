@@ -46,6 +46,8 @@ import EvaluationRequestList from "../pages/Expert/ExpertEvaluation/EvaluationRe
 import EvaluationRequestDetail from "../pages/Expert/ExpertEvaluation/EvaluationRequestDetail";
 import ExpertEvaluationResult from "../pages/Learner/ExpertEvaluation/ExpertEvaluationResult";
 import ExpertSimulation from "../pages/Expert/ExpertSimulation/ExpertSimulation";
+import AIPracticePage from "../pages/Learner/AIPractice/AIPracticePage";
+import AIPracticeFeedbackPage from "../pages/Learner/AIPractice/AIPracticeFeedbackPage";
 
 const router = createBrowserRouter([
   // ── Auth pages (không có Header) ─────────────────────────────
@@ -313,6 +315,24 @@ const router = createBrowserRouter([
         element: (
           <LearnerProtectedRoute>
             <QuizResultDetailPage />
+          </LearnerProtectedRoute>
+        ),
+      },
+
+      // ── AI Practice (UC-27 luyện tập, UC-28 xem kết quả) ──
+      {
+        path: "courses/:courseId/materials/:materialId/practice",
+        element: (
+          <LearnerProtectedRoute>
+            <AIPracticePage />
+          </LearnerProtectedRoute>
+        ),
+      },
+      {
+        path: "courses/:courseId/materials/:materialId/practice/:attemptId/feedback",
+        element: (
+          <LearnerProtectedRoute>
+            <AIPracticeFeedbackPage />
           </LearnerProtectedRoute>
         ),
       },
