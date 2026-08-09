@@ -222,10 +222,17 @@ export default function SubscriptionResourceUsage() {
                 )}
               </div>
 
-              <Link to="/subscription-plans" className={styles.upgradeBtn}>
-                <i className="fas fa-gem" aria-hidden="true" />
-                {data.hasActiveSubscription ? "Gia hạn / Nâng cấp gói" : "Khám phá gói đăng ký"}
-              </Link>
+              <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+                <Link to="/profile/subscription" className={styles.upgradeBtn}>
+                  <i className="fas fa-gem" aria-hidden="true" />
+                  Xem gói hiện tại
+                </Link>
+                <Link to="/subscription-plans" className={styles.upgradeBtn}
+                  style={{ background: "transparent", border: "1.5px solid var(--primary)", color: "var(--primary)" }}>
+                  <i className="fas fa-arrow-up-right-dots" aria-hidden="true" />
+                  {data.hasActiveSubscription ? "Gia hạn / Nâng cấp" : "Khám phá gói"}
+                </Link>
+              </div>
             </div>
 
             {/* Resources List Header */}

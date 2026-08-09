@@ -200,9 +200,17 @@ export default function Header({ onLoginClick }) {
                     <i className="fas fa-user" /> Hồ sơ cá nhân
                   </Link>
                   {user.role === "Learner" && (
-                    <Link to="/profile/subscription-usage" onClick={() => setUserMenuOpen(false)}>
-                      <i className="fas fa-chart-pie" /> Tài nguyên đăng ký
-                    </Link>
+                    <>
+                      <Link to="/profile/subscription" onClick={() => setUserMenuOpen(false)}>
+                        <i className="fas fa-gem" /> Gói đăng ký của tôi
+                      </Link>
+                      <Link to="/profile/payment-history" onClick={() => setUserMenuOpen(false)}>
+                        <i className="fas fa-receipt" /> Lịch sử thanh toán
+                      </Link>
+                      <Link to="/profile/subscription-usage" onClick={() => setUserMenuOpen(false)}>
+                        <i className="fas fa-chart-pie" /> Tài nguyên đăng ký
+                      </Link>
+                    </>
                   )}
                   <button
                     className={styles.logoutBtn}
