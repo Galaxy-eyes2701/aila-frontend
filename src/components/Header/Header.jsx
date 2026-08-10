@@ -1,8 +1,9 @@
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useEffect, useState, useRef } from "react";
 import useAuth from "../../hooks/useAuth";
 import api from "../../utils/api";
 import styles from "./Header.module.css";
+import { DEFAULT_AVATAR } from "../../constants/defaultAvatar";
 
 const NAV_LINKS = [
   { label: "Khóa học", href: "/courses" },
@@ -12,11 +13,10 @@ const NAV_LINKS = [
   { label: "Hỏi đáp", href: "*" },
 ];
 
-import { DEFAULT_AVATAR } from "../../constants/defaultAvatar";
-
 export default function Header({ onLoginClick }) {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const [avatarUrl, setAvatarUrl] = useState(DEFAULT_AVATAR);
   const [unreadCount, setUnreadCount] = useState(0);
   const [recentNotifications, setRecentNotifications] = useState([]);
@@ -26,6 +26,12 @@ export default function Header({ onLoginClick }) {
 
   const noticeRef = useRef(null);
   const userMenuRef = useRef(null);
+
+  const isLinkActive = (href) => {
+    if (href === "*") return false;
+    if (href === "/") return location.pathname === "/";
+    return location.pathname.startsWith(href);
+  };
 
   // Đóng dropdown khi bấm ra ngoài
   useEffect(() => {
@@ -124,7 +130,11 @@ export default function Header({ onLoginClick }) {
         >
           {NAV_LINKS.map(({ label, href }) => (
             <li key={label}>
-              <Link to={href} onClick={() => setMobileOpen(false)}>
+              <Link
+                to={href}
+                className={isLinkActive(href) ? styles.active : ""}
+                onClick={() => setMobileOpen(false)}
+              >
                 {label}
               </Link>
             </li>

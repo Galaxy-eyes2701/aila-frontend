@@ -25,10 +25,17 @@ export default function AdminHeader() {
     navigate("/admin/login");
   }, [logout, navigate]);
 
+  const isLinkActive = (href) => {
+    return (
+      location.pathname === href ||
+      (href !== "/admin" && location.pathname.startsWith(href))
+    );
+  };
+
   return (
     <header className={styles.navbar}>
       <div className={`container ${styles.navContent}`}>
-        <Link to="/admin" className={styles.logo}>
+        <Link to="/admin/reports" className={styles.logo}>
           Bình dân <span>Học AI</span>
         </Link>
 
@@ -39,7 +46,7 @@ export default function AdminHeader() {
             <li key={link.href}>
               <Link
                 to={link.href}
-                className={location.pathname === link.href ? styles.active : ""}
+                className={isLinkActive(link.href) ? styles.active : ""}
                 onClick={() => setMobileOpen(false)}
               >
                 {link.label}

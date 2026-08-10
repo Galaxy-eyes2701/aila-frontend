@@ -1,4 +1,4 @@
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useEffect, useState, useRef } from "react";
 import useAuth from "../../hooks/useAuth";
 import api from "../../utils/api";
@@ -24,6 +24,7 @@ const EXPERT_NAV_LINKS = [
 export default function ExpertHeader() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const [avatarUrl, setAvatarUrl] = useState(DEFAULT_AVATAR);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [noticeOpen, setNoticeOpen] = useState(false);
@@ -88,7 +89,7 @@ export default function ExpertHeader() {
           setRecentNotifications(all.slice(0, 3));
           setUnreadCount(all.filter((n) => !n.isRead).length);
         }
-      } catch {}
+      } catch { }
     };
 
     fetchNotifications();
@@ -135,6 +136,25 @@ export default function ExpertHeader() {
     navigate("/expert/login");
   };
 
+  const isLinkActive = (href) => {
+    if (href === "/expert") {
+      return location.pathname === "/expert" || location.pathname === "/expert/";
+    }
+    if (href === "/expert/courses") {
+      return (
+        location.pathname.startsWith("/expert/courses") ||
+        location.pathname.startsWith("/expert/modules")
+      );
+    }
+    if (href === "/expert/evaluation-requests") {
+      return (
+        location.pathname.startsWith("/expert/evaluation-requests") ||
+        location.pathname.startsWith("/expert/evaluation")
+      );
+    }
+    return location.pathname.startsWith(href);
+  };
+
   return (
     <header className={styles.navbar}>
       <div className={`container ${styles.navContent}`}>
@@ -148,7 +168,11 @@ export default function ExpertHeader() {
           <ul className={`${styles.navLinks} ${mobileOpen ? styles.navLinksOpen : ''}`}>
             {EXPERT_NAV_LINKS.map(({ label, href, badge }) => (
               <li key={label}>
-                <Link to={href} onClick={() => setMobileOpen(false)}>
+                <Link
+                  to={href}
+                  className={isLinkActive(href) ? styles.active : ""}
+                  onClick={() => setMobileOpen(false)}
+                >
                   {label}
                   {badge === "evaluations" && pendingEvaluations > 0 && (
                     <span
