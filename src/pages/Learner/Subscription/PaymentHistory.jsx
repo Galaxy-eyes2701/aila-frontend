@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import Pagination from "../../../components/Pagination/Pagination";
 import { resolveApiError } from "../../../utils/api";
 import { formatPrice, formatDateTime } from "../../../utils/subscriptionPlan";
@@ -30,8 +30,6 @@ function toInputDate(iso) {
  * BR-02: Lọc theo date range.
  */
 export default function PaymentHistory() {
-  const navigate = useNavigate();
-
   // Filter state
   const [fromDate, setFromDate] = useState("");
   const [toDate,   setToDate]   = useState("");
