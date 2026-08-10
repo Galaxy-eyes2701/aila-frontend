@@ -293,3 +293,102 @@
   color: #6a6f73;
   text-align: center;
 }
+
+/* ── ACTIVE SUBSCRIPTION BANNER ─────────────────────────────────────── */
+.activeSubBanner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding: 12px 18px;
+  margin-bottom: 24px;
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: 12px;
+  font-size: 0.88rem;
+  color: #15803d;
+}
+
+.activeSubBanner i {
+  font-size: 1rem;
+  flex-shrink: 0;
+}
+
+.activeSubBanner span {
+  flex: 1;
+  min-width: 180px;
+}
+
+.activeSubLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #15803d;
+  text-decoration: none;
+  white-space: nowrap;
+  padding: 5px 12px;
+  border: 1px solid #86efac;
+  border-radius: 8px;
+  transition: background 0.15s;
+}
+
+.activeSubLink:hover {
+  background: #dcfce7;
+}
+
+/* ── CARD — CURRENT PLAN HIGHLIGHT ──────────────────────────────────── */
+.cardCurrent {
+  border: 2px solid #0056d2;
+  box-shadow: 0 4px 20px rgba(0, 86, 210, 0.18);
+  position: relative;
+}
+
+.currentBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #0056d2;
+  color: #fff;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 4px 12px;
+  border-radius: 0 0 10px 0;
+  position: absolute;
+  top: 0;
+  left: 0;
+  letter-spacing: 0.3px;
+}
+
+/* ── DISABLED PLAN NOTE (BR-05) ─────────────────────────────────────── */
+.disabledNote {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  color: #94a3b8;
+  font-style: italic;
+  margin-top: auto;
+}
+
+.disabledNote i {
+  width: auto;
+  height: auto;
+  background: none;
+  color: #cbd5e1;
+  font-size: 0.8rem;
+}
+
+/* ── BUY BUTTON — RENEW VARIANT ─────────────────────────────────────── */
+.buyButtonRenew {
+  background: linear-gradient(135deg, #0f9b58, #059669);
+}
+
+.buyButtonRenew:hover:not(:disabled) {
+  background: linear-gradient(135deg, #0b7d49, #047857);
+}

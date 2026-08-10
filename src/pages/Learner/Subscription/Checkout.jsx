@@ -168,15 +168,15 @@ export default function Checkout() {
   // Dừng polling khi unmount
   useEffect(() => () => stopPolling(), [stopPolling]);
 
-  // Phát hiện hết hạn QR — chỉ trigger khi đang ở phase qr
-  // và remaining đã chạy xuống 0 (tránh trigger ngay khi mount với remaining=0 ban đầu)
-  const paymentSetRef = useRef(false);
+  // Phát hiện hết hạn QR.
+  // Dùng ref để track đã từng có remaining > 0 (tránh trigger ngay khi countdown = 0 lúc init)
+  const hadPositiveRemaining = useRef(false);
   useEffect(() => {
-    if (payment) { paymentSetRef.current = true; }
-  }, [payment]);
+    if (remaining > 0) hadPositiveRemaining.current = true;
+  }, [remaining]);
 
   useEffect(() => {
-    if (phase === "qr" && remaining === 0 && paymentSetRef.current) {
+    if (phase === "qr" && remaining === 0 && hadPositiveRemaining.current) {
       stopPolling();
       setPhase("expired");
     }
@@ -265,7 +265,11 @@ export default function Checkout() {
               <div className={styles.btnRow}>
                 <button
                   className={styles.btnPrimary}
-                  onClick={() => { setPayment(null); setPhase("ready"); }}
+                  onClick={() => {
+                    setPayment(null);
+                    hadPositiveRemaining.current = false;
+                    setPhase("ready");
+                  }}
                 >
                   <i className="fas fa-rotate-right" /> Tạo giao dịch mới
                 </button>
