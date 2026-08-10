@@ -12,19 +12,19 @@ import {
 const DIFFICULTY_OPTIONS = [
   {
     value: 1,
-    label: "Dễ (Easy)",
+    label: "Dễ",
     tag: "Có mẫu prompt gợi ý",
-    desc: "Expert điền các mẫu prompt (Prompt Template) để học viên tham khảo khi thực hành.",
+    desc: "Expert điền các mẫu prompt để học viên tham khảo khi thực hành.",
   },
   {
     value: 2,
-    label: "Trung bình (Medium)",
+    label: "Trung bình",
     tag: "Có hướng dẫn từng bước",
-    desc: "Expert điền các bước hướng dẫn (Step Guidance) để dẫn dắt học viên thực hành.",
+    desc: "Expert điền các bước hướng dẫn để dẫn dắt học viên thực hành.",
   },
   {
     value: 3,
-    label: "Khó (Hard)",
+    label: "Khó",
     tag: "Không có gợi ý",
     desc: "Không cần điền hướng dẫn hay mẫu prompt — học viên tự luyện hoàn toàn.",
   },
@@ -106,25 +106,25 @@ export default function AIPracticeMaterialModal({
           setStepGuidances(
             d.stepGuidances?.length
               ? [...d.stepGuidances]
-                  .sort((a, b) => a.orderIndex - b.orderIndex)
-                  .map((s) => ({ content: s.content }))
+                .sort((a, b) => a.orderIndex - b.orderIndex)
+                .map((s) => ({ content: s.content }))
               : [emptyStepGuidance()],
           );
           setPromptTemplates(
             d.promptTemplates?.length
               ? d.promptTemplates.map((p) => ({
-                  title: p.title,
-                  content: p.content,
-                }))
+                title: p.title,
+                content: p.content,
+              }))
               : [emptyPromptTemplate()],
           );
           setScoringCriteria(
             d.scoringCriteria?.length
               ? d.scoringCriteria.map((c) => ({
-                  title: c.title,
-                  description: c.description ?? "",
-                  weight: c.weight,
-                }))
+                title: c.title,
+                description: c.description ?? "",
+                weight: c.weight,
+              }))
               : [emptyScoringCriteria()],
           );
         })
@@ -147,8 +147,8 @@ export default function AIPracticeMaterialModal({
   // Danh sách bước hiển thị phụ thuộc độ khó đã chọn
   const flowSteps = useMemo(() => {
     const flow = ["basic"];
-    if (basic.difficulty === 1) flow.push("promptTemplate"); // Easy
-    else if (basic.difficulty === 2) flow.push("stepGuidance"); // Medium
+    if (basic.difficulty === 1) flow.push("promptTemplate");
+    else if (basic.difficulty === 2) flow.push("stepGuidance");
     flow.push("scoring");
     return flow;
   }, [basic.difficulty]);
@@ -173,9 +173,9 @@ export default function AIPracticeMaterialModal({
 
   const stepTitles = {
     basic: "Thông tin thực hành AI",
-    stepGuidance: "Hướng dẫn từng bước (Step Guidance)",
-    promptTemplate: "Mẫu prompt gợi ý (Prompt Template)",
-    scoring: "Tiêu chí chấm điểm (Scoring Criteria)",
+    stepGuidance: "Hướng dẫn từng bước",
+    promptTemplate: "Mẫu prompt gợi ý",
+    scoring: "Tiêu chí chấm điểm",
   };
 
   function updateBasic(field, value) {
@@ -225,11 +225,11 @@ export default function AIPracticeMaterialModal({
   function validateStep(step) {
     if (step === "basic") {
       if (!basic.title.trim()) return "Tiêu đề không được để trống.";
-      if (!basic.scenario.trim()) return "Vui lòng nhập bối cảnh (Scenario).";
-      if (!basic.aiTask.trim()) return "Vui lòng nhập nhiệm vụ của AI (AI Task).";
+      if (!basic.scenario.trim()) return "Vui lòng nhập bối cảnh.";
+      if (!basic.aiTask.trim()) return "Vui lòng nhập nhiệm vụ của AI.";
       if (!basic.learnerTask.trim())
-        return "Vui lòng nhập nhiệm vụ của học viên (Learner Task).";
-      if (basic.difficulty === null) return "Vui lòng chọn độ khó (Difficulty).";
+        return "Vui lòng nhập nhiệm vụ của học viên.";
+      if (basic.difficulty === null) return "Vui lòng chọn độ khó.";
       if (Number(basic.maxPromptAttempts) <= 0)
         return "Số lượt prompt tối đa phải lớn hơn 0.";
       return "";
@@ -257,7 +257,7 @@ export default function AIPracticeMaterialModal({
       if (scoringCriteria.some((c) => !c.title.trim()))
         return "Tiêu đề tiêu chí chấm điểm không được để trống.";
       if (scoringCriteria.some((c) => Number(c.weight) <= 0))
-        return "Trọng số (Weight) của mỗi tiêu chí phải lớn hơn 0.";
+        return "Trọng số của mỗi tiêu chí phải lớn hơn 0.";
       const totalWeight = scoringCriteria.reduce(
         (sum, c) => sum + (Number(c.weight) || 0),
         0,
@@ -304,16 +304,16 @@ export default function AIPracticeMaterialModal({
         promptTemplates:
           basic.difficulty === 1 // Easy
             ? promptTemplates.map((p) => ({
-                title: p.title.trim(),
-                content: p.content.trim(),
-              }))
+              title: p.title.trim(),
+              content: p.content.trim(),
+            }))
             : [],
         stepGuidances:
           basic.difficulty === 2 // Medium
             ? stepGuidances.map((s, i) => ({
-                orderIndex: i + 1,
-                content: s.content.trim(),
-              }))
+              orderIndex: i + 1,
+              content: s.content.trim(),
+            }))
             : [],
         scoringCriteria: scoringCriteria.map((c) => ({
           title: c.title.trim(),
@@ -327,19 +327,19 @@ export default function AIPracticeMaterialModal({
       const res = isEditMode
         ? await updateAIPracticeMaterial(material.id, sharedFields)
         : await createAIPracticeMaterial({
-            ...sharedFields,
-            moduleId,
-            difficulty: basic.difficulty,
-          });
+          ...sharedFields,
+          moduleId,
+          difficulty: basic.difficulty,
+        });
 
       if (res.success) {
         onSuccess(res.data);
       } else {
         setError(
           res.errorMessage ||
-            (isEditMode
-              ? "Không thể cập nhật học liệu Thực hành AI."
-              : "Không thể tạo học liệu Thực hành AI."),
+          (isEditMode
+            ? "Không thể cập nhật học liệu Thực hành AI."
+            : "Không thể tạo học liệu Thực hành AI."),
         );
       }
     } catch (err) {
@@ -370,9 +370,8 @@ export default function AIPracticeMaterialModal({
           {flowSteps.map((step, i) => (
             <div
               key={step}
-              className={`${styles.stepDot} ${
-                i === stepIndex ? styles.stepDotActive : ""
-              } ${i < stepIndex ? styles.stepDotDone : ""}`}
+              className={`${styles.stepDot} ${i === stepIndex ? styles.stepDotActive : ""
+                } ${i < stepIndex ? styles.stepDotDone : ""}`}
             >
               {i < stepIndex ? <i className="fas fa-check" /> : i + 1}
             </div>
@@ -392,7 +391,7 @@ export default function AIPracticeMaterialModal({
             </div>
 
             <div className={styles.formGroup}>
-              <label>Bối cảnh (Scenario)</label>
+              <label>Bối cảnh</label>
               <textarea
                 rows={3}
                 value={basic.scenario}
@@ -402,7 +401,7 @@ export default function AIPracticeMaterialModal({
             </div>
 
             <div className={styles.formGroup}>
-              <label>Nhiệm vụ của AI (AI Task)</label>
+              <label>Nhiệm vụ của AI</label>
               <textarea
                 rows={2}
                 value={basic.aiTask}
@@ -412,7 +411,7 @@ export default function AIPracticeMaterialModal({
             </div>
 
             <div className={styles.formGroup}>
-              <label>Nhiệm vụ của học viên (Learner Task)</label>
+              <label>Nhiệm vụ của học viên</label>
               <textarea
                 rows={2}
                 value={basic.learnerTask}
@@ -434,7 +433,7 @@ export default function AIPracticeMaterialModal({
             </div>
 
             <div className={styles.formGroup}>
-              <label>Độ khó (Difficulty)</label>
+              <label>Độ khó</label>
               {isEditMode && (
                 <p className={styles.hint} style={{ marginTop: -4 }}>
                   Độ khó không thể thay đổi sau khi tạo.
@@ -444,17 +443,16 @@ export default function AIPracticeMaterialModal({
                 {DIFFICULTY_OPTIONS.map((opt) => (
                   <div
                     key={opt.value}
-                    className={`${styles.difficultyCard} ${
-                      basic.difficulty === opt.value
-                        ? styles.difficultyCardActive
-                        : ""
-                    }`}
+                    className={`${styles.difficultyCard} ${basic.difficulty === opt.value
+                      ? styles.difficultyCardActive
+                      : ""
+                      }`}
                     style={
                       isEditMode
                         ? {
-                            cursor: "not-allowed",
-                            opacity: basic.difficulty === opt.value ? 1 : 0.5,
-                          }
+                          cursor: "not-allowed",
+                          opacity: basic.difficulty === opt.value ? 1 : 0.5,
+                        }
                         : undefined
                     }
                     onClick={
@@ -614,7 +612,7 @@ export default function AIPracticeMaterialModal({
                   onChange={(e) =>
                     updateScoringCriteria(index, "weight", e.target.value)
                   }
-                  placeholder="Trọng số (Weight)"
+                  placeholder="Trọng số (%)"
                 />
               </div>
             ))}

@@ -53,39 +53,38 @@ function ActivityLogFilter({ onSearch, loading }) {
   };
 
   return (
-    <form className={styles.activityLogFilter} onSubmit={handleSubmit}>
-      <div className={styles.filterField}>
-        <label htmlFor="startDate">Ngày bắt đầu</label>
-
+    <form className={styles.filterBar} onSubmit={handleSubmit}>
+      <div className={styles.filterGroup}>
+        <label htmlFor="startDate">Từ ngày</label>
         <input
           id="startDate"
           type="date"
+          className={styles.filterInput}
           value={startDate}
           onChange={(event) => setStartDate(event.target.value)}
         />
       </div>
 
-      <div className={styles.filterField}>
-        <label htmlFor="endDate">Ngày kết thúc</label>
-
+      <div className={styles.filterGroup}>
+        <label htmlFor="endDate">Đến ngày</label>
         <input
           id="endDate"
           type="date"
+          className={styles.filterInput}
           value={endDate}
           onChange={(event) => setEndDate(event.target.value)}
         />
       </div>
 
-      <div className={styles.filterField}>
+      <div className={styles.filterGroup}>
         <label htmlFor="action">Hành động</label>
-
         <select
           id="action"
+          className={styles.filterSelect}
           value={action}
           onChange={(event) => setAction(event.target.value)}
         >
           <option value="">Tất cả hành động</option>
-
           {ACTION_OPTIONS.map((item) => (
             <option key={item} value={item}>
               {ACTION_LABELS[item]}
@@ -97,18 +96,20 @@ function ActivityLogFilter({ onSearch, loading }) {
       <div className={styles.filterActions}>
         <button
           type="submit"
-          className={`${styles.btn} ${styles.btnPrimary}`}
+          className={styles.primaryButton}
           disabled={loading}
         >
-          {loading ? "Đang tìm kiếm..." : "Tìm kiếm"}
+          <i className="fas fa-search" />
+          {loading ? "Đang tìm..." : "Tìm kiếm"}
         </button>
 
         <button
           type="button"
-          className={`${styles.btn} ${styles.btnSecondary}`}
+          className={styles.secondaryButton}
           onClick={handleReset}
           disabled={loading}
         >
+          <i className="fas fa-rotate-right" />
           Làm mới
         </button>
       </div>

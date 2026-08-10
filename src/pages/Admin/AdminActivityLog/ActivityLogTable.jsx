@@ -19,36 +19,35 @@ function formatDateTime(value) {
 
   return new Intl.DateTimeFormat("vi-VN", {
     dateStyle: "medium",
-    timeStyle: "medium",
+    timeStyle: "short",
   }).format(new Date(value));
 }
 
 function getActionClass(action) {
   if (!action) {
-    return styles.activityAction;
+    return styles.badge;
   }
 
   const actionClass = {
-    Create: styles.activityActionCreate,
-    Update: styles.activityActionUpdate,
-    Delete: styles.activityActionDelete,
-    Publish: styles.activityActionPublish,
-    Unpublish: styles.activityActionUnpublish,
-    Approve: styles.activityActionApprove,
-    Reject: styles.activityActionReject,
-    Lock: styles.activityActionLock,
-    Unlock: styles.activityActionUnlock,
+    Create: styles.actionCreate,
+    Update: styles.actionUpdate,
+    Delete: styles.actionDelete,
+    Publish: styles.actionPublish,
+    Unpublish: styles.actionUnpublish,
+    Approve: styles.actionApprove,
+    Reject: styles.actionReject,
+    Lock: styles.actionLock,
+    Unlock: styles.actionUnlock,
   };
 
-  return `${styles.activityAction} ${actionClass[action] || ""}`;
+  return `${styles.badge} ${actionClass[action] || styles.actionDefault}`;
 }
 
 function ActivityLogTable({ logs, loading }) {
   if (loading) {
     return (
-      <div className={styles.activityLogState}>
-        <div className={styles.activityLogSpinner} />
-
+      <div className={styles.loadingState}>
+        <div className={styles.spinner} />
         <p>Đang tải nhật ký hoạt động...</p>
       </div>
     );
@@ -56,19 +55,17 @@ function ActivityLogTable({ logs, loading }) {
 
   if (!logs || logs.length === 0) {
     return (
-      <div className={styles.activityLogEmpty}>
-        <div className={styles.emptyIcon}>⏱</div>
-
+      <div className={styles.emptyState}>
+        <i className="fas fa-history" />
         <h3>Không tìm thấy dữ liệu nhật ký</h3>
-
         <p>Không tìm thấy dữ liệu nhật ký phù hợp với yêu cầu truy vấn.</p>
       </div>
     );
   }
 
   return (
-    <div className={styles.activityLogTableWrapper}>
-      <table className={styles.activityLogTable}>
+    <div className={styles.tableWrapper}>
+      <table className={styles.table}>
         <thead>
           <tr>
             <th>Quản trị viên</th>
@@ -88,9 +85,8 @@ function ActivityLogTable({ logs, loading }) {
                   </div>
 
                   <div>
-                    <div className={styles.adminName}>{log.adminName}</div>
-
-                    <div className={styles.adminId}>{log.adminId}</div>
+                    <div className={styles.adminName}>{log.adminName || "Quản trị viên"}</div>
+                    <div className={styles.adminId}>{log.adminId || log.id}</div>
                   </div>
                 </div>
               </td>
@@ -109,6 +105,7 @@ function ActivityLogTable({ logs, loading }) {
 
               <td>
                 <span className={styles.timestampCell}>
+                  <i className="far fa-clock" />
                   {formatDateTime(log.createdAt)}
                 </span>
               </td>

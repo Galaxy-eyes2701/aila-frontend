@@ -1,119 +1,134 @@
-.activity-log-filter {
+.filterBar {
   display: flex;
+  flex-wrap: wrap;
   align-items: flex-end;
   gap: 16px;
-
-  padding: 20px;
+  padding: 18px 20px;
   margin-bottom: 24px;
-
-  border: 1px solid #e5e7eb;
-  border-radius: 12px;
-
-  background: #ffffff;
+  background: var(--surface, #ffffff);
+  border: 1px solid var(--border, #e5e7eb);
+  border-radius: var(--radius-md, 12px);
+  box-shadow: var(--shadow-sm, 0 1px 2px rgba(15, 23, 42, 0.05));
 }
 
-.filter-field {
+.filterGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
   flex: 1;
   min-width: 180px;
 }
 
-.filter-field label {
-  display: block;
-  margin-bottom: 7px;
-
-  color: #374151;
+.filterGroup label {
+  color: var(--ink, #0f172a);
   font-size: 13px;
   font-weight: 600;
 }
 
-.filter-field input,
-.filter-field select {
-  width: 100%;
+.filterInput,
+.filterSelect {
   height: 42px;
-
   padding: 0 12px;
-
-  border: 1px solid #d9dce3;
-  border-radius: 8px;
-
+  border: 1px solid var(--border, #e5e7eb);
+  border-radius: var(--radius-sm, 8px);
   background: #ffffff;
-  color: #252933;
-
+  color: var(--ink, #0f172a);
   font-family: inherit;
   font-size: 14px;
-
   outline: none;
-
-  transition:
-    border-color 0.15s ease,
-    box-shadow 0.15s ease;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
-.filter-field input:focus,
-.filter-field select:focus {
-  border-color: #4f46e5;
-
-  box-shadow:
-    0 0 0 3px rgba(79, 70, 229, 0.1);
-}
-
-.filter-actions {
-  display: flex;
-  gap: 8px;
-}
-
-.btn {
-  height: 42px;
-
-  padding: 0 18px;
-
-  border-radius: 8px;
-
-  font-family: inherit;
-  font-size: 14px;
-  font-weight: 600;
-
+.filterSelect {
+  appearance: none;
+  background: #ffffff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='none' stroke='%2364748b' stroke-width='2' viewBox='0 0 24 24'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E") no-repeat right 12px center;
+  padding-right: 32px;
   cursor: pointer;
-
-  transition:
-    opacity 0.15s ease,
-    transform 0.15s ease;
 }
 
-.btn:hover:not(:disabled) {
+.filterInput:focus,
+.filterSelect:focus {
+  border-color: var(--primary, #2563eb);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+
+.filterActions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.primaryButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 42px;
+  padding: 0 20px;
+  border: none;
+  border-radius: var(--radius-sm, 8px);
+  background: var(--primary, #2563eb);
+  color: #ffffff;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  white-space: nowrap;
+  box-shadow: 0 1px 2px rgba(37, 99, 235, 0.25);
+  transition: background 0.15s ease, transform 0.1s ease, box-shadow 0.15s ease;
+}
+
+.primaryButton:hover:not(:disabled) {
+  background: var(--primary-dark, #1d4ed8);
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
   transform: translateY(-1px);
 }
 
-.btn:disabled {
+.primaryButton:disabled {
+  background: #93c5fd;
   cursor: not-allowed;
-  opacity: 0.6;
+  box-shadow: none;
 }
 
-.btn-primary {
-  border: none;
-
-  background: #4f46e5;
-  color: #ffffff;
-}
-
-.btn-secondary {
-  border: 1px solid #d9dce3;
-
-  background: #ffffff;
+.secondaryButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 42px;
+  padding: 0 18px;
+  border: 1px solid var(--border, #e5e7eb);
+  border-radius: var(--radius-sm, 8px);
+  background: var(--surface, #ffffff);
   color: #374151;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.secondaryButton:hover:not(:disabled) {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+}
+
+.secondaryButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 @media (max-width: 900px) {
-  .activity-log-filter {
-    align-items: stretch;
+  .filterBar {
     flex-direction: column;
+    align-items: stretch;
   }
-
-  .filter-actions {
+  .filterGroup {
     width: 100%;
   }
-
-  .filter-actions .btn {
+  .filterActions {
+    width: 100%;
+  }
+  .filterActions button {
     flex: 1;
   }
 }
