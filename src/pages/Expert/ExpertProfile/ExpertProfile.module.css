@@ -1,6 +1,7 @@
 .page {
   padding: 48px 0 64px;
   min-height: calc(100vh - 68px);
+  background: var(--bg, #f7f3eb);
 }
 
 /* ── BREADCRUMB ── */
