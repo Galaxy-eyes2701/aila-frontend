@@ -1,0 +1,119 @@
+.activity-log-filter {
+  display: flex;
+  align-items: flex-end;
+  gap: 16px;
+
+  padding: 20px;
+  margin-bottom: 24px;
+
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+
+  background: #ffffff;
+}
+
+.filter-field {
+  flex: 1;
+  min-width: 180px;
+}
+
+.filter-field label {
+  display: block;
+  margin-bottom: 7px;
+
+  color: #374151;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.filter-field input,
+.filter-field select {
+  width: 100%;
+  height: 42px;
+
+  padding: 0 12px;
+
+  border: 1px solid #d9dce3;
+  border-radius: 8px;
+
+  background: #ffffff;
+  color: #252933;
+
+  font-family: inherit;
+  font-size: 14px;
+
+  outline: none;
+
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.filter-field input:focus,
+.filter-field select:focus {
+  border-color: #4f46e5;
+
+  box-shadow:
+    0 0 0 3px rgba(79, 70, 229, 0.1);
+}
+
+.filter-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.btn {
+  height: 42px;
+
+  padding: 0 18px;
+
+  border-radius: 8px;
+
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition:
+    opacity 0.15s ease,
+    transform 0.15s ease;
+}
+
+.btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+
+.btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.btn-primary {
+  border: none;
+
+  background: #4f46e5;
+  color: #ffffff;
+}
+
+.btn-secondary {
+  border: 1px solid #d9dce3;
+
+  background: #ffffff;
+  color: #374151;
+}
+
+@media (max-width: 900px) {
+  .activity-log-filter {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .filter-actions {
+    width: 100%;
+  }
+
+  .filter-actions .btn {
+    flex: 1;
+  }
+}

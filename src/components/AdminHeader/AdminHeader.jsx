@@ -12,6 +12,7 @@ const NAV_LINKS = [
   { label: "Bài viết", href: "/admin/blogs" },
   { label: "Gói đăng ký", href: "/admin/subscription-plans" },
   { label: "Tài nguyên", href: "/admin/resource-limit-management" },
+  { label: "Nhật kí", href: "/admin/activity-logs" },
 ];
 
 export default function AdminHeader() {

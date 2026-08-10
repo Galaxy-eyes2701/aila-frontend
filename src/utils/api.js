@@ -1,8 +1,8 @@
 import axios from "axios";
 
 const api = axios.create({
-  // baseURL: "https://localhost:7124/api",
-  baseURL: "https://api.aila.io.vn/api",
+  baseURL: "https://localhost:7124/api",
+  // baseURL: "https://api.aila.io.vn/api",
   withCredentials: true,
 });
 

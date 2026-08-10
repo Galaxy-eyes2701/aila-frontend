@@ -1,0 +1,239 @@
+.activityLogPage {
+  min-height: 100vh;
+  background: #f5f7fb;
+  padding: 32px;
+}
+
+.activityLogContainer {
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.activityLogHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 24px;
+}
+
+.pageBreadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  margin-bottom: 12px;
+
+  color: #6b7280;
+  font-size: 14px;
+}
+
+.pageBreadcrumb span:last-child {
+  color: #374151;
+  font-weight: 500;
+}
+
+.activityLogHeader h1 {
+  margin: 0 0 8px;
+
+  color: #111827;
+  font-size: 28px;
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+.activityLogHeader p {
+  margin: 0;
+
+  color: #6b7280;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.activityLogSummary {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+
+  min-width: 140px;
+  padding: 16px 20px;
+
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+
+  background: #ffffff;
+}
+
+.summaryLabel {
+  color: #6b7280;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.summaryValue {
+  margin-top: 4px;
+
+  color: #111827;
+  font-size: 26px;
+  font-weight: 700;
+}
+
+.activityLogError {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+
+  margin-bottom: 24px;
+  padding: 16px 18px;
+
+  border: 1px solid #fecaca;
+  border-radius: 10px;
+
+  background: #fef2f2;
+}
+
+.errorIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  flex-shrink: 0;
+
+  width: 32px;
+  height: 32px;
+
+  border-radius: 50%;
+
+  background: #dc2626;
+  color: #ffffff;
+
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.activityLogError > div:nth-child(2) {
+  flex: 1;
+}
+
+.activityLogError strong {
+  display: block;
+
+  margin-bottom: 4px;
+
+  color: #991b1b;
+  font-size: 14px;
+}
+
+.activityLogError p {
+  margin: 0;
+
+  color: #b91c1c;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.activityLogError button {
+  flex-shrink: 0;
+
+  padding: 8px 14px;
+
+  border: 1px solid #dc2626;
+  border-radius: 7px;
+
+  background: #ffffff;
+  color: #b91c1c;
+
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+
+  cursor: pointer;
+}
+
+.activityLogError button:hover:not(:disabled) {
+  background: #fef2f2;
+}
+
+.activityLogError button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.activityLogCard {
+  overflow: hidden;
+
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+
+  background: #ffffff;
+}
+
+.activityLogCardHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  padding: 20px 24px;
+
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.activityLogCardHeader h2 {
+  margin: 0 0 5px;
+
+  color: #111827;
+  font-size: 18px;
+  font-weight: 650;
+}
+
+.activityLogCardHeader p {
+  margin: 0;
+
+  color: #6b7280;
+  font-size: 13px;
+}
+
+.resultCount {
+  display: inline-flex;
+  align-items: center;
+
+  padding: 6px 10px;
+
+  border-radius: 20px;
+
+  background: #f3f4f6;
+  color: #4b5563;
+
+  font-size: 13px;
+  font-weight: 600;
+}
+
+@media (max-width: 768px) {
+  .activityLogPage {
+    padding: 20px 16px;
+  }
+
+  .activityLogHeader {
+    flex-direction: column;
+  }
+
+  .activityLogSummary {
+    width: 100%;
+    align-items: flex-start;
+  }
+
+  .activityLogError {
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .activityLogError button {
+    margin-left: 46px;
+  }
+
+  .activityLogCardHeader {
+    align-items: flex-start;
+    gap: 12px;
+    flex-direction: column;
+  }
+}

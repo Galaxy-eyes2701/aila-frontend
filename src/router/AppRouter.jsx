@@ -45,6 +45,7 @@ import AccountResourceLimitManagement from "../pages/Admin/AccountResourceLimitM
 import EvaluationRequestList from "../pages/Expert/ExpertEvaluation/EvaluationRequestList";
 import EvaluationRequestDetail from "../pages/Expert/ExpertEvaluation/EvaluationRequestDetail";
 import ExpertEvaluationResult from "../pages/Learner/ExpertEvaluation/ExpertEvaluationResult";
+import AdminActivityLogsPage from "../pages/Admin/AdminActivityLog/AdminActivityLogsPage";
 
 const router = createBrowserRouter([
   // ── Auth pages (không có Header) ─────────────────────────────
@@ -148,6 +149,18 @@ const router = createBrowserRouter([
               >
                 Quản lý giới hạn tài nguyên
               </a>
+              <a
+                href="/admin/activity-logs"
+                style={{
+                  padding: "14px 22px",
+                  background: "#b45309",
+                  color: "#fff",
+                  borderRadius: 12,
+                  textDecoration: "none",
+                }}
+              >
+                Nhật kí hoạt động
+              </a>
             </div>
           </div>
         ),
@@ -179,6 +192,10 @@ const router = createBrowserRouter([
       {
         path: "resource-limit-management",
         element: <AccountResourceLimitManagement />,
+      },
+      {
+        path: "activity-logs",
+        element: <AdminActivityLogsPage />,
       },
     ],
   },
