@@ -45,6 +45,12 @@ import AccountResourceLimitManagement from "../pages/Admin/AccountResourceLimitM
 import EvaluationRequestList from "../pages/Expert/ExpertEvaluation/EvaluationRequestList";
 import EvaluationRequestDetail from "../pages/Expert/ExpertEvaluation/EvaluationRequestDetail";
 import ExpertEvaluationResult from "../pages/Learner/ExpertEvaluation/ExpertEvaluationResult";
+import ExpertSimulation from "../pages/Expert/ExpertSimulation/ExpertSimulation";
+import AIPracticePage from "../pages/Learner/AIPractice/AIPracticePage";
+import AIPracticeFeedbackPage from "../pages/Learner/AIPractice/AIPracticeFeedbackPage";
+import CurrentSubscription from "../pages/Learner/Subscription/CurrentSubscription";
+import Checkout from "../pages/Learner/Subscription/Checkout";
+import PaymentHistory from "../pages/Learner/Subscription/PaymentHistory";
 import AdminActivityLogsPage from "../pages/Admin/AdminActivityLog/AdminActivityLogsPage";
 
 const router = createBrowserRouter([
@@ -62,6 +68,7 @@ const router = createBrowserRouter([
       </AdminProtectedRoute>
     ),
     children: [
+      { index: true, element: <Navigate to="/admin/reports" replace /> },
       { index: true, element: <Navigate to="/admin/dashboard" replace /> },
       {
         path: "dashboard",
@@ -221,6 +228,8 @@ const router = createBrowserRouter([
         element: <EvaluationRequestDetail />,
       },
       { path: "notifications", element: <Notifications /> },
+      // UC-60 — Expert chạy thử AI Practice Simulation
+      { path: "simulation/:materialId", element: <ExpertSimulation /> },
     ],
   },
 
@@ -279,6 +288,33 @@ const router = createBrowserRouter([
           </LearnerProtectedRoute>
         ),
       },
+      // UC-18: Xem gói đăng ký hiện tại
+      {
+        path: "profile/subscription",
+        element: (
+          <LearnerProtectedRoute>
+            <CurrentSubscription />
+          </LearnerProtectedRoute>
+        ),
+      },
+      // UC-20: Lịch sử thanh toán
+      {
+        path: "profile/payment-history",
+        element: (
+          <LearnerProtectedRoute>
+            <PaymentHistory />
+          </LearnerProtectedRoute>
+        ),
+      },
+      // UC-19: Trang thanh toán gói đăng ký
+      {
+        path: "subscription-plans/:planId/checkout",
+        element: (
+          <LearnerProtectedRoute>
+            <Checkout />
+          </LearnerProtectedRoute>
+        ),
+      },
       {
         path: "notifications",
         element: (
@@ -327,6 +363,24 @@ const router = createBrowserRouter([
         element: (
           <LearnerProtectedRoute>
             <QuizResultDetailPage />
+          </LearnerProtectedRoute>
+        ),
+      },
+
+      // ── AI Practice (UC-27 luyện tập, UC-28 xem kết quả) ──
+      {
+        path: "courses/:courseId/materials/:materialId/practice",
+        element: (
+          <LearnerProtectedRoute>
+            <AIPracticePage />
+          </LearnerProtectedRoute>
+        ),
+      },
+      {
+        path: "courses/:courseId/materials/:materialId/practice/:attemptId/feedback",
+        element: (
+          <LearnerProtectedRoute>
+            <AIPracticeFeedbackPage />
           </LearnerProtectedRoute>
         ),
       },

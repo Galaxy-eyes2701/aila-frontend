@@ -320,7 +320,7 @@ function PreviewOverview({ course }) {
 }
 
 /* ── Main Modal ───────────────────────────────────────────────────────────── */
-export default function CoursePreviewModal({ courseId, onClose, materialPreviewEndpoint }) {
+export default function CoursePreviewModal({ courseId, onClose, materialPreviewEndpoint, initialMaterialId }) {
   const [course,          setCourse]          = useState(null);
   const [loading,         setLoading]         = useState(true);
   const [error,           setError]           = useState('');
@@ -344,6 +344,13 @@ export default function CoursePreviewModal({ courseId, onClose, materialPreviewE
   }, [courseId]);
 
   useEffect(() => { fetchCourse(); }, [fetchCourse]);
+
+  // Auto-select material khi có initialMaterialId và course đã load xong
+  useEffect(() => {
+    if (!initialMaterialId || !course || loading) return;
+    handleSelectMaterial(initialMaterialId);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialMaterialId, course, loading]);
 
   useEffect(() => {
     const onKey = e => { if (e.key === 'Escape') onClose(); };

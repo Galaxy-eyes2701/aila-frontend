@@ -559,3 +559,179 @@
   font-weight: 500;
 }
 .completeHint i { color: var(--primary); }
+
+
+/* ── AIPractice Panel (inline trong LearningContent) ─────────────────────── */
+.aiPracticePanel {
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #fff;
+}
+
+.aiPracticeHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 18px;
+  background: #f0f6ff;
+  border-bottom: 1px solid #dbeafe;
+  font-size: 15px;
+  font-weight: 700;
+  color: #1d4ed8;
+}
+
+.aiPracticeCompletedBadge {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #16a34a;
+  background: #dcfce7;
+  padding: 3px 10px;
+  border-radius: 999px;
+}
+
+.aiPracticeBody {
+  padding: 16px 18px;
+}
+
+.aiPracticeScenarioLabel {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  color: #6b7280;
+  margin: 0 0 5px;
+}
+
+.aiPracticeScenario {
+  font-size: 14px;
+  color: #111827;
+  line-height: 1.65;
+  margin: 0 0 12px;
+}
+
+.aiPracticeMeta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.aiPracticeMetaChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  background: #f0f6ff;
+  color: #2563eb;
+}
+
+.aiPracticeStartBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: calc(100% - 36px);
+  margin: 0 18px 16px;
+  padding: 11px;
+  background: #2563eb;
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-weight: 700;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.aiPracticeStartBtn:hover { background: #1d4ed8; }
+
+.aiPracticeHistory {
+  border-top: 1px solid #e5e7eb;
+  padding: 14px 18px 16px;
+}
+
+.aiPracticeHistoryTitle {
+  font-size: 13px;
+  font-weight: 700;
+  color: #374151;
+  margin: 0 0 10px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.aiPracticeHistoryList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.aiPracticeAttemptRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 9px 12px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  background: #f9fafb;
+}
+
+.aiPracticeAttemptInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.aiPracticeAttemptNum {
+  font-size: 13px;
+  font-weight: 600;
+  color: #111827;
+}
+
+.aiPracticeAttemptDate {
+  font-size: 11px;
+  color: #9ca3af;
+}
+
+.aiPracticeAttemptRight {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.aiPracticeAttemptScore {
+  font-size: 14px;
+  font-weight: 800;
+  color: #2563eb;
+}
+
+.aiPracticeViewBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 10px;
+  border: 1px solid #93c5fd;
+  border-radius: 6px;
+  background: #eff6ff;
+  color: #1d4ed8;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.aiPracticeViewBtn:hover { background: #dbeafe; }
+
+.aiPracticeLoading {
+  padding: 20px 18px;
+  font-size: 13px;
+  color: #6b7280;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}

@@ -4,10 +4,9 @@ import useAuth from "../../hooks/useAuth";
 import styles from "./AdminHeader.module.css";
 
 const NAV_LINKS = [
-  { label: "Bảng điều khiển", href: "/admin/dashboard" },
+  { label: "Báo cáo", href: "/admin/reports" },
   { label: "Người dùng", href: "/admin/users" },
   { label: "Tags", href: "/admin/tags" },
-  { label: "Báo cáo", href: "/admin/reports" },
   { label: "Danh mục", href: "/admin/categories" },
   { label: "Bài viết", href: "/admin/blogs" },
   { label: "Gói đăng ký", href: "/admin/subscription-plans" },

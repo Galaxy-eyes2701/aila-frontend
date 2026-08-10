@@ -1,5 +1,13 @@
 import api from "../../../utils/api";
 
+/**
+ * Admin lấy tất cả báo cáo liên quan đến một course (lịch sử vi phạm).
+ */
+export async function getCourseReports(courseId) {
+  const res = await api.get(`/admin/courses/${courseId}/reports`);
+  return res.data;
+}
+
 // ===== Expert =====
 
 /**
