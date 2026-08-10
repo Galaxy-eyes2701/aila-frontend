@@ -45,6 +45,18 @@ export default function LearningSections({ profile }) {
           </Link>
         </div>
         <SummaryStats summary={summary} aiScenarioCount={aiScenarioHistory.length} />
+        {/* UC-18 — link gói đăng ký */}
+        <div style={{ marginTop: 12 }}>
+          <Link to="/profile/subscription"
+            style={{ fontSize: 13, color: "var(--primary)", display: "inline-flex", alignItems: "center", gap: 6 }}>
+            <i className="fas fa-gem" /> Xem gói đăng ký hiện tại
+          </Link>
+          <span style={{ margin: "0 10px", color: "var(--border)" }}>|</span>
+          <Link to="/profile/payment-history"
+            style={{ fontSize: 13, color: "var(--text-muted)", display: "inline-flex", alignItems: "center", gap: 6 }}>
+            <i className="fas fa-receipt" /> Lịch sử thanh toán
+          </Link>
+        </div>
       </section>
 
       {allEmpty ? (

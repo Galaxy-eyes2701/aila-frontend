@@ -5,6 +5,7 @@ import api from "../../../utils/api";
 import LearningHeader from "./LearningHeader";
 import LearningSidebar from "./LearningSidebar";
 import LearningContent from "./LearningContent";
+import AIChatWidget from "./AIChatWidget";
 import styles from "./LearningView.module.css";
 
 /* ── Skeleton Loading ────────────────────────────────────────────────────── */
@@ -245,6 +246,7 @@ export default function LearningView() {
         <LearningContent
           contentLoading={contentLoading}
           currentMaterial={currentMaterial}
+          enrollmentId={learningViewData?.progress?.enrollmentId}
           onComplete={handleCompleteMaterial}
           hasNextLesson={!!nextLessonId}
           onNextLesson={async () => {
@@ -263,6 +265,9 @@ export default function LearningView() {
           }}
         />
       </div>
+
+      {/* UC-31 — AI Learning Assistant floating widget */}
+      <AIChatWidget courseId={courseId} />
     </div>
   );
 }

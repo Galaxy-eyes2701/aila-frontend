@@ -1,19 +1,22 @@
 // LearningContent.jsx
 import { useEffect, useState } from "react";
 import DOMPurify from "dompurify";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import QuizPanel from "./QuizPanel";
+import AIPracticePanel from "./AIPracticePanel";
 import ReportCourseModal from "../Report/ReportCourseModal";
 import styles from "./LearningView.module.css";
 
 export default function LearningContent({
   contentLoading,
   currentMaterial,
+  enrollmentId,
   onComplete,
   hasNextLesson,
   onNextLesson,
 }) {
   const { courseId } = useParams();
+  const navigate = useNavigate();
   const [showReport, setShowReport] = useState(false);
   const [reportToast, setReportToast] = useState(false);
 
@@ -169,6 +172,16 @@ export default function LearningContent({
               courseId={courseId}
               materialId={currentMaterial.id}
             />
+          ) : /* ── 4. ĐỊNH DẠNG: AI PRACTICE ── */
+          type.includes("aipractice") || type === "aipractice" ? (
+            <AIPracticePanel
+              key={currentMaterial.id}
+              courseId={courseId}
+              materialId={currentMaterial.id}
+              enrollmentId={enrollmentId}
+              isCompleted={currentMaterial.isCompleted}
+              onCompleted={onComplete}
+            />
           ) : (
             /* ── TRƯỜNG HỢP KHÁC ── */
             <div className={styles.noDetail}>
@@ -202,6 +215,12 @@ export default function LearningContent({
               <span className={styles.completeHint}>
                 <i className="fas fa-circle-info" /> Học liệu này hoàn thành khi
                 bạn đạt bài kiểm tra.
+              </span>
+            ) : (type.includes("aipractice") || type === "aipractice") ? (
+              /* AIPractice: hoàn thành khi kết thúc phiên luyện tập */
+              <span className={styles.completeHint}>
+                <i className="fas fa-circle-info" /> Học liệu này hoàn thành khi
+                bạn kết thúc phiên thực hành AI.
               </span>
             ) : (
               <button className={styles.completeBtn} onClick={onComplete}>

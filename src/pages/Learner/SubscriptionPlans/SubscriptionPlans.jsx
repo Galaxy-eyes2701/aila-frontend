@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { useNavigate, useOutletContext } from 'react-router-dom';
+import { Link, useNavigate, useOutletContext } from 'react-router-dom';
 import useAuth from '../../../hooks/useAuth';
 import { resolveApiError } from '../../../utils/api';
 import { hasValidSession } from '../../../utils/token';
@@ -14,20 +14,47 @@ import {
   getPublicSubscriptionPlanById,
   getPublicSubscriptionPlans,
 } from './services/subscriptionPlanApi';
+import { getCurrentSubscription } from '../Subscription/services/subscriptionApi';
 import styles from './SubscriptionPlans.module.css';
 
-// Trang mua/thanh toán nằm ngoài phạm vi milestone này (§9) — FE chỉ chịu trách nhiệm tới bước điều hướng.
 const purchaseRoute = (planId) => `/subscription-plans/${planId}/checkout`;
 
 const BENEFITS = [
-  { key: 'aiTokenLimit', icon: 'fa-bolt', label: 'AI Token' },
-  { key: 'aiPracticeScenarioLimit', icon: 'fa-comments', label: 'Lượt AI Practice' },
-  { key: 'expertEvaluationLimit', icon: 'fa-user-check', label: 'Lượt đánh giá chuyên gia' },
+  { key: 'aiTokenLimit',          icon: 'fa-bolt',       label: 'AI Token'                    },
+  { key: 'aiPracticeScenarioLimit', icon: 'fa-comments', label: 'Lượt AI Practice'             },
+  { key: 'expertEvaluationLimit', icon: 'fa-user-check', label: 'Lượt đánh giá chuyên gia'    },
 ];
 
-function PlanCard({ plan, checking, disabled, onBuy }) {
+/**
+ * Xác định trạng thái nút mua cho một gói so với gói đang active.
+ * - activeTier = null  → chưa có gói → "Mua ngay"
+ * - plan.tier > active → "Nâng cấp"
+ * - plan.tier === active → "Gia hạn"
+ * - plan.tier < active → disabled (BR-05)
+ */
+function resolveBuyLabel(planTier, activeTier) {
+  if (activeTier === null) return { label: 'Mua ngay', disabled: false };
+  if (planTier > activeTier)  return { label: 'Nâng cấp',  disabled: false };
+  if (planTier === activeTier) return { label: 'Gia hạn',   disabled: false };
+  return { label: 'Không khả dụng', disabled: true }; // BR-05
+}
+
+function PlanCard({ plan, checking, anyChecking, activeTier, isCurrentPlan, onBuy }) {
+  const { label: buyLabel, disabled: tierDisabled } = resolveBuyLabel(
+    plan.tierLevel ?? 0,
+    activeTier
+  );
+
+  const isDisabled = anyChecking || tierDisabled;
+
   return (
-    <article className={styles.card}>
+    <article className={`${styles.card} ${isCurrentPlan ? styles.cardCurrent : ''}`}>
+      {isCurrentPlan && (
+        <div className={styles.currentBadge}>
+          <i className="fas fa-circle-check" aria-hidden="true" /> Gói hiện tại
+        </div>
+      )}
+
       <header className={styles.cardHead}>
         <h2 className={styles.cardName}>{plan.name}</h2>
         <div className={styles.cardPrice}>
@@ -36,7 +63,6 @@ function PlanCard({ plan, checking, disabled, onBuy }) {
         </div>
       </header>
 
-      {/* description === null → không render, tuyệt đối không in "null" hay "-" */}
       {plan.description && <p className={styles.cardDesc}>{plan.description}</p>}
 
       <ul className={styles.benefits}>
@@ -49,51 +75,63 @@ function PlanCard({ plan, checking, disabled, onBuy }) {
         ))}
       </ul>
 
-      <button
-        type="button"
-        className={styles.buyButton}
-        onClick={() => onBuy(plan)}
-        disabled={disabled}
-        aria-label={`Mua gói ${plan.name}`}
-      >
-        {checking ? (
-          <>
-            <i className="fas fa-spinner fa-spin" aria-hidden="true" /> Đang kiểm tra...
-          </>
-        ) : (
-          'Mua ngay'
-        )}
-      </button>
+      {tierDisabled ? (
+        <div className={styles.disabledNote} role="note">
+          <i className="fas fa-lock" aria-hidden="true" />
+          Không thể mua gói có cấp thấp hơn gói đang hoạt động
+        </div>
+      ) : (
+        <button
+          type="button"
+          className={`${styles.buyButton} ${isCurrentPlan ? styles.buyButtonRenew : ''}`}
+          onClick={() => onBuy(plan)}
+          disabled={isDisabled}
+          aria-label={`${buyLabel} gói ${plan.name}`}
+        >
+          {checking ? (
+            <><i className="fas fa-spinner fa-spin" aria-hidden="true" /> Đang kiểm tra...</>
+          ) : (
+            <>
+              <i className={`fas ${
+                buyLabel === 'Gia hạn'  ? 'fa-rotate-right' :
+                buyLabel === 'Nâng cấp' ? 'fa-arrow-up-right-dots' : 'fa-gem'
+              }`} aria-hidden="true" />
+              {' '}{buyLabel}
+            </>
+          )}
+        </button>
+      )}
     </article>
   );
 }
 
 export default function SubscriptionPlans() {
-  const navigate = useNavigate();
+  const navigate    = useNavigate();
   const { user, logout } = useAuth();
-  const { openLogin } = useOutletContext() ?? {};
+  const { openLogin }   = useOutletContext() ?? {};
 
-  const [plans, setPlans] = useState([]);
-  const [status, setStatus] = useState('loading'); // loading | ready | error
-  const [loadError, setLoadError] = useState('');
+  const [plans,          setPlans]          = useState([]);
+  const [status,         setStatus]         = useState('loading');
+  const [loadError,      setLoadError]      = useState('');
   const [checkingPlanId, setCheckingPlanId] = useState('');
-  const [toast, setToast] = useState(null);
+  const [toast,          setToast]          = useState(null);
 
-  // Gói đang chờ mua trong lúc người dùng đăng nhập ở pop-up.
+  // Gói đang active (chỉ fetch khi user đã login)
+  const [activeSub,      setActiveSub]      = useState(null); // null = chưa fetch / không có
+
   const pendingPlanIdRef = useRef('');
 
   const showToast = useCallback((message, type = 'success') => {
     setToast({ message, type });
   }, []);
 
+  // Fetch danh sách gói
   const fetchPlans = useCallback(async () => {
     setStatus('loading');
     setLoadError('');
-
     try {
       const res = await getPublicSubscriptionPlans();
       if (res.success) {
-        // Giữ nguyên thứ tự API trả về — FE không sort lại (AC-09.2).
         setPlans(res.data ?? []);
         setStatus('ready');
       } else {
@@ -107,74 +145,77 @@ export default function SubscriptionPlans() {
     }
   }, []);
 
+  // Fetch gói đang active của learner (nếu đã login)
+  const fetchActiveSub = useCallback(async () => {
+    if (!user || !hasValidSession()) return;
+    try {
+      const res = await getCurrentSubscription();
+      if (res.success) setActiveSub(res.data);
+    } catch { /* im lặng — không block trang */ }
+  }, [user]);
+
+  useEffect(() => { fetchPlans();    }, [fetchPlans]);
+  useEffect(() => { fetchActiveSub(); }, [fetchActiveSub]);
+
+  // Re-fetch active sub khi user thay đổi (đăng nhập / đăng xuất)
   useEffect(() => {
-    fetchPlans();
-  }, [fetchPlans]);
+    if (!user) setActiveSub(null);
+  }, [user]);
 
-  /** Bước re-check bắt buộc trước khi sang trang mua (§2.3). */
-  const startPurchase = useCallback(
-    async (planId) => {
-      setCheckingPlanId(planId);
-      try {
-        const res = await getPublicSubscriptionPlanById(planId);
-        if (res.success) {
-          navigate(purchaseRoute(planId));
-          return;
-        }
-
-        showToast(res.errorMessage || PLAN_UNAVAILABLE_MESSAGE, 'error');
-        fetchPlans();
-      } catch (err) {
-        const { status: httpStatus } = resolveApiError(err);
-
-        if (httpStatus === 404) {
-          // PLAN_NOT_FOUND và PLAN_NOT_AVAILABLE hiển thị như nhau.
-          showToast(PLAN_UNAVAILABLE_MESSAGE, 'error');
-          fetchPlans();
-        } else if (httpStatus === 401) {
-          logout();
-          pendingPlanIdRef.current = planId;
-          openLogin?.();
-        } else {
-          showToast('Không kiểm tra được gói đăng ký. Vui lòng thử lại.', 'error');
-        }
-      } finally {
-        setCheckingPlanId('');
-      }
-    },
-    [fetchPlans, logout, navigate, openLogin, showToast]
-  );
-
-  const handleBuyNow = useCallback(
-    (plan) => {
-      // Token hết hạn được xử lý y như chưa đăng nhập — kiểm tra TRƯỚC khi coi là đã đăng nhập.
-      if (!hasValidSession()) {
-        if (localStorage.getItem('accessToken')) logout();
-
-        pendingPlanIdRef.current = plan.id;
-
-        if (openLogin) {
-          openLogin();
-        } else {
-          showToast('Vui lòng đăng nhập để mua gói đăng ký.', 'error');
-        }
+  /** Re-check plan trước khi navigate sang checkout */
+  const startPurchase = useCallback(async (planId) => {
+    setCheckingPlanId(planId);
+    try {
+      const res = await getPublicSubscriptionPlanById(planId);
+      if (res.success) {
+        navigate(purchaseRoute(planId));
         return;
       }
+      showToast(res.errorMessage || PLAN_UNAVAILABLE_MESSAGE, 'error');
+      fetchPlans();
+    } catch (err) {
+      const { status: httpStatus } = resolveApiError(err);
+      if (httpStatus === 404) {
+        showToast(PLAN_UNAVAILABLE_MESSAGE, 'error');
+        fetchPlans();
+      } else if (httpStatus === 401) {
+        logout();
+        pendingPlanIdRef.current = planId;
+        openLogin?.();
+      } else {
+        showToast('Không kiểm tra được gói đăng ký. Vui lòng thử lại.', 'error');
+      }
+    } finally {
+      setCheckingPlanId('');
+    }
+  }, [fetchPlans, logout, navigate, openLogin, showToast]);
 
-      startPurchase(plan.id);
-    },
-    [logout, openLogin, showToast, startPurchase]
-  );
+  const handleBuyNow = useCallback((plan) => {
+    if (!hasValidSession()) {
+      if (localStorage.getItem('accessToken')) logout();
+      pendingPlanIdRef.current = plan.id;
+      if (openLogin) {
+        openLogin();
+      } else {
+        showToast('Vui lòng đăng nhập để mua gói đăng ký.', 'error');
+      }
+      return;
+    }
+    startPurchase(plan.id);
+  }, [logout, openLogin, showToast, startPurchase]);
 
-  // Đăng nhập thành công trong pop-up → chạy tiếp nhánh mua đang chờ.
-  // Đăng nhập thất bại / đóng pop-up → không có gì xảy ra, ở nguyên trang.
+  // Sau khi đăng nhập xong → chạy tiếp pending purchase
   useEffect(() => {
     if (!user || !pendingPlanIdRef.current || !hasValidSession()) return;
-
     const planId = pendingPlanIdRef.current;
     pendingPlanIdRef.current = '';
     startPurchase(planId);
   }, [user, startPurchase]);
+
+  // Tier của gói đang active (null = không có)
+  const activeTier = activeSub?.hasActiveSubscription
+    ? (activeSub.tierLevel ?? null)
+    : null;
 
   return (
     <div className={styles.page}>
@@ -195,6 +236,21 @@ export default function SubscriptionPlans() {
 
       <div className={styles.content}>
         <div className="container">
+
+          {/* Banner gói đang active */}
+          {activeSub?.hasActiveSubscription && (
+            <div className={styles.activeSubBanner}>
+              <i className="fas fa-circle-check" aria-hidden="true" />
+              <span>
+                Gói hiện tại của bạn: <strong>{activeSub.subscriptionPlanName}</strong>
+                {' '}— còn <strong>{activeSub.remainingDays} ngày</strong>
+              </span>
+              <Link to="/profile/subscription" className={styles.activeSubLink}>
+                Xem chi tiết <i className="fas fa-arrow-right" />
+              </Link>
+            </div>
+          )}
+
           {status === 'error' && (
             <div className={styles.errorBanner} role="alert">
               <i className="fas fa-triangle-exclamation" aria-hidden="true" />
@@ -207,8 +263,8 @@ export default function SubscriptionPlans() {
 
           {status === 'loading' && (
             <div className={styles.grid} aria-hidden="true">
-              {Array.from({ length: 3 }).map((_, index) => (
-                <div key={index} className={styles.skeleton} />
+              {Array.from({ length: 3 }).map((_, i) => (
+                <div key={i} className={styles.skeleton} />
               ))}
             </div>
           )}
@@ -225,15 +281,22 @@ export default function SubscriptionPlans() {
 
           {status === 'ready' && plans.length > 0 && (
             <div className={styles.grid}>
-              {plans.map((plan) => (
-                <PlanCard
-                  key={plan.id}
-                  plan={plan}
-                  checking={checkingPlanId === plan.id}
-                  disabled={Boolean(checkingPlanId)}
-                  onBuy={handleBuyNow}
-                />
-              ))}
+              {plans.map((plan) => {
+                const isCurrentPlan =
+                  activeSub?.hasActiveSubscription &&
+                  plan.tierLevel === activeTier;
+                return (
+                  <PlanCard
+                    key={plan.id}
+                    plan={plan}
+                    checking={checkingPlanId === plan.id}
+                    anyChecking={Boolean(checkingPlanId)}
+                    activeTier={activeTier}
+                    isCurrentPlan={isCurrentPlan}
+                    onBuy={handleBuyNow}
+                  />
+                );
+              })}
             </div>
           )}
 
