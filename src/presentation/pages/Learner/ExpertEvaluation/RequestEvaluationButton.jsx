@@ -96,7 +96,7 @@ export default function RequestEvaluationButton({
             className={`${styles.button} ${styles.secondary}`}
           >
             <i className="fas fa-file-circle-check" aria-hidden="true" />
-            Xem yêu cầu đã gửi
+            Xem đánh giá của chuyên gia
           </Link>
         ) : (
           <span className={`${styles.button} ${styles.sent}`}>

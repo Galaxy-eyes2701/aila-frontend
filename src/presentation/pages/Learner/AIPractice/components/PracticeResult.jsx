@@ -76,13 +76,20 @@ export default function PracticeResult({
         </span>
       </div>
 
-      {/* UC-29 — nhờ chuyên gia đánh giá, đặt ngay cạnh phần điểm AI */}
+      {/* UC-29 — nhờ chuyên gia đánh giá, đặt ngay cạnh phần điểm AI.
+          Đã gửi yêu cầu trước đó (xem lại từ lịch sử) -> đổi hẳn sang lời mời xem kết quả. */}
       {attemptId && (
         <div className={styles.expertCta}>
           <div className={styles.expertCtaText}>
-            <p className={styles.expertCtaTitle}>Muốn góc nhìn của chuyên gia?</p>
+            <p className={styles.expertCtaTitle}>
+              {expertEvaluationRequestId
+                ? "Bạn đã nhờ chuyên gia đánh giá bài này"
+                : "Muốn góc nhìn của chuyên gia?"}
+            </p>
             <p className={styles.expertCtaDesc}>
-              Chuyên gia phụ trách khóa học sẽ chấm lại bài của bạn và đưa phản hồi riêng.
+              {expertEvaluationRequestId
+                ? "Xem trạng thái yêu cầu và phản hồi riêng của chuyên gia phụ trách khóa học."
+                : "Chuyên gia phụ trách khóa học sẽ chấm lại bài của bạn và đưa phản hồi riêng."}
             </p>
           </div>
           <RequestEvaluationButton

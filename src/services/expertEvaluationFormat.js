@@ -1,4 +1,7 @@
-import { DELETED_MATERIAL_TITLE } from "@infrastructure/constants/expertEvaluation";
+import {
+  DELETED_MATERIAL_TITLE,
+  EVALUATION_LIMITS,
+} from "@infrastructure/constants/expertEvaluation";
 
 /**
  * Quy tắc hiển thị chung (§8 spec): server trả UTC ISO-8601,
@@ -46,15 +49,25 @@ export function formatRelativeTime(value, fallback = "—") {
   return `${Math.floor(hours / 24)} ngày trước`;
 }
 
-/** Điểm luôn kèm hậu tố `/10`, 1–2 chữ số thập phân. */
-export function formatScore(score, fallback = "—") {
+/**
+ * Phần số của điểm, tối đa 2 chữ số thập phân và bỏ số 0 thừa.
+ * `null` khi không có điểm — để phân biệt với điểm 0.
+ * 85 -> "85"; 85.5 -> "85.5"; 85.255 -> "85.26"
+ */
+function formatScoreValue(score) {
   if (score === null || score === undefined || Number.isNaN(Number(score))) {
-    return fallback;
+    return null;
   }
-  const rounded = Math.round(Number(score) * 100) / 100;
-  // 6 -> "6.0"; 6.5 -> "6.5"; 6.25 -> "6.25"
-  const text = Number.isInteger(rounded) ? rounded.toFixed(1) : String(rounded);
-  return `${text}/10`;
+  return String(Math.round(Number(score) * 100) / 100);
+}
+
+/**
+ * Điểm luôn kèm hậu tố `/100` — chuyên gia và AI dùng chung thang điểm này
+ * (xem `EVALUATION_LIMITS.MAX_SCORE`).
+ */
+export function formatScore(score, fallback = "—") {
+  const text = formatScoreValue(score);
+  return text === null ? fallback : `${text}/${EVALUATION_LIMITS.MAX_SCORE}`;
 }
 
 /** Học liệu đã bị xóa -> backend trả title rỗng; không để trống trên UI. */
@@ -74,9 +87,8 @@ export function buildScoreComparison(expertScore, aiScore) {
   if (diff === 0) return "Chuyên gia đồng quan điểm với AI";
 
   const direction = diff > 0 ? "cao hơn" : "thấp hơn";
-  const gap = Math.abs(diff);
-  const gapText = Number.isInteger(gap) ? gap.toFixed(1) : String(gap);
-  const expertText = formatScore(expertScore).replace("/10", "");
+  const gapText = formatScoreValue(Math.abs(diff));
+  const expertText = formatScoreValue(expertScore);
 
   return `Chuyên gia chấm ${expertText} — ${direction} AI ${gapText} điểm`;
 }
