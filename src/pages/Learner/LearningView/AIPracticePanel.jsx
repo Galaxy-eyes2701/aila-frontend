@@ -159,7 +159,7 @@ export default function AIPracticePanel({
                     </span>
                     {score != null && (
                       <span className={styles.aiPracticeAttemptScore}>
-                        {Math.round(score)}%
+                        {Math.round(score)}/100
                       </span>
                     )}
                     {status.toLowerCase() === "completed" && (

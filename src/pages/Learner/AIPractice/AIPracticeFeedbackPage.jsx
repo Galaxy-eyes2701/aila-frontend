@@ -99,7 +99,11 @@ export default function AIPracticeFeedbackPage() {
           </span>
           {attempt.finalScore != null && (
             <span className={`${styles.hintChip} ${styles.hintChipGreen}`}>
+<<<<<<< Updated upstream
               <i className="fas fa-star" /> {Math.round(attempt.finalScore ?? attempt.FinalScore ?? 0)}%
+=======
+              <i className="fas fa-star" /> {Math.round(finalScore)}/100
+>>>>>>> Stashed changes
             </span>
           )}
         </div>

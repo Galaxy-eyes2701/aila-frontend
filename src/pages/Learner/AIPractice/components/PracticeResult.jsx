@@ -54,8 +54,9 @@ export default function PracticeResult({
       {/* Score */}
       <div className={styles.scoreRow}>
         <div>
-          <div className={styles.scoreBig}>{Math.round(score)}%</div>
-          <div className={styles.scoreLabel}>Điểm tổng</div>
+          {/* Cùng thang 0–100 với điểm chuyên gia chấm (UC-64) để hai bên so được với nhau. */}
+          <div className={styles.scoreBig}>{Math.round(score)}/100</div>
+          <div className={styles.scoreLabel}>Điểm tổng do AI chấm</div>
         </div>
         <span className={`${styles.gradeTag} ${gradeClass(grade)}`}>
           <i className="fas fa-award" /> {gradeLabel(grade)}

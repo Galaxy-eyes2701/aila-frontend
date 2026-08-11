@@ -1,4 +1,9 @@
-import { DELETED_MATERIAL_TITLE } from "../constants/expertEvaluation";
+import {
+  DELETED_MATERIAL_TITLE,
+  EVALUATION_LIMITS,
+} from "../constants/expertEvaluation";
+
+const { MAX_SCORE } = EVALUATION_LIMITS;
 
 /**
  * Quy tắc hiển thị chung (§8 spec): server trả UTC ISO-8601,
@@ -46,15 +51,22 @@ export function formatRelativeTime(value, fallback = "—") {
   return `${Math.floor(hours / 24)} ngày trước`;
 }
 
-/** Điểm luôn kèm hậu tố `/10`, 1–2 chữ số thập phân. */
+/**
+ * Điểm AI (`finalScore`) và điểm chuyên gia (`overallScore`) dùng chung thang 0–100,
+ * nên chung một hàm format. Hậu tố lấy từ `MAX_SCORE` thay vì hardcode.
+ */
 export function formatScore(score, fallback = "—") {
+  const text = formatScoreValue(score);
+  return text === null ? fallback : `${text}/${MAX_SCORE}`;
+}
+
+/** Phần số của điểm, không kèm hậu tố. Trả null khi không có điểm. */
+function formatScoreValue(score) {
   if (score === null || score === undefined || Number.isNaN(Number(score))) {
-    return fallback;
+    return null;
   }
-  const rounded = Math.round(Number(score) * 100) / 100;
-  // 6 -> "6.0"; 6.5 -> "6.5"; 6.25 -> "6.25"
-  const text = Number.isInteger(rounded) ? rounded.toFixed(1) : String(rounded);
-  return `${text}/10`;
+  // 87 -> "87"; 87.5 -> "87.5"; 87.25 -> "87.25"
+  return String(Math.round(Number(score) * 100) / 100);
 }
 
 /** Học liệu đã bị xóa -> backend trả title rỗng; không để trống trên UI. */
@@ -74,9 +86,8 @@ export function buildScoreComparison(expertScore, aiScore) {
   if (diff === 0) return "Chuyên gia đồng quan điểm với AI";
 
   const direction = diff > 0 ? "cao hơn" : "thấp hơn";
-  const gap = Math.abs(diff);
-  const gapText = Number.isInteger(gap) ? gap.toFixed(1) : String(gap);
-  const expertText = formatScore(expertScore).replace("/10", "");
+  const gapText = formatScoreValue(Math.abs(diff));
+  const expertText = formatScoreValue(expertScore);
 
   return `Chuyên gia chấm ${expertText} — ${direction} AI ${gapText} điểm`;
 }

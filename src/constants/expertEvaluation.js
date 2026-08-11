@@ -39,10 +39,14 @@ export const STATUS_FILTERS = [
   { value: REQUEST_STATUS.CANCELLED, label: REQUEST_STATUS_LABEL.Cancelled },
 ];
 
-/** Ràng buộc form chấm điểm — khớp validator phía backend (UC-64). */
+/**
+ * Ràng buộc form chấm điểm — khớp validator phía backend (UC-64), đọc từ
+ * `ExpertEvaluation` trong appsettings.json. Chuyên gia chấm cùng thang 0–100 với AI
+ * để hai điểm so sánh trực tiếp được; đổi ở đây phải đổi cả appsettings.json.
+ */
 export const EVALUATION_LIMITS = {
   MIN_SCORE: 0,
-  MAX_SCORE: 10,
+  MAX_SCORE: 100,
   SCORE_DECIMALS: 2,
   FEEDBACK_MAX: 2000,
   RECOMMENDATION_MAX: 1000,
