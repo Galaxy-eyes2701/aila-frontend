@@ -18,7 +18,7 @@ export default function AiScenariosPage() {
             <i className="fas fa-arrow-left" /> Hồ sơ
           </Link>
           <h1 className={styles.pageTitle}>
-            Lịch sử AI scenario{data ? ` (${data.totalItems})` : ""}
+            Lịch sử luyện tập AI{data ? ` (${data.totalItems})` : ""}
           </h1>
         </div>
 
@@ -37,7 +37,7 @@ export default function AiScenariosPage() {
           <>
             <div className={styles.quizList}>
               {data.items.map((a) => (
-                <AiScenarioRow key={a.materialId} item={a} />
+                <AiScenarioRow key={a.attemptId} item={a} />
               ))}
             </div>
             {data.totalPages > 1 && (

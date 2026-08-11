@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useLocation, useParams } from "react-router-dom";
 import { getAttemptDetail } from "./services/practiceApi";
 import PracticeResult from "./components/PracticeResult";
 import styles from "./AIPractice.module.css";
@@ -14,6 +14,12 @@ import styles from "./AIPractice.module.css";
  */
 export default function AIPracticeFeedbackPage() {
   const { courseId, materialId, attemptId } = useParams();
+  const location = useLocation();
+
+  // Đến từ lịch sử luyện tập trong hồ sơ → quay lại đúng chỗ vừa rời đi.
+  const fromProfile = location.state?.from === "profile";
+  const backTo = fromProfile ? "/profile" : `/learning/${courseId}`;
+  const backLabel = fromProfile ? "Về hồ sơ" : "Về khóa học";
 
   const [loading, setLoading]   = useState(true);
   const [attempt, setAttempt]   = useState(null);
@@ -52,8 +58,8 @@ export default function AIPracticeFeedbackPage() {
     return (
       <div className={styles.page}>
         <div className={styles.container}>
-          <Link to={`/learning/${courseId}`} className={styles.backBtn}>
-            <i className="fas fa-arrow-left" /> Về khóa học
+          <Link to={backTo} className={styles.backBtn}>
+            <i className="fas fa-arrow-left" /> {backLabel}
           </Link>
           <div className={styles.errorBox}>
             <i className="fas fa-circle-exclamation" />{error}
@@ -69,6 +75,8 @@ export default function AIPracticeFeedbackPage() {
   const submissions = attempt.submissions ?? attempt.Submissions ?? [];
   const validMsgs   = submissions.filter((s) => !(s.isRejected ?? s.IsRejected));
 
+  const finalScore = attempt.finalScore ?? attempt.FinalScore ?? null;
+
   // Mặc định kiểm tra status
   const status = (attempt.status ?? attempt.Status ?? "").toLowerCase();
   const isCompleted = status === "completed";
@@ -76,8 +84,8 @@ export default function AIPracticeFeedbackPage() {
   return (
     <div className={styles.page}>
       <div className={styles.container}>
-        <Link to={`/learning/${courseId}`} className={styles.backBtn}>
-          <i className="fas fa-arrow-left" /> Về khóa học
+        <Link to={backTo} className={styles.backBtn}>
+          <i className="fas fa-arrow-left" /> {backLabel}
         </Link>
 
         <h1 className={styles.pageTitle}>
@@ -97,9 +105,9 @@ export default function AIPracticeFeedbackPage() {
           <span className={styles.hintChip}>
             <i className="fas fa-comments" /> {validMsgs.length} lượt hợp lệ
           </span>
-          {attempt.finalScore != null && (
+          {finalScore != null && (
             <span className={`${styles.hintChip} ${styles.hintChipGreen}`}>
-              <i className="fas fa-star" /> {Math.round(attempt.finalScore ?? attempt.FinalScore ?? 0)}%
+              <i className="fas fa-star" /> {Math.round(finalScore)}%
             </span>
           )}
         </div>
@@ -147,6 +155,13 @@ export default function AIPracticeFeedbackPage() {
             result={attempt}
             courseId={courseId}
             materialId={materialId}
+            attemptId={attemptId}
+            attemptStatus={isCompleted ? "Completed" : "InProgress"}
+            expertEvaluationRequestId={
+              attempt.expertEvaluationRequestId ??
+              attempt.ExpertEvaluationRequestId ??
+              null
+            }
           />
         ) : (
           <div className={styles.errorBox} style={{ marginTop: 8 }}>

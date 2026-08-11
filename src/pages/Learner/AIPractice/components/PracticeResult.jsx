@@ -1,15 +1,23 @@
 import { Link } from "react-router-dom";
+import RequestEvaluationButton from "../../ExpertEvaluation/RequestEvaluationButton";
 import styles from "../AIPractice.module.css";
 
 /**
  * UC-28 — Hiển thị kết quả đánh giá AI sau khi kết thúc phiên luyện tập.
  * Dùng chung cho UC-27 (vừa xong) và UC-28 (xem lại từ lịch sử).
+ *
+ * @param {string=} attemptId     bật nút UC-29 "Nhờ chuyên gia đánh giá"
+ * @param {string=} attemptStatus "Completed" | "InProgress" | "Abandoned"
+ * @param {string=} expertEvaluationRequestId  yêu cầu đã gửi trước đó (nếu backend trả)
  */
 export default function PracticeResult({
   result,
   courseId,
   materialId,
   onPracticeAgain,
+  attemptId,
+  attemptStatus,
+  expertEvaluationRequestId = null,
 }) {
   // Tương thích cả camelCase lẫn PascalCase từ API
   const scoring =
@@ -17,18 +25,24 @@ export default function PracticeResult({
     result?.DetailedScoring ??
     result?.scoring;
 
-  const score =
+  // Giữ null khi chưa có điểm để phân biệt với điểm 0 (UC-29 cần biết đã chấm AI chưa).
+  const rawScore =
     scoring?.percentage ??
     scoring?.Percentage ??
     result?.finalScore ??
     result?.FinalScore ??
-    0;
+    null;
+
+  const score = rawScore ?? 0;
 
   const grade   = scoring?.grade   ?? scoring?.Grade   ?? "";
   const summary = scoring?.summary ?? scoring?.Summary ?? result?.overallSuggestion ?? result?.OverallSuggestion ?? "";
   const criteria     = scoring?.criteria          ?? scoring?.Criteria          ?? [];
   const suggestions  = scoring?.learningSuggestions ?? scoring?.LearningSuggestions ?? [];
   const issues       = scoring?.detectedIssues    ?? scoring?.DetectedIssues    ?? [];
+
+  // Backend chỉ nhận yêu cầu chuyên gia khi lượt đã có kết quả chấm của AI.
+  const hasAiEvaluation = rawScore !== null || criteria.length > 0;
 
   function gradeClass(g) {
     const u = (g ?? "").toLowerCase();
@@ -61,6 +75,24 @@ export default function PracticeResult({
           <i className="fas fa-award" /> {gradeLabel(grade)}
         </span>
       </div>
+
+      {/* UC-29 — nhờ chuyên gia đánh giá, đặt ngay cạnh phần điểm AI */}
+      {attemptId && (
+        <div className={styles.expertCta}>
+          <div className={styles.expertCtaText}>
+            <p className={styles.expertCtaTitle}>Muốn góc nhìn của chuyên gia?</p>
+            <p className={styles.expertCtaDesc}>
+              Chuyên gia phụ trách khóa học sẽ chấm lại bài của bạn và đưa phản hồi riêng.
+            </p>
+          </div>
+          <RequestEvaluationButton
+            attemptId={attemptId}
+            attemptStatus={attemptStatus}
+            hasAiEvaluation={hasAiEvaluation}
+            requestId={expertEvaluationRequestId}
+          />
+        </div>
+      )}
 
       {/* Summary */}
       {summary && (
