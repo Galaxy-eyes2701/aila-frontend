@@ -219,6 +219,8 @@ const router = createBrowserRouter([
       { index: true, element: <ExpertHome /> },
       { path: "profile", element: <ExpertProfile /> },
       { path: "courses", element: <ExpertCourseManagement /> },
+      { path: "my-courses", element: <ExpertCourseManagement /> },
+      { path: "my-courses/:courseId", element: <ExpertCourseManagement /> },
       { path: "courses/:courseId/modules", element: <ModuleManagement /> },
       { path: "ai-resource-usage", element: <ExpertAiResourceUsage /> },
       // UC-63 / UC-64 — hàng chờ & chấm bài đánh giá

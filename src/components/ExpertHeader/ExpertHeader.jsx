@@ -99,6 +99,34 @@ export default function ExpertHeader() {
     };
   }, [user]);
 
+  const handleNotificationClick = async (n) => {
+    setNoticeOpen(false);
+    if (!n) return;
+
+    if (!n.isRead) {
+      setRecentNotifications((prev) =>
+        prev.map((item) => (item.id === n.id ? { ...item, isRead: true } : item))
+      );
+      setUnreadCount((prev) => Math.max(0, prev - 1));
+      try {
+        await api.patch(`/notifications/${n.id}/read`);
+        window.dispatchEvent(new CustomEvent("notifications-updated"));
+      } catch {}
+    }
+
+    const targetUrl = n.redirectUrl || n.redicturl || n.redirect_url || n.targetUrl;
+    if (targetUrl) {
+      if (targetUrl.startsWith("http://") || targetUrl.startsWith("https://")) {
+        window.location.href = targetUrl;
+      } else {
+        const formattedUrl = targetUrl.startsWith("/") ? targetUrl : `/${targetUrl}`;
+        navigate(formattedUrl);
+      }
+    } else {
+      navigate("/expert/notifications");
+    }
+  };
+
   // Badge "Yêu cầu đánh giá": chỉ cần totalItems nên gọi pageSize=1.
   const [pendingEvaluations, setPendingEvaluations] = useState(0);
 
@@ -213,8 +241,13 @@ export default function ExpertHeader() {
                   Chưa có thông báo nào.
                 </div>
               ) : (
-                recentNotifications.map(n => (
-                  <div key={n.id} className={styles.noticeDropdownItem}>
+                recentNotifications.map((n) => (
+                  <div
+                    key={n.id}
+                    className={styles.noticeDropdownItem}
+                    onClick={() => handleNotificationClick(n)}
+                    style={{ cursor: "pointer" }}
+                  >
                     <strong>{n.title}</strong>
                     {n.body}
                   </div>

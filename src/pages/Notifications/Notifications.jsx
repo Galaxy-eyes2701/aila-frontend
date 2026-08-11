@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import api from '../../utils/api';
 import styles from './Notifications.module.css';
 import Pagination from '../../components/Pagination/Pagination.jsx';
@@ -54,6 +54,7 @@ function SkeletonLoader() {
 
 /* ── Component ───────────────────────────────────────────────────────────── */
 export default function Notifications() {
+  const navigate = useNavigate();
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading]             = useState(true);
   const [error, setError]                 = useState('');
@@ -89,17 +90,28 @@ export default function Notifications() {
     } catch { }
   };
 
-  const markOneRead = async (id) => {
-    const notification = notifications.find(n => n.id === id);
-    if (!notification || notification.isRead) return;
+  const handleNotificationClick = async (n) => {
+    if (!n) return;
 
-    setNotifications(prev =>
-      prev.map(n => n.id === id ? { ...n, isRead: true } : n)
-    );
-    try {
-      await api.patch(`/notifications/${id}/read`);
-      window.dispatchEvent(new CustomEvent('notifications-updated'));
-    } catch { }
+    if (!n.isRead) {
+      setNotifications(prev =>
+        prev.map(item => item.id === n.id ? { ...item, isRead: true } : item)
+      );
+      try {
+        await api.patch(`/notifications/${n.id}/read`);
+        window.dispatchEvent(new CustomEvent('notifications-updated'));
+      } catch { }
+    }
+
+    const targetUrl = n.redirectUrl || n.redicturl || n.redirect_url || n.targetUrl;
+    if (targetUrl) {
+      if (targetUrl.startsWith('http://') || targetUrl.startsWith('https://')) {
+        window.location.href = targetUrl;
+      } else {
+        const formattedUrl = targetUrl.startsWith('/') ? targetUrl : `/${targetUrl}`;
+        navigate(formattedUrl);
+      }
+    }
   };
 
     // Lọc theo filter
@@ -209,7 +221,7 @@ const unreadCount = notifications.filter(
                   <li
                     key={n.id}
                     className={`${styles.item} ${!n.isRead ? styles.unread : ''}`}
-                    onClick={() => markOneRead(n.id)}
+                    onClick={() => handleNotificationClick(n)}
                   >
                     <div className={`${styles.typeIcon} ${styles[typeClass]}`}>
                       <i className={`fas ${getTypeIcon(n.type)}`} />
