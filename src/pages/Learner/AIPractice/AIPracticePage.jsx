@@ -527,6 +527,9 @@ export default function AIPracticePage() {
               courseId={courseId}
               materialId={materialId}
               onPracticeAgain={handlePracticeAgain}
+              attemptId={attemptId}
+              // phase "done" nghĩa là completeAttempt đã chạy xong.
+              attemptStatus="Completed"
             />
           </>
         )}

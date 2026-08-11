@@ -209,21 +209,21 @@
 }
 .viewDetail:hover { background: var(--primary); color: #fff; }
 
-/* ── AI scenario rows ───────────────────────────────────────────────────── */
-.aiRow {
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  box-shadow: var(--shadow-sm);
-  padding: 16px 20px;
-  display: flex;
+/* ── AI scenario rows (dùng chung .quizRow) ─────────────────────────────── */
+.diffBadge {
+  display: inline-flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 16px;
+  gap: 6px;
+  padding: 3px 12px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 800;
+  background: var(--primary-light);
+  color: var(--primary-dark);
 }
-.aiName { font-size: 16px; font-weight: 700; color: var(--text); }
-.aiDate { font-size: 13px; color: var(--text-muted); margin-top: 2px; }
-.aiScore { font-size: 15px; font-weight: 800; color: var(--primary); }
+.diffEasy { background: #d7f0df; color: #1d7a3e; }
+.diffMedium { background: #fdf0d5; color: #a2701a; }
+.diffHard { background: #fbe0e0; color: #c62828; }
 
 /* ── State blocks (empty / error / skeleton) ────────────────────────────── */
 .blockState {

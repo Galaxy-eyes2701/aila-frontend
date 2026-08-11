@@ -27,6 +27,11 @@ export default function LearningSections({ profile }) {
   const quizHistory = profile.quizHistory || [];
   const aiScenarioHistory = profile.aiScenarioHistory || [];
 
+  // Tổng số lượt luyện AI lấy từ summary (server đếm toàn bộ); danh sách nhúng
+  // chỉ là 5 lượt gần nhất nên không dùng .length làm tổng.
+  const totalAiScenarios =
+    summary.totalAiScenariosPracticed ?? aiScenarioHistory.length;
+
   const allEmpty =
     enrollments.length === 0 &&
     quizHistory.length === 0 &&
@@ -44,7 +49,7 @@ export default function LearningSections({ profile }) {
             <i className="fas fa-bolt" /> Xem sử dụng tài nguyên <i className="fas fa-arrow-right" />
           </Link>
         </div>
-        <SummaryStats summary={summary} aiScenarioCount={aiScenarioHistory.length} />
+        <SummaryStats summary={summary} aiScenarioCount={totalAiScenarios} />
         {/* UC-18 — link gói đăng ký */}
         <div style={{ marginTop: 12 }}>
           <Link to="/profile/subscription"
@@ -130,13 +135,19 @@ export default function LearningSections({ profile }) {
           <section className={styles.section}>
             <div className={styles.sectionHeader}>
               <h2 className={styles.sectionTitle}>
-                <i className="fas fa-robot" /> Lịch sử AI scenario
+                <i className="fas fa-robot" /> Lịch sử luyện tập AI
               </h2>
+              {totalAiScenarios > aiScenarioHistory.length && (
+                <Link to="/profile/ai-scenarios" className={styles.viewAll}>
+                  Xem tất cả ({totalAiScenarios}){" "}
+                  <i className="fas fa-arrow-right" />
+                </Link>
+              )}
             </div>
             {aiScenarioHistory.length > 0 ? (
               <div className={styles.quizList}>
                 {aiScenarioHistory.slice(0, 5).map((a) => (
-                  <AiScenarioRow key={a.materialId} item={a} />
+                  <AiScenarioRow key={a.attemptId} item={a} />
                 ))}
               </div>
             ) : (
