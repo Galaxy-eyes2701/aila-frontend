@@ -1,7 +1,7 @@
 /* ── DESIGN TOKENS ─────────────────────────────────────────────────────── */
 .page {
   min-height: 100vh;
-  background: #e8e9ff;
+  background: #e0f2fe;
   font-family: 'DM Sans', 'Inter', system-ui, sans-serif;
 }
 
@@ -497,7 +497,7 @@
 
 .ctag {
   font-size: 0.62rem;
-  background: #e8e9ff;
+  background: #e0f2fe;
   color: #6a6f73;
   border-radius: 4px;
   padding: 2px 7px;

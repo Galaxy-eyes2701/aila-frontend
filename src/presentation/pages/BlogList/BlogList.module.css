@@ -266,7 +266,7 @@
   transition: background var(--transition);
 }
 
-.clearSearchBtn:hover { background: #dde3fd; }
+.clearSearchBtn:hover { background: #bae6fd; }
 
 /* ── SKELETON ── */
 .skeletonCard {

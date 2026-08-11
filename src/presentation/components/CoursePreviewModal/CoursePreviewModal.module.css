@@ -23,7 +23,7 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  background: #1e1b4b;
+  background: #0369a1;
   color: #c7d2fe;
   font-size: 12px;
   font-weight: 700;
@@ -33,7 +33,7 @@
   flex-wrap: wrap;
   z-index: 10;
 }
-.previewBanner > i { color: #818cf8; font-size: 14px; }
+.previewBanner > i { color: #38bdf8; font-size: 14px; }
 
 .closeBannerBtn {
   margin-left: auto;
@@ -42,7 +42,7 @@
   gap: 6px;
   padding: 6px 16px;
   border-radius: 6px;
-  background: #4f46e5;
+  background: #0284c7;
   color: #fff;
   font-size: 12px;
   font-weight: 700;
@@ -51,7 +51,7 @@
   white-space: nowrap;
   transition: background .15s;
 }
-.closeBannerBtn:hover { background: #4338ca; }
+.closeBannerBtn:hover { background: #0369a1; }
 
 /* ── CENTER STATE ─────────────────────────────────────────── */
 .centerState {
@@ -214,8 +214,8 @@
   font-size: 11px;
   font-weight: 700;
   letter-spacing: .4px;
-  color: #4338ca;
-  background: #eef2ff;
+  color: #0369a1;
+  background: #e0f2fe;
   border: 1px solid #c7d2fe;
   border-radius: 4px;
   padding: 4px 10px;
@@ -306,12 +306,12 @@
   gap: 12px;
   color: var(--text-muted);
 }
-.quizPreview i { font-size: 40px; color: #818cf8; }
+.quizPreview i { font-size: 40px; color: #38bdf8; }
 .quizPreview p { font-size: 15px; font-weight: 600; color: var(--text); }
 .quizNote {
   font-size: 12px;
-  color: #6366f1;
-  background: #eef2ff;
+  color: #0284c7;
+  background: #e0f2fe;
   padding: 7px 14px;
   border-radius: 6px;
   display: flex;
@@ -484,8 +484,8 @@
   font-size: 11px;
   font-weight: 700;
   letter-spacing: .4px;
-  color: #4338ca;
-  background: #eef2ff;
+  color: #0369a1;
+  background: #e0f2fe;
   border: 1px solid #c7d2fe;
   border-radius: 4px;
   padding: 3px 10px;
@@ -562,7 +562,7 @@
   flex-shrink: 0;
 }
 .quizQBadgeSingle  { background: #dbeafe; color: #1d4ed8; }
-.quizQBadgeMulti   { background: #ede9fe; color: #6d28d9; }
+.quizQBadgeMulti   { background: #e0f2fe; color: #0369a1; }
 
 /* ── OPTION LIST ──────────────────────────────────────────── */
 .quizOptionList {

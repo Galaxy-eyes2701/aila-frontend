@@ -20,7 +20,7 @@
   --border: #e2e8f0;
   --border-subtle: #f1f5f9;
   --surface: #ffffff;
-  --canvas: #e8e9ff;
+  --canvas: #e0f2fe;
   --radius-sm: 8px;
   --radius-md: 12px;
   --radius-lg: 16px;
@@ -169,7 +169,7 @@
 
 .iconPurple {
   background: #f5f3ff;
-  color: #7c3aed;
+  color: #0284c7;
 }
 
 .statContent {
@@ -465,7 +465,7 @@
 }
 
 .roleExpert {
-  background: #f3e8ff;
+  background: #f0f9ff;
   color: #6b21a8;
 }
 
@@ -504,7 +504,7 @@
   width: 36px;
   height: 36px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #6366f1, #3b82f6);
+  background: linear-gradient(135deg, #0284c7, #3b82f6);
   color: white;
   display: flex;
   align-items: center;

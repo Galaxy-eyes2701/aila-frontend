@@ -6,7 +6,7 @@
 
 /* ── Hero Banner ── */
 .hero {
-  background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #312e81 100%);
+  background: linear-gradient(135deg, #0f172a 0%, #0369a1 50%, #0284c7 100%);
   color: #ffffff;
   padding: 56px 24px 72px;
   position: relative;
@@ -37,12 +37,12 @@
   align-items: center;
   gap: 8px;
   font-size: 0.875rem;
-  color: #a5b4fc;
+  color: #7dd3fc;
   margin-bottom: 16px;
 }
 
 .breadcrumb a {
-  color: #a5b4fc;
+  color: #7dd3fc;
   text-decoration: none;
   transition: color 0.2s ease;
 }
@@ -69,7 +69,7 @@
 
 .heroTitleGroup h1 em {
   font-style: normal;
-  background: linear-gradient(135deg, #a5b4fc 0%, #818cf8 100%);
+  background: linear-gradient(135deg, #7dd3fc 0%, #38bdf8 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
@@ -201,7 +201,7 @@
   align-items: center;
   gap: 8px;
   padding: 12px 24px;
-  background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%);
+  background: linear-gradient(135deg, #0284c7 0%, #0284c7 100%);
   color: #ffffff;
   border-radius: 12px;
   font-weight: 600;
@@ -227,7 +227,7 @@
 }
 
 .sectionTitle i {
-  color: #6366f1;
+  color: #0284c7;
 }
 
 /* ── Resources Grid ── */
@@ -275,8 +275,8 @@
 }
 
 .iconAiToken {
-  background: #eef2ff;
-  color: #6366f1;
+  background: #e0f2fe;
+  color: #0284c7;
 }
 
 .iconAiPractice {
@@ -378,7 +378,7 @@
 }
 
 .remainingValue {
-  color: #4f46e5;
+  color: #0284c7;
 }
 
 /* ── Guidelines Section ── */
@@ -409,8 +409,8 @@
   width: 36px;
   height: 36px;
   border-radius: 10px;
-  background: #e0e7ff;
-  color: #4f46e5;
+  background: #e0f2fe;
+  color: #0284c7;
   display: flex;
   align-items: center;
   justify-content: center;

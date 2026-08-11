@@ -98,7 +98,7 @@
   transition: background var(--transition);
 }
 
-.markAllBtn:hover { background: #dde3fd; }
+.markAllBtn:hover { background: #bae6fd; }
 
 /* ── NOTICE LIST ── */
 .list { list-style: none; }
@@ -117,7 +117,7 @@
 
 .item:hover { background: #fafafe; }
 
-.item.unread { background: #f5f7ff; }
+.item.unread { background: #f0f9ff; }
 
 /* Type icon */
 .typeIcon {
@@ -132,7 +132,7 @@
   margin-top: 2px;
 }
 
-.typeIcon.system      { background: #e0e7ff; color: #4338ca; }
+.typeIcon.system      { background: #e0f2fe; color: #0369a1; }
 .typeIcon.courseUpdate { background: #d1fae5; color: #059669; }
 .typeIcon.enrollment  { background: #fef3c7; color: #d97706; }
 .typeIcon.assignment  { background: #fce7f3; color: #db2777; }
@@ -181,7 +181,7 @@
   letter-spacing: .4px;
 }
 
-.typePill.system      { background: #e0e7ff; color: #4338ca; }
+.typePill.system      { background: #e0f2fe; color: #0369a1; }
 .typePill.courseUpdate { background: #d1fae5; color: #059669; }
 .typePill.enrollment  { background: #fef3c7; color: #d97706; }
 .typePill.assignment  { background: #fce7f3; color: #db2777; }

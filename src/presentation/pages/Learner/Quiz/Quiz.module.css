@@ -1,7 +1,7 @@
 /* ── Layout khung trang ─────────────────────────────────────────────────── */
 .page {
   min-height: calc(100vh - 140px);
-  background: #e8e9ff;
+  background: #e0f2fe;
   padding: 32px 0 64px;
 }
 
