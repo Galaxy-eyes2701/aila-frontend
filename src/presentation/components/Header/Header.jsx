@@ -7,10 +7,8 @@ import { DEFAULT_AVATAR } from "@infrastructure/constants/defaultAvatar";
 
 const NAV_LINKS = [
   { label: "Khóa học", href: "/courses" },
-  { label: "Hướng dẫn", href: "*" },
   { label: "Tin tức", href: "/blogs" },
   { label: "Gói đăng ký", href: "/subscription-plans" },
-  { label: "Hỏi đáp", href: "*" },
 ];
 
 export default function Header({ onLoginClick }) {
@@ -102,7 +100,7 @@ export default function Header({ onLoginClick }) {
           setRecentNotifications(all.slice(0, 3));
           setUnreadCount(all.filter((n) => !n.isRead).length);
         }
-      } catch {}
+      } catch { }
     };
 
     fetchNotifications();
@@ -124,7 +122,7 @@ export default function Header({ onLoginClick }) {
       try {
         await api.patch(`/notifications/${n.id}/read`);
         window.dispatchEvent(new CustomEvent("notifications-updated"));
-      } catch {}
+      } catch { }
     }
 
     const targetUrl = n.redirectUrl || n.redicturl || n.redirect_url || n.targetUrl;
