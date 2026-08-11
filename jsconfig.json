@@ -1,0 +1,18 @@
+{
+  "compilerOptions": {
+    "baseUrl": ".",
+    "jsx": "react-jsx",
+    "moduleResolution": "node",
+    "target": "ES2020",
+    "module": "ESNext",
+    "paths": {
+      "@/*": ["src/*"],
+      "@presentation/*": ["src/presentation/*"],
+      "@routing/*": ["src/routing/*"],
+      "@state/*": ["src/state/*"],
+      "@services/*": ["src/services/*"],
+      "@infrastructure/*": ["src/infrastructure/*"]
+    }
+  },
+  "include": ["src/**/*"]
+}
