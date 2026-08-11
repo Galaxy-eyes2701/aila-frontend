@@ -39,10 +39,15 @@ export const STATUS_FILTERS = [
   { value: REQUEST_STATUS.CANCELLED, label: REQUEST_STATUS_LABEL.Cancelled },
 ];
 
-/** Ràng buộc form chấm điểm — khớp validator phía backend (UC-64). */
+/**
+ * Ràng buộc form chấm điểm — khớp validator phía backend (UC-64,
+ * `ExpertEvaluationSettings` trong aila-backend).
+ * Thang điểm 0–100 để trùng thang với điểm AI (`PracticeAttempt.FinalScore`),
+ * nhờ vậy hai kết quả so sánh được trực tiếp.
+ */
 export const EVALUATION_LIMITS = {
   MIN_SCORE: 0,
-  MAX_SCORE: 10,
+  MAX_SCORE: 100,
   SCORE_DECIMALS: 2,
   FEEDBACK_MAX: 2000,
   RECOMMENDATION_MAX: 1000,
