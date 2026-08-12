@@ -101,6 +101,10 @@ const router = createBrowserRouter([
         path: "activity-logs",
         element: <AdminActivityLogsPage />,
       },
+      {
+        path: "notifications",
+        element: <Notifications />,
+      },
     ],
   },
 
