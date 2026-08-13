@@ -90,6 +90,115 @@
   background: #f8fafc;
   transform: translateY(-1px);
 }
+/* ===== Notification Bell & Dropdown ===== */
+.noticeWrapper {
+  position: relative;
+}
+
+.bellBtn {
+  position: relative;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #eff6ff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #2563eb;
+  font-size: 17px;
+  border: none;
+  cursor: pointer;
+  transition:
+    background 0.2s ease,
+    transform 0.2s ease;
+}
+
+.bellBtn:hover {
+  background: #2563eb;
+  color: #fff;
+  transform: scale(1.08);
+}
+
+.bellBadge {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: 999px;
+  background: #ef4444;
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid #fff;
+}
+
+.noticeDropdown {
+  display: none;
+  position: absolute;
+  top: 100%;
+  right: 0;
+  width: 320px;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e5e7eb;
+  overflow: hidden;
+  z-index: 200;
+  margin-top: 8px;
+}
+
+.noticeDropdownHeader {
+  padding: 16px 20px 12px;
+  font-weight: 700;
+  font-size: 15px;
+  border-bottom: 1px solid #e5e7eb;
+  color: #111827;
+}
+
+.noticeDropdownItem {
+  padding: 14px 20px;
+  border-bottom: 1px solid #e5e7eb;
+  font-size: 13px;
+  color: #4b5563;
+  line-height: 1.5;
+  transition: background 0.2s ease;
+}
+
+.noticeDropdownItem:hover {
+  background: #f9fafb;
+}
+
+.noticeDropdownItem strong {
+  display: block;
+  color: #111827;
+  margin-bottom: 2px;
+  font-size: 13.5px;
+}
+
+.noticeDropdownFooter {
+  display: block;
+  padding: 12px 20px;
+  text-align: center;
+  font-size: 13px;
+  font-weight: 600;
+  color: #2563eb;
+  text-decoration: none;
+  transition: background 0.2s ease;
+}
+
+.noticeDropdownFooter:hover {
+  background: #eff6ff;
+}
+
+.dropdownOpen {
+  display: block !important;
+}
+
 /* ===== Hamburger menu (chỉ hiện trên mobile) ===== */
 .menuToggle {
   display: none;
@@ -146,6 +255,14 @@
   .menuToggle {
     display: flex;
   }
+
+  .noticeDropdown {
+    position: fixed;
+    top: 68px;
+    right: 16px;
+    left: auto;
+    width: min(320px, calc(100vw - 32px));
+  }
 }
 
 @media (max-width: 480px) {
@@ -163,7 +280,14 @@
     white-space: nowrap;
   }
 
+  .bellBtn {
+    width: 36px;
+    height: 36px;
+    font-size: 15px;
+  }
+
   .navContent {
     gap: 10px;
   }
 }
+

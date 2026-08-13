@@ -280,9 +280,6 @@ export default function ExpertHeader() {
               <Link to="/expert/profile" onClick={() => setUserMenuOpen(false)}>
                 <i className="fas fa-user" /> Hồ sơ cá nhân
               </Link>
-              <Link to="/expert/ai-resource-usage" onClick={() => setUserMenuOpen(false)}>
-                <i className="fas fa-bolt" /> Tài nguyên AI
-              </Link>
               <button
                 className={styles.logoutBtn}
                 onClick={() => { setUserMenuOpen(false); handleLogout(); }}

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import api from '@services/api';
+import useAuth from '@state/hooks/useAuth';
 import styles from './Notifications.module.css';
 import Pagination from '@presentation/components/Pagination/Pagination.jsx';
 
@@ -55,12 +56,15 @@ function SkeletonLoader() {
 /* ── Component ───────────────────────────────────────────────────────────── */
 export default function Notifications() {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading]             = useState(true);
   const [error, setError]                 = useState('');
   const [filter, setFilter]               = useState('all'); // 'all' | 'unread'
 
-    // ── Phân trang ──
+  const homePath = user?.role === 'Admin' ? '/admin/reports' : user?.role === 'Expert' ? '/expert' : '/';
+
+  // ── Phân trang ──
   const [currentPage, setCurrentPage]   = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
 
@@ -82,7 +86,7 @@ export default function Notifications() {
     fetchNotifications();
   }, []);
 
-    const markAllRead = async () => {
+  const markAllRead = async () => {
     setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
     try {
       await api.patch('/notifications/read-all');
@@ -114,41 +118,41 @@ export default function Notifications() {
     }
   };
 
-    // Lọc theo filter
-    const filtered =
-      filter === "unread"
-        ? notifications.filter((n) => !n.isRead)
-        : notifications;
+  // Lọc theo filter
+  const filtered =
+    filter === "unread"
+      ? notifications.filter((n) => !n.isRead)
+      : notifications;
 
-    // Reset trang khi đổi filter
-    useEffect(() => {
-      setCurrentPage(1);
-    }, [filter, itemsPerPage]);
+  // Reset trang khi đổi filter
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [filter, itemsPerPage]);
 
-    // Tính phân trang
-    const totalItems = filtered.length;
-    const totalPages = Math.max(
-      1,
-      Math.ceil(totalItems / itemsPerPage)
-    );
+  // Tính phân trang
+  const totalItems = filtered.length;
+  const totalPages = Math.max(
+    1,
+    Math.ceil(totalItems / itemsPerPage)
+  );
 
-    const startIndex = (currentPage - 1) * itemsPerPage;
+  const startIndex = (currentPage - 1) * itemsPerPage;
 
-    const displayed = filtered.slice(
-      startIndex,
-      startIndex + itemsPerPage
-    );
+  const displayed = filtered.slice(
+    startIndex,
+    startIndex + itemsPerPage
+  );
 
-const unreadCount = notifications.filter(
-  (n) => !n.isRead
-).length;
+  const unreadCount = notifications.filter(
+    (n) => !n.isRead
+  ).length;
 
-   return (
+  return (
     <div className={styles.page}>
       <div className="container">
         {/* Breadcrumb */}
         <div className={styles.breadcrumb}>
-          <Link to="/">Trang chủ</Link>
+          <Link to={homePath}>Trang chủ</Link>
           <i className="fas fa-chevron-right" />
           <span>Thông báo</span>
         </div>

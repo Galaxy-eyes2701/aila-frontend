@@ -69,109 +69,6 @@ const router = createBrowserRouter([
     ),
     children: [
       { index: true, element: <Navigate to="/admin/reports" replace /> },
-      { index: true, element: <Navigate to="/admin/dashboard" replace /> },
-      {
-        path: "dashboard",
-        element: (
-          <div style={{ padding: 48 }}>
-            <h2>Admin Dashboard</h2>
-            <p>Chọn chức năng bên dưới để quản lý người dùng hoặc tags.</p>
-            <div
-              style={{
-                display: "flex",
-                gap: 16,
-                marginTop: 24,
-                flexWrap: "wrap",
-              }}
-            >
-              <a
-                href="/admin/users"
-                style={{
-                  padding: "14px 22px",
-                  background: "#2563eb",
-                  color: "#fff",
-                  borderRadius: 12,
-                  textDecoration: "none",
-                }}
-              >
-                Quản lý người dùng
-              </a>
-              <a
-                href="/admin/tags"
-                style={{
-                  padding: "14px 22px",
-                  background: "#1d4ed8",
-                  color: "#fff",
-                  borderRadius: 12,
-                  textDecoration: "none",
-                }}
-              >
-                Quản lý tags
-              </a>
-              <a
-                href="/admin/reports"
-                style={{
-                  padding: "14px 22px",
-                  background: "#0f766e",
-                  color: "#fff",
-                  borderRadius: 12,
-                  textDecoration: "none",
-                }}
-              >
-                Review reports
-              </a>
-              <a
-                href="/admin/categories"
-                style={{
-                  padding: "14px 22px",
-                  background: "#7c3aed",
-                  color: "#fff",
-                  borderRadius: 12,
-                  textDecoration: "none",
-                }}
-              >
-                Quản lý category
-              </a>
-              <a
-                href="/admin/subscription-plans"
-                style={{
-                  padding: "14px 22px",
-                  background: "#b45309",
-                  color: "#fff",
-                  borderRadius: 12,
-                  textDecoration: "none",
-                }}
-              >
-                Quản lý gói đăng ký
-              </a>
-              <a
-                href="/admin/resource-limit-management"
-                style={{
-                  padding: "14px 22px",
-                  background: "#b45309",
-                  color: "#fff",
-                  borderRadius: 12,
-                  textDecoration: "none",
-                }}
-              >
-                Quản lý giới hạn tài nguyên
-              </a>
-              <a
-                href="/admin/activity-logs"
-                style={{
-                  padding: "14px 22px",
-                  background: "#b45309",
-                  color: "#fff",
-                  borderRadius: 12,
-                  textDecoration: "none",
-                }}
-              >
-                Nhật kí hoạt động
-              </a>
-            </div>
-          </div>
-        ),
-      },
       {
         path: "users",
         element: <UserManagement />,
@@ -203,6 +100,10 @@ const router = createBrowserRouter([
       {
         path: "activity-logs",
         element: <AdminActivityLogsPage />,
+      },
+      {
+        path: "notifications",
+        element: <Notifications />,
       },
     ],
   },

@@ -154,7 +154,12 @@ export default function Header({ onLoginClick }) {
         <ul
           className={`${styles.navLinks} ${mobileOpen ? styles.navLinksOpen : ""}`}
         >
-          {NAV_LINKS.map(({ label, href }) => (
+          {[
+            ...NAV_LINKS,
+            ...(user && user.role === "Learner"
+              ? [{ label: "Tài nguyên đăng ký", href: "/profile/subscription-usage" }]
+              : []),
+          ].map(({ label, href }) => (
             <li key={label}>
               <Link
                 to={href}
@@ -247,9 +252,6 @@ export default function Header({ onLoginClick }) {
                       </Link>
                       <Link to="/profile/payment-history" onClick={() => setUserMenuOpen(false)}>
                         <i className="fas fa-receipt" /> Lịch sử thanh toán
-                      </Link>
-                      <Link to="/profile/subscription-usage" onClick={() => setUserMenuOpen(false)}>
-                        <i className="fas fa-chart-pie" /> Tài nguyên đăng ký
                       </Link>
                     </>
                   )}
