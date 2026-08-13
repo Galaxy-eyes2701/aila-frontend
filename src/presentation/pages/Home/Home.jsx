@@ -91,6 +91,8 @@ export default function Home() {
   const [blogs, setBlogs]           = useState([]);
   const [coursesLoading, setCLoading] = useState(true);
   const [blogsLoading, setBLoading]   = useState(true);
+  const [recommendedCourses, setRecommendedCourses] = useState([]);
+  const [recLoading, setRecLoading]                 = useState(false);
 
   // ── Banner slider ──
   const [slide, setSlide]   = useState(0);
@@ -120,6 +122,23 @@ export default function Home() {
     if (d.success) setBlogs(d.data ?? []);
   }).catch(() => {}).finally(() => setBLoading(false));
   }, []);
+
+  /* ── Fetch recommendations for Learner ── */
+  useEffect(() => {
+    if (user && user.role === 'Learner') {
+      setRecLoading(true);
+      api.get('/courses/recommendation?limit=5')
+        .then(r => {
+          const list = r.data?.data ?? r.data ?? [];
+          setRecommendedCourses(Array.isArray(list) ? list : []);
+        })
+        .catch(() => setRecommendedCourses([]))
+        .finally(() => setRecLoading(false));
+    } else {
+      setRecommendedCourses([]);
+      setRecLoading(false);
+    }
+  }, [user]);
 
   /* ── Kiểm tra onboarding sau khi đăng nhập ── */
     useEffect(() => {
@@ -231,10 +250,92 @@ export default function Home() {
           </section>
         )}
 
+        {/* ══ RECOMMENDED COURSES FOR YOU ══ */}
+        {user && user.role === 'Learner' ? (
+          (recLoading || recommendedCourses.length > 0) && (
+            <section className={styles.homeSection}>
+              <div className={styles.sectionHeader}>
+                <div className={styles.recommendedTitleGroup}>
+                  <h2 className={styles.sectionTitle}>Khóa học đề xuất cho bạn</h2>
+                  <span className={styles.aiBadge}>
+                    <i className="fas fa-sparkles" /> Gợi ý AI
+                  </span>
+                </div>
+                <Link to="/courses" className={styles.seeAll}>
+                  Xem tất cả <i className="fas fa-arrow-right" />
+                </Link>
+              </div>
+              <div className={styles.courseGrid}>
+                {recLoading ? (
+                  <CourseSkeleton />
+                ) : (
+                  recommendedCourses.map(course => {
+                    const courseId = course.courseId || course.id;
+                    return (
+                      <Link to={`/courses/${courseId}`} key={courseId} className={`${styles.courseCard} ${styles.recommendedCard}`}>
+                        <div className={styles.courseThumbnail}>
+                          {course.thumbnailUrl ? (
+                            <img src={course.thumbnailUrl} alt={course.name} />
+                          ) : (
+                            <div className={styles.courseNoThumb}>
+                              <i className="fas fa-graduation-cap" />
+                            </div>
+                          )}
+                          {course.recommendationScore > 0 && (
+                            <span className={styles.matchScoreBadge}>
+                              <i className="fas fa-bolt" /> Phù hợp {Math.round(course.recommendationScore * 100)}%
+                            </span>
+                          )}
+                        </div>
+                        <div className={styles.courseBody}>
+                          <div className={styles.courseCategory}>{course.categoryName || course.category?.name || 'AI Course'}</div>
+                          <div className={styles.courseTitle}>{course.name}</div>
+                          {course.matchedTags && course.matchedTags.length > 0 && (
+                            <div className={styles.matchedTagsList}>
+                              {course.matchedTags.slice(0, 3).map((tag, idx) => (
+                                <span key={idx} className={styles.matchedTagChip}>
+                                  #{tag}
+                                </span>
+                              ))}
+                            </div>
+                          )}
+                          <div className={styles.courseMeta}>
+                            <span className={styles.courseLevel}>{LEVEL_MAP[course.level] ?? course.level}</span>
+                            {course.expertName && (
+                              <span><i className="fas fa-user-tie" style={{ marginRight: 4 }} />{course.expertName}</span>
+                            )}
+                          </div>
+                        </div>
+                      </Link>
+                    );
+                  })
+                )}
+              </div>
+            </section>
+          )
+        ) : (
+          <section className={styles.homeSection}>
+            <div className={styles.guestRecommendBanner}>
+              <div className={styles.guestRecommendCopy}>
+                <span className={styles.aiBadge}>
+                  <i className="fas fa-sparkles" /> Đề xuất dành riêng cho bạn
+                </span>
+                <h3>Khám phá các khóa học AI phù hợp nhất với nhu cầu của bạn</h3>
+                <p>Đăng nhập hoặc đăng ký tài khoản để hệ thống AI phân tích kỹ năng và đề xuất khóa học cá nhân hóa cho bạn.</p>
+              </div>
+              <div className={styles.guestRecommendActions}>
+                <button className={styles.btnPrimary} onClick={openLogin}>
+                  <i className="fas fa-sign-in-alt" /> Đăng nhập để xem đề xuất
+                </button>
+              </div>
+            </div>
+          </section>
+        )}
+
         {/* ══ TOP COURSES ══ */}
         <section className={styles.homeSection}>
           <div className={styles.sectionHeader}>
-            <h2 className={styles.sectionTitle}>Khóa học nổi bật</h2>
+            <h2 className={styles.sectionTitle}>Khóa học mới nhất</h2>
             <Link to="/courses" className={styles.seeAll}>
               Xem tất cả <i className="fas fa-arrow-right" />
             </Link>

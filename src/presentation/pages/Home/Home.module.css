@@ -504,3 +504,109 @@
     padding: 5px 12px;
   }
 }
+
+/* ── RECOMMENDED COURSES & AI BADGES ── */
+.recommendedTitleGroup {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.aiBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, rgba(124, 58, 237, 0.15), rgba(79, 110, 247, 0.15));
+  color: #6d28d9;
+  font-size: 12px;
+  font-weight: 700;
+  border: 1px solid rgba(124, 58, 237, 0.25);
+  box-shadow: 0 2px 8px rgba(124, 58, 237, 0.12);
+}
+
+.recommendedCard {
+  position: relative;
+  border: 1px solid rgba(124, 58, 237, 0.25);
+  transition: transform var(--transition), box-shadow var(--transition), border-color var(--transition);
+}
+
+.recommendedCard:hover {
+  border-color: rgba(124, 58, 237, 0.5);
+  box-shadow: 0 8px 28px rgba(124, 58, 237, 0.18);
+}
+
+.matchScoreBadge {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: linear-gradient(135deg, #7c3aed, #4f6ef7);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 999px;
+  box-shadow: 0 4px 12px rgba(124, 58, 237, 0.4);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.matchedTagsList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.matchedTagChip {
+  font-size: 10.5px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 6px;
+  background: rgba(124, 58, 237, 0.08);
+  color: #6d28d9;
+  border: 1px solid rgba(124, 58, 237, 0.15);
+}
+
+/* ── GUEST RECOMMEND BANNER ── */
+.guestRecommendBanner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 32px 36px;
+  border-radius: var(--radius-lg);
+  background: linear-gradient(135deg, rgba(79, 110, 247, 0.06), rgba(124, 58, 237, 0.08));
+  border: 1.5px dashed rgba(124, 58, 237, 0.3);
+  box-shadow: 0 6px 24px rgba(124, 58, 237, 0.06);
+}
+
+@media (max-width: 768px) {
+  .guestRecommendBanner {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 24px 20px;
+  }
+}
+
+.guestRecommendCopy h3 {
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--text);
+  margin: 12px 0 8px;
+}
+
+.guestRecommendCopy p {
+  font-size: 14px;
+  color: var(--text-muted);
+  line-height: 1.6;
+  margin: 0;
+  max-width: 580px;
+}
+
+.guestRecommendActions {
+  flex-shrink: 0;
+}
