@@ -10,19 +10,6 @@ const LEVELS = [
   { value: 'Advanced',  label: 'Nâng cao',       sub: 'Chuyên sâu',         num: 'LEVEL 3' },
 ];
 
-const DURATIONS = [
-  { value: 'all',    label: 'Thời lượng: Tất cả' },
-  { value: 'short',  label: 'Dưới 5 giờ' },
-  { value: 'medium', label: 'Từ 5 – 15 giờ' },
-  { value: 'long',   label: 'Hơn 15 giờ' },
-];
-
-function durCat(h) {
-  if (h < 5)  return 'short';
-  if (h <= 15) return 'medium';
-  return 'long';
-}
-
 function LevelBadge({ level }) {
   const map = {
     Beginner:     { label: 'Mới bắt đầu', cls: styles.lvBegin },
@@ -46,7 +33,6 @@ function CourseCard({ course, onClick }) {
           onError={e => { e.target.src = fallback; }}
           loading="lazy"
         />
-        <span className={styles.ccardDur}>{course.durationHours}h</span>
       </div>
       <div className={styles.ccardBody}>
         <span className={styles.ccardCat}>{course.category?.name}</span>
@@ -84,22 +70,26 @@ export default function CourseList() {
 
   const [courses,    setCourses]    = useState([]);
   const [categories, setCategories] = useState([]);
+  const [tags,       setTags]       = useState([]);
   const [loading,    setLoading]    = useState(true);
   const [total,      setTotal]      = useState(0);
   const [pageIndex,  setPageIndex]  = useState(0);
   const PAGE_SIZE = 12;
 
   // Filters
-  const [keyword,    setKeyword]    = useState(searchParams.get('keyword') || '');
-  const [inputVal,   setInputVal]   = useState(searchParams.get('keyword') || '');
-  const [categoryId, setCategoryId] = useState(searchParams.get('categoryId') || '');
-  const [level,      setLevel]      = useState(searchParams.get('level') || 'all');
-  const [duration,   setDuration]   = useState('all');
+  const [keyword,      setKeyword]      = useState(searchParams.get('keyword') || '');
+  const [inputVal,     setInputVal]     = useState(searchParams.get('keyword') || '');
+  const [categoryId,   setCategoryId]   = useState(searchParams.get('categoryId') || '');
+  const [level,        setLevel]        = useState(searchParams.get('level') || 'all');
+  const [selectedTags, setSelectedTags] = useState([]); // array of tag ids
 
-  // Fetch categories once
+  // Fetch categories and tags once
   useEffect(() => {
     api.get('/categories').then(res => {
       if (res.data.success) setCategories(res.data.data ?? []);
+    }).catch(() => {});
+    api.get('/tags').then(res => {
+      if (res.data.success) setTags(res.data.data ?? []);
     }).catch(() => {});
   }, []);
 
@@ -146,10 +136,20 @@ export default function CourseList() {
     setPageIndex(0);
   };
 
-  // Filter by duration client-side (API doesn't support it yet)
-  const visibleCourses = duration === 'all'
+  // Toggle a tag selection
+  const toggleTag = (tagId) => {
+    setSelectedTags(prev =>
+      prev.includes(tagId) ? prev.filter(id => id !== tagId) : [...prev, tagId]
+    );
+    setPageIndex(0);
+  };
+
+  // Filter by selected tags client-side
+  const visibleCourses = selectedTags.length === 0
     ? courses
-    : courses.filter(c => durCat(c.durationHours) === duration);
+    : courses.filter(c =>
+        c.tags?.some(t => selectedTags.includes(t.id))
+      );
 
   const hasMore = courses.length < total;
 
@@ -242,26 +242,39 @@ export default function CourseList() {
             ))}
           </div>
 
-          {/* Sub-filters */}
-          <div className={styles.filterRow}>
-            <div className={styles.filterLeft}>
-              <select
-                value={duration}
-                onChange={e => setDuration(e.target.value)}
-                className={styles.filterSel}
-                aria-label="Lọc theo thời lượng"
-              >
-                {DURATIONS.map(d => (
-                  <option key={d.value} value={d.value}>{d.label}</option>
+          {/* Sub-filters: Tag multi-select */}
+          {tags.length > 0 && (
+            <div className={styles.tagFilterSection}>
+              <div className={styles.tagFilterLabel}>
+                <i className="fas fa-tag" /> Lọc theo tag
+              </div>
+              <div className={styles.tagFilterPills}>
+                {tags.map(tag => (
+                  <button
+                    key={tag.id}
+                    className={`${styles.tagPill} ${selectedTags.includes(tag.id) ? styles.tagPillActive : ''}`}
+                    onClick={() => toggleTag(tag.id)}
+                    aria-pressed={selectedTags.includes(tag.id)}
+                  >
+                    {tag.name}
+                    {selectedTags.includes(tag.id) && (
+                      <i className="fas fa-times" style={{ marginLeft: 4, fontSize: '0.6rem' }} />
+                    )}
+                  </button>
                 ))}
-              </select>
+              </div>
             </div>
-            {(keyword || categoryId || level !== 'all' || duration !== 'all') && (
+          )}
+
+          {/* Clear filters row */}
+          <div className={styles.filterRow}>
+            <div className={styles.filterLeft} />
+            {(keyword || categoryId || level !== 'all' || selectedTags.length > 0) && (
               <button
                 className={styles.clearBtn}
                 onClick={() => {
                   setKeyword(''); setInputVal('');
-                  setCategoryId(''); setLevel('all'); setDuration('all');
+                  setCategoryId(''); setLevel('all'); setSelectedTags([]);
                 }}
               >
                 <i className="fas fa-times" /> Xóa bộ lọc
@@ -283,7 +296,7 @@ export default function CourseList() {
               <p>Hãy thử tìm kiếm với từ khóa khác hoặc xóa bộ lọc.</p>
               <button className={styles.clearBtn} onClick={() => {
                 setKeyword(''); setInputVal('');
-                setCategoryId(''); setLevel('all'); setDuration('all');
+                setCategoryId(''); setLevel('all'); setSelectedTags([]);
               }}>
                 Xóa bộ lọc
               </button>
@@ -301,7 +314,7 @@ export default function CourseList() {
           )}
 
           {/* Load more */}
-          {hasMore && !loading && duration === 'all' && (
+          {hasMore && !loading && selectedTags.length === 0 && (
             <div className={styles.showMoreWrap}>
               <button className={styles.showMoreBtn} onClick={loadMore}>
                 <i className="fas fa-chevron-down" /> Xem thêm khóa học

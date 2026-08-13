@@ -297,6 +297,63 @@
 }
 .levelCardActive .levelDot { background: #0056d2; }
 
+/* ── TAG FILTER ──────────────────────────────────────────────────────── */
+.tagFilterSection {
+  margin-bottom: 16px;
+}
+
+.tagFilterLabel {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #6a6f73;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.tagFilterPills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+.tagPill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 5px 12px;
+  border: 1.5px solid #d1d7dc;
+  border-radius: 999px;
+  background: #fff;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #374151;
+  cursor: pointer;
+  transition: all 0.15s;
+  font-family: inherit;
+  box-shadow: 0 1px 4px rgba(0,0,0,.06);
+}
+
+.tagPill:hover {
+  border-color: #0056d2;
+  color: #0056d2;
+  background: #e8f1ff;
+}
+
+.tagPillActive {
+  border-color: #0056d2;
+  background: #0056d2;
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(0,86,210,.25);
+}
+
+.tagPillActive:hover {
+  background: #003d99;
+  border-color: #003d99;
+  color: #fff;
+}
+
 /* ── FILTER ROW ──────────────────────────────────────────────────────── */
 .filterRow {
   display: flex;
