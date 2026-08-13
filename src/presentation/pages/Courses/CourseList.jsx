@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import api from '@services/api';
+import useAuth from '@state/hooks/useAuth';
 import styles from './CourseList.module.css';
 
 const LEVELS = [
@@ -9,6 +10,56 @@ const LEVELS = [
   { value: 'Intermediate', label: 'Trình độ cơ bản',  sub: 'Đã có kinh nghiệm',  num: 'LEVEL 2' },
   { value: 'Advanced',  label: 'Nâng cao',       sub: 'Chuyên sâu',         num: 'LEVEL 3' },
 ];
+
+const LEVEL_MAP = { Beginner: 'Mới bắt đầu', Intermediate: 'Trung cấp', Advanced: 'Nâng cao' };
+
+function RecommendCard({ course, onClick }) {
+  const fallback = 'https://images.unsplash.com/photo-1677442135703-1787eea5ce01?w=480&q=75';
+  const courseId = course.courseId || course.id;
+  return (
+    <article
+      className={styles.recCard}
+      onClick={() => onClick(courseId)}
+      tabIndex={0}
+      onKeyDown={e => e.key === 'Enter' && onClick(courseId)}
+      role="button"
+      aria-label={course.name}
+    >
+      <div className={styles.recThumb}>
+        <img
+          src={course.thumbnailUrl || fallback}
+          alt={course.name}
+          onError={e => { e.target.src = fallback; }}
+          loading="lazy"
+        />
+        {course.recommendationScore > 0 && (
+          <span className={styles.recScoreBadge}>
+            <i className="fas fa-bolt" /> {Math.round(course.recommendationScore * 100)}% phù hợp
+          </span>
+        )}
+      </div>
+      <div className={styles.recBody}>
+        <span className={styles.recCat}>{course.categoryName || course.category?.name}</span>
+        <h3 className={styles.recTitle}>{course.name}</h3>
+        {course.matchedTags?.length > 0 && (
+          <div className={styles.recTags}>
+            {course.matchedTags.slice(0, 3).map((tag, i) => (
+              <span key={i} className={styles.recTag}>#{tag}</span>
+            ))}
+          </div>
+        )}
+        <div className={styles.recMeta}>
+          <span className={styles.recLevel}>{LEVEL_MAP[course.level] ?? course.level}</span>
+          {course.expertName && (
+            <span className={styles.recExpert}>
+              <i className="fas fa-user-tie" /> {course.expertName}
+            </span>
+          )}
+        </div>
+      </div>
+    </article>
+  );
+}
 
 function LevelBadge({ level }) {
   const map = {
@@ -67,6 +118,7 @@ function CourseCard({ course, onClick }) {
 export default function CourseList() {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
+  const { user } = useAuth();
 
   const [courses,    setCourses]    = useState([]);
   const [categories, setCategories] = useState([]);
@@ -83,6 +135,10 @@ export default function CourseList() {
   const [level,        setLevel]        = useState(searchParams.get('level') || 'all');
   const [selectedTags, setSelectedTags] = useState([]); // array of tag ids
 
+  // Recommendations
+  const [recCourses, setRecCourses] = useState([]);
+  const [recLoading, setRecLoading] = useState(false);
+
   // Fetch categories and tags once
   useEffect(() => {
     api.get('/categories').then(res => {
@@ -92,6 +148,22 @@ export default function CourseList() {
       if (res.data.success) setTags(res.data.data ?? []);
     }).catch(() => {});
   }, []);
+
+  // Fetch recommendations for Learner
+  useEffect(() => {
+    if (user?.role === 'Learner') {
+      setRecLoading(true);
+      api.get('/courses/recommendation?limit=6')
+        .then(r => {
+          const list = r.data?.data ?? r.data ?? [];
+          setRecCourses(Array.isArray(list) ? list : []);
+        })
+        .catch(() => setRecCourses([]))
+        .finally(() => setRecLoading(false));
+    } else {
+      setRecCourses([]);
+    }
+  }, [user]);
 
   // Fetch courses whenever filters change
   const fetchCourses = useCallback(async (page = 0) => {
@@ -179,12 +251,6 @@ export default function CourseList() {
             </div>
             <button type="submit" className={styles.heroSearchBtn}>Tìm kiếm</button>
           </form>
-
-          <div className={styles.heroStats}>
-            <div className={styles.hstat}><div className={styles.hstatNum}>{total}+</div><div className={styles.hstatLbl}>Khóa học</div></div>
-            <div className={styles.hstat}><div className={styles.hstatNum}>10k+</div><div className={styles.hstatLbl}>Học viên</div></div>
-            <div className={styles.hstat}><div className={styles.hstatNum}>50+</div><div className={styles.hstatLbl}>Chuyên gia</div></div>
-          </div>
         </div>
       </section>
 
@@ -198,7 +264,7 @@ export default function CourseList() {
                 className={`${styles.catPill} ${!categoryId ? styles.catPillActive : ''}`}
                 onClick={() => setCategoryId('')}
               >
-                <span className={styles.catPillIcon}>🏠</span> Tất cả
+                Tất cả
               </button>
               {categories.map(cat => (
                 <button
@@ -206,7 +272,6 @@ export default function CourseList() {
                   className={`${styles.catPill} ${categoryId === cat.id ? styles.catPillActive : ''}`}
                   onClick={() => setCategoryId(categoryId === cat.id ? '' : cat.id)}
                 >
-                  <span className={styles.catPillIcon}>📚</span>
                   {cat.name}
                 </button>
               ))}
@@ -225,6 +290,40 @@ export default function CourseList() {
             </h1>
             <span className={styles.exploreCount}>{total} khóa học</span>
           </div>
+
+          {/* Recommended courses — chỉ hiện cho Learner */}
+          {user?.role === 'Learner' && (recLoading || recCourses.length > 0) && (
+            <div className={styles.recSection}>
+              <div className={styles.recHeader}>
+                <div className={styles.recTitleGroup}>
+                  <h2 className={styles.recHeading}>Đề xuất dành cho bạn</h2>
+                  <span className={styles.aiBadge}>
+                    <i className="fas fa-sparkles" /> Gợi ý AI
+                  </span>
+                </div>
+              </div>
+              {recLoading ? (
+                <div className={styles.recGrid}>
+                  {Array.from({ length: 4 }).map((_, i) => (
+                    <div key={i} className={styles.recSkeleton} />
+                  ))}
+                </div>
+              ) : (
+                <div className={styles.recGrid}>
+                  {recCourses.map(course => {
+                    const courseId = course.courseId || course.id;
+                    return (
+                      <RecommendCard
+                        key={courseId}
+                        course={course}
+                        onClick={id => navigate(`/courses/${id}`)}
+                      />
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Level cards */}
           <div className={styles.levelCards}>
@@ -245,8 +344,21 @@ export default function CourseList() {
           {/* Sub-filters: Tag multi-select */}
           {tags.length > 0 && (
             <div className={styles.tagFilterSection}>
-              <div className={styles.tagFilterLabel}>
-                <i className="fas fa-tag" /> Lọc theo tag
+              <div className={styles.tagFilterLabelRow}>
+                <div className={styles.tagFilterLabel}>
+                  <i className="fas fa-tag" /> Lọc theo tag
+                </div>
+                {(keyword || categoryId || level !== 'all' || selectedTags.length > 0) && (
+                  <button
+                    className={styles.clearBtn}
+                    onClick={() => {
+                      setKeyword(''); setInputVal('');
+                      setCategoryId(''); setLevel('all'); setSelectedTags([]);
+                    }}
+                  >
+                    <i className="fas fa-times" /> Xóa bộ lọc
+                  </button>
+                )}
               </div>
               <div className={styles.tagFilterPills}>
                 {tags.map(tag => (
@@ -265,22 +377,6 @@ export default function CourseList() {
               </div>
             </div>
           )}
-
-          {/* Clear filters row */}
-          <div className={styles.filterRow}>
-            <div className={styles.filterLeft} />
-            {(keyword || categoryId || level !== 'all' || selectedTags.length > 0) && (
-              <button
-                className={styles.clearBtn}
-                onClick={() => {
-                  setKeyword(''); setInputVal('');
-                  setCategoryId(''); setLevel('all'); setSelectedTags([]);
-                }}
-              >
-                <i className="fas fa-times" /> Xóa bộ lọc
-              </button>
-            )}
-          </div>
 
           {/* Grid */}
           {loading && courses.length === 0 ? (

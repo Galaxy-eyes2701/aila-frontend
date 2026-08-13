@@ -52,6 +52,9 @@ import CurrentSubscription from "@presentation/pages/Learner/Subscription/Curren
 import Checkout from "@presentation/pages/Learner/Subscription/Checkout";
 import PaymentHistory from "@presentation/pages/Learner/Subscription/PaymentHistory";
 import AdminActivityLogsPage from "@presentation/pages/Admin/AdminActivityLog/AdminActivityLogsPage";
+import AIReports from "@presentation/pages/Admin/AIReports/AIReports";
+import AIPricing from "@presentation/pages/Admin/AIPricing/AIPricing";
+import PolicyViolations from "@presentation/pages/Admin/PolicyViolations/PolicyViolations";
 
 const router = createBrowserRouter([
   // ── Auth pages (không có Header) ─────────────────────────────
@@ -100,6 +103,18 @@ const router = createBrowserRouter([
       {
         path: "activity-logs",
         element: <AdminActivityLogsPage />,
+      },
+      {
+        path: "ai-reports",
+        element: <AIReports />,
+      },
+      {
+        path: "ai-pricing",
+        element: <AIPricing />,
+      },
+      {
+        path: "policy-violations",
+        element: <PolicyViolations />,
       },
       {
         path: "notifications",

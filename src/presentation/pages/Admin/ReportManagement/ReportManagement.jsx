@@ -1107,8 +1107,6 @@ export default function ReportManagement() {
           courseId={previewCourseId}
           initialMaterialId={previewMaterialId}
           onClose={() => { setPreviewCourseId(null); setPreviewMaterialId(null); }}
-          materialPreviewEndpoint={(cId, mId) =>
-            `/admin/courses/${cId}/materials/${mId}/preview`}
         />
       )}
 

@@ -63,7 +63,6 @@ export default function CourseDetail() {
   const [loading,          setLoading]          = useState(true);
   const [enrolling,        setEnrolling]        = useState(false);
   const [error,            setError]            = useState('');
-  const [stickyVisible,    setStickyVisible]    = useState(false);
 
   // null = đang check API, true = đã enroll, false = chưa enroll
   const [enrolled,         setEnrolled]         = useState(false);
@@ -124,12 +123,6 @@ export default function CourseDetail() {
       });
   }, [user, id]);
 
-  // Sticky tabs
-  useEffect(() => {
-    const onScroll = () => setStickyVisible(window.scrollY > 300);
-    window.addEventListener('scroll', onScroll, { passive: true });
-    return () => window.removeEventListener('scroll', onScroll);
-  }, []);
 
   const handleEnroll = async () => {
     if (!user) { setAuthModal('login'); return; }
@@ -224,14 +217,6 @@ export default function CourseDetail() {
   return (
     <div className={styles.page}>
 
-      {/* ── STICKY SECONDARY TABS ─────────────────────────── */}
-      <div className={`${styles.stickyTabs} ${stickyVisible ? styles.stickyVisible : ''}`}>
-        <div className={styles.stickyTabsInner}>
-          <a href="#curriculum" className={styles.stickyTab}>Nội dung</a>
-          <a href="#instructor" className={styles.stickyTab}>Giảng viên</a>
-        </div>
-      </div>
-
       {/* ── HERO ──────────────────────────────────────────── */}
       <section className={styles.hero} id="hero">
         <div className={styles.heroInner}>
@@ -255,7 +240,6 @@ export default function CourseDetail() {
 
           <div className={styles.metaRow}>
             <span className={styles.metaItem}><i className="fas fa-layer-group" />{LEVEL_LABELS[course.level] ?? course.level}</span>
-            <span className={styles.metaItem}><i className="fas fa-clock" />{course.durationHours}h học</span>
             <span className={styles.metaItem}><i className="fas fa-book-open" />{course.totalModules} học phần · {course.totalMaterials} bài học</span>
             <span className={styles.metaItem}><i className="fas fa-tag" />{course.category?.name}</span>
           </div>
@@ -267,42 +251,6 @@ export default function CourseDetail() {
 
         {/* ══ CONTENT COLUMN ══ */}
         <div className={styles.contentCol}>
-
-          {/* SKILL TAGS */}
-          {course.tags?.length > 0 && (
-            <section className={styles.sectionCard}>
-              <h2 className={styles.sectionTitle}>
-                <i className="fas fa-bolt" style={{ color: '#f59e0b', marginRight: 8 }} />
-                Kỹ năng đạt được
-              </h2>
-              <div className={styles.skillTags}>
-                {course.tags.map(tag => (
-                  <Link key={tag.id} to={`/courses?keyword=${tag.name}`} className={styles.skillTag}>
-                    {tag.name}
-                  </Link>
-                ))}
-              </div>
-            </section>
-          )}
-
-          {/* CURRICULUM */}
-          <section className={styles.sectionCard} id="curriculum">
-            <div className={styles.curriculumHeader}>
-              <h2 className={styles.sectionTitle} style={{ marginBottom: 0 }}>Nội dung khóa học</h2>
-              <span className={styles.curriculumMeta}>
-                {course.totalModules} học phần · {totalMaterials} bài học · {course.durationHours}h
-              </span>
-            </div>
-            {course.modules.length > 0 ? (
-              <div className={styles.moduleAccordion}>
-                {course.modules.map((mod, i) => (
-                  <ModuleItem key={mod.id} module={mod} index={i} initialOpen={i === 0} />
-                ))}
-              </div>
-            ) : (
-              <p className={styles.emptyNote}>Nội dung khóa học đang được cập nhật.</p>
-            )}
-          </section>
 
           {/* INSTRUCTOR */}
           <section className={styles.sectionCard} id="instructor">
@@ -334,6 +282,25 @@ export default function CourseDetail() {
                 )}
               </div>
             </div>
+          </section>
+
+          {/* CURRICULUM */}
+          <section className={styles.sectionCard} id="curriculum">
+            <div className={styles.curriculumHeader}>
+              <h2 className={styles.sectionTitle} style={{ marginBottom: 0 }}>Nội dung khóa học</h2>
+              <span className={styles.curriculumMeta}>
+                {course.totalModules} học phần · {totalMaterials} bài học · {course.durationHours}h
+              </span>
+            </div>
+            {course.modules.length > 0 ? (
+              <div className={styles.moduleAccordion}>
+                {course.modules.map((mod, i) => (
+                  <ModuleItem key={mod.id} module={mod} index={i} initialOpen={i === 0} />
+                ))}
+              </div>
+            ) : (
+              <p className={styles.emptyNote}>Nội dung khóa học đang được cập nhật.</p>
+            )}
           </section>
 
         </div>

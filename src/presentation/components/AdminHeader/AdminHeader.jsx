@@ -12,6 +12,9 @@ const NAV_LINKS = [
   { label: "Bài viết", href: "/admin/blogs" },
   { label: "Gói đăng ký", href: "/admin/subscription-plans" },
   { label: "Tài nguyên", href: "/admin/resource-limit-management" },
+  { label: "AI - Báo cáo", href: "/admin/ai-reports" },
+  { label: "AI - Vi phạm", href: "/admin/policy-violations" },
+  { label: "AI - Giá", href: "/admin/ai-pricing" },
   { label: "Nhật kí", href: "/admin/activity-logs" },
 ];
 
