@@ -75,9 +75,7 @@ export default function CourseRow({ course, onEdit, onPublish, onUnpublish, onPr
         <button
           className={styles.actionBtn}
           onClick={() => onEdit(course)}
-          disabled={isPublished}
           title={isPublished ? 'Hãy ẩn khóa học trước khi chỉnh sửa' : 'Chỉnh sửa thông tin'}
-          style={isPublished ? { opacity: 0.5, cursor: 'not-allowed' } : {}}
         >
           <i className="fas fa-pen" /> Sửa
         </button>
