@@ -231,13 +231,6 @@ export default function CourseDetail() {
           <h1 className={styles.heroTitle}>{course.name}</h1>
           {course.description && <p className={styles.heroSubtitle}>{course.description}</p>}
 
-          <div className={styles.heroAuthor}>
-            Tạo bởi{' '}
-            <Link to={`/experts/${course.author?.userId}`} className={styles.heroAuthorLink}>
-              {course.author?.fullName}
-            </Link>
-          </div>
-
           <div className={styles.metaRow}>
             <span className={styles.metaItem}><i className="fas fa-layer-group" />{LEVEL_LABELS[course.level] ?? course.level}</span>
             <span className={styles.metaItem}><i className="fas fa-book-open" />{course.totalModules} học phần · {course.totalMaterials} bài học</span>
@@ -289,7 +282,7 @@ export default function CourseDetail() {
             <div className={styles.curriculumHeader}>
               <h2 className={styles.sectionTitle} style={{ marginBottom: 0 }}>Nội dung khóa học</h2>
               <span className={styles.curriculumMeta}>
-                {course.totalModules} học phần · {totalMaterials} bài học · {course.durationHours}h
+                {course.totalModules} học phần · {totalMaterials} bài học
               </span>
             </div>
             {course.modules.length > 0 ? (
