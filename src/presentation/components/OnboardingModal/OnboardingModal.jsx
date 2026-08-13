@@ -295,6 +295,7 @@ export default function OnboardingModal({ onClose, onComplete }) {
             <button
               className={styles.btnStart}
               onClick={() => {
+                window.dispatchEvent(new CustomEvent('onboarding-completed'));
                 onComplete?.();
                 onClose?.();
               }}

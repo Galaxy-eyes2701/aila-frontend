@@ -374,7 +374,7 @@ export default function ExpertHome() {
               />
               <StatCard
                 icon="fa-user-clock"
-                label="Học Viên Hoạt Động"
+                label="Học Viên Tương Tác"
                 value={overview.totalActiveLearners ?? 0}
                 color="#10b981"
                 sub="Học viên tương tác"
