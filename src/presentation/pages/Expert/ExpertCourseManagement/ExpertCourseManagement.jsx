@@ -83,6 +83,7 @@ export default function ExpertCourseManagement() {
       id: course.id, name: course.name,
       categoryId: course.category?.id ?? '', level: course.level,
       description: course.description ?? '', thumbnailUrl: course.thumbnailUrl ?? '',
+      durationHours: course.durationHours ?? 0,
       tagIds: course.tags?.map(t => t.id) ?? [],
     });
     setShowForm(true);

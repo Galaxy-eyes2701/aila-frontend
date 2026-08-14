@@ -211,6 +211,34 @@ export default function CourseDetail() {
     );
   }
 
+  // Check if course is published
+  if (!course.isPublished) {
+    return (
+      <div className={styles.errorPage}>
+        <i className="fas fa-lock" />
+        <h2>Khóa học chưa được công khai</h2>
+        <p>Khóa học này đang trong quá trình xây dựng và chưa sẵn sàng cho học viên.</p>
+        <button className={styles.backBtn} onClick={() => navigate('/courses')}>
+          <i className="fas fa-arrow-left" /> Quay lại danh sách
+        </button>
+      </div>
+    );
+  }
+
+  // Check if course is locked due to policy violation
+  if (course.isPublicationLocked) {
+    return (
+      <div className={styles.errorPage}>
+        <i className="fas fa-ban" />
+        <h2>Khóa học tạm thời bị khóa</h2>
+        <p>Khóa học này hiện không khả dụng.</p>
+        <button className={styles.backBtn} onClick={() => navigate('/courses')}>
+          <i className="fas fa-arrow-left" /> Quay lại danh sách
+        </button>
+      </div>
+    );
+  }
+
   const totalMaterials  = course.modules.reduce((s, m) => s + m.materials.length, 0);
   const progressPercent = learningProgress ? Math.round(learningProgress.percent) : 0;
 

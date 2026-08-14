@@ -19,6 +19,7 @@ export default function CourseFormModal({ mode, initialData, categories, onClose
     level:        initialData?.level        ?? 'Beginner',
     description:  initialData?.description  ?? '',
     thumbnailUrl: initialData?.thumbnailUrl ?? '',
+    durationHours: initialData?.durationHours ?? '',
     tagIds:       initialData?.tagIds       ?? [],
   });
   const [saving,      setSaving]      = useState(false);
@@ -76,6 +77,15 @@ export default function CourseFormModal({ mode, initialData, categories, onClose
     else if (name.length < 3)   errs.name = 'Tên khóa học phải có ít nhất 3 ký tự.';
     else if (name.length > 150) errs.name = 'Tên khóa học không được vượt quá 150 ký tự.';
     if (!form.categoryId)       errs.categoryId = 'Vui lòng chọn danh mục.';
+    
+    // Validate duration
+    const duration = parseFloat(form.durationHours);
+    if (form.durationHours && (isNaN(duration) || duration < 0)) {
+      errs.durationHours = 'Thời lượng phải là số không âm.';
+    } else if (duration > 1000) {
+      errs.durationHours = 'Thời lượng không được vượt quá 1000 giờ.';
+    }
+    
     if (form.thumbnailUrl.trim() && !isValidUrl(form.thumbnailUrl.trim()))
       errs.thumbnailUrl = 'URL ảnh bìa không hợp lệ. Phải bắt đầu bằng https://.';
     if (form.description.length > 1000)
@@ -241,6 +251,7 @@ export default function CourseFormModal({ mode, initialData, categories, onClose
         name: form.name.trim(), categoryId: form.categoryId, level: form.level,
         description: form.description.trim() || null,
         thumbnailUrl: form.thumbnailUrl.trim() || null,
+        durationHours: form.durationHours ? parseFloat(form.durationHours) : 0,
         tagIds: form.tagIds,
       };
       const res = isEdit
@@ -296,6 +307,25 @@ export default function CourseFormModal({ mode, initialData, categories, onClose
                   {LEVELS.map(l => <option key={l.value} value={l.value}>{l.label}</option>)}
                 </select>
               </div>
+            </div>
+
+            {/* Duration */}
+            <div className={styles.formGroup}>
+              <label className={styles.formLabel}><i className="fas fa-clock" /> Thời lượng khóa học (giờ)</label>
+              <input 
+                name="durationHours"
+                type="number"
+                step="0.5"
+                min="0"
+                max="1000"
+                className={`${styles.formInput} ${fieldErrors.durationHours ? styles.inputError : ''}`}
+                value={form.durationHours} 
+                onChange={handleChange} 
+                placeholder="VD: 15.5" 
+                style={{ maxWidth: '200px' }}
+              />
+              {fieldErrors.durationHours && <span className={styles.fieldError}><i className="fas fa-exclamation-circle" /> {fieldErrors.durationHours}</span>}
+              <small className={styles.fieldHint}>Ước tính tổng thời lượng học (có thể để trống)</small>
             </div>
 
             {/* Thumbnail */}
