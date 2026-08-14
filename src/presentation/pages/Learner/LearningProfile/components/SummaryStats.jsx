@@ -1,13 +1,13 @@
 import styles from "../LearningProfile.module.css";
 
-/** 5 thẻ tổng quan. Thẻ cuối: số AI scenario đã làm. */
+/** 5 thẻ tổng quan. Thẻ cuối: số lượt luyện tập AI đã làm. */
 export default function SummaryStats({ summary, aiScenarioCount = 0 }) {
   const items = [
     { num: summary.totalCourses, label: "Khóa học" },
     { num: summary.coursesInProgress, label: "Đang học" },
     { num: summary.coursesCompleted, label: "Hoàn thành" },
-    { num: summary.totalQuizzesTaken, label: "Quiz đã làm" },
-    { num: aiScenarioCount, label: "AI scenario đã làm" },
+    { num: summary.totalQuizzesTaken, label: "Bài kiểm tra" },
+    { num: aiScenarioCount, label: "Luyện tập AI" },
   ];
 
   return (

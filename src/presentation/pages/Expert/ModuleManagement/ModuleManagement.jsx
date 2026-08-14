@@ -12,6 +12,7 @@ import DocumentDetailModal from "./components/LearningMaterial/DocumentDetailMod
 import { getMaterialModalType } from "@infrastructure/constants/materialType";
 import QuizDetailModal from "./components/LearningMaterial/QuizDetailModal";
 import AIPracticeMaterialModal from "./components/LearningMaterial/AIPracticeMaterialModal";
+import ConfirmModal from "./components/ConfirmModal";
 
 const emptyForm = {
   title: "",
@@ -37,6 +38,7 @@ export default function ModuleManagement() {
   const [materialDetailModal, setMaterialDetailModal] = useState(null);
   const [pendingCallback, setPendingCallback] = useState(null);
   const [aiPracticeModal, setAiPracticeModal] = useState(null); // { title }
+  const [deleteTargetModule, setDeleteTargetModule] = useState(null);
 
   const sortedModules = useMemo(
     () => [...modules].sort((a, b) => a.orderIndex - b.orderIndex),
@@ -171,15 +173,17 @@ export default function ModuleManagement() {
     }
   };
 
-  const handleDelete = async (module) => {
-    const confirmed = window.confirm(
-      `Xóa học phần "${module.title}"? Tất cả học liệu bên trong sẽ bị xóa theo.`,
-    );
-    if (!confirmed) return;
+  const handleDelete = (module) => {
+    setDeleteTargetModule(module);
+  };
 
-    setBusyId(module.id);
+  const confirmDeleteModule = async () => {
+    if (!deleteTargetModule) return;
+    const target = deleteTargetModule;
+
+    setBusyId(target.id);
     try {
-      const res = await api.delete(`/courses/${courseId}/modules/${module.id}`);
+      const res = await api.delete(`/courses/${courseId}/modules/${target.id}`);
       if (!res.data?.success) {
         showToast(
           res.data?.errorMessage || "Không thể xóa học phần.",
@@ -188,9 +192,10 @@ export default function ModuleManagement() {
         return;
       }
 
-      setModules((current) => current.filter((item) => item.id !== module.id));
+      setModules((current) => current.filter((item) => item.id !== target.id));
       setHasOrderChanges(true);
       showToast("Đã xóa học phần.");
+      setDeleteTargetModule(null);
     } catch (error) {
       showToast(
         error.response?.data?.errorMessage || "Không thể xóa học phần.",
@@ -501,6 +506,17 @@ export default function ModuleManagement() {
           fetchModules();
           showToast("Đã cập nhật Quiz.");
         }}
+      />
+      <ConfirmModal
+        open={!!deleteTargetModule}
+        title={`Xóa học phần "${deleteTargetModule?.title}"?`}
+        description="Tất cả học liệu bên trong học phần này sẽ bị xóa theo. Bạn có chắc chắn muốn xóa?"
+        confirmLabel="Xóa học phần"
+        cancelLabel="Hủy"
+        tone="danger"
+        busy={busyId === deleteTargetModule?.id}
+        onConfirm={confirmDeleteModule}
+        onClose={() => setDeleteTargetModule(null)}
       />
       {toast && <Toast toast={toast} onClose={() => setToast(null)} />}
     </div>

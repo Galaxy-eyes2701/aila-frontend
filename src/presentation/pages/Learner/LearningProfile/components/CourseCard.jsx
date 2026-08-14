@@ -35,8 +35,11 @@ export default function CourseCard({ enrollment: en }) {
       </div>
 
       <div className={styles.courseInfo}>
-        {en.categoryName && <div className={styles.courseCat}>{en.categoryName}</div>}
-        <div className={styles.courseName}>{en.courseName}</div>
+        {/* Luôn render để mọi thẻ giữ đúng khung cao bằng nhau */}
+        <div className={styles.courseCat}>{en.categoryName || "Khóa học"}</div>
+        <div className={styles.courseName} title={en.courseName}>
+          {en.courseName}
+        </div>
         <div className={styles.courseMeta}>
           <i className="fas fa-clock" /> {en.durationHours} giờ
         </div>

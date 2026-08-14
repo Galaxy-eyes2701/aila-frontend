@@ -17,15 +17,23 @@ function EmptyBlock({ icon, title, desc, primary }) {
   );
 }
 
+/** Lưới khóa học có 4 cột ⇒ chỉ xem trước 4 thẻ để hàng luôn đầy. */
+const COURSE_PREVIEW = 4;
+const ROW_PREVIEW = 5;
+
 /**
  * Các khối học tập UC-30 nhúng vào /profile — thứ tự cố định (AC-3):
- * Tổng quan → Khóa học → Lịch sử quiz → Lịch sử AI scenario.
+ * Tổng quan → Khóa học → Lịch sử bài kiểm tra → Lịch sử AI scenario.
  */
 export default function LearningSections({ profile }) {
   const { summary } = profile;
   const enrollments = profile.enrollments || [];
   const quizHistory = profile.quizHistory || [];
   const aiScenarioHistory = profile.aiScenarioHistory || [];
+
+  const shownCourses = enrollments.slice(0, COURSE_PREVIEW);
+  const shownQuizzes = quizHistory.slice(0, ROW_PREVIEW);
+  const shownScenarios = aiScenarioHistory.slice(0, ROW_PREVIEW);
 
   // Tổng số lượt luyện AI lấy từ summary (server đếm toàn bộ); danh sách nhúng
   // chỉ là 5 lượt gần nhất nên không dùng .length làm tổng.
@@ -51,14 +59,14 @@ export default function LearningSections({ profile }) {
         </div>
         <SummaryStats summary={summary} aiScenarioCount={totalAiScenarios} />
         {/* UC-18 — link gói đăng ký */}
-        <div style={{ marginTop: 12 }}>
-          <Link to="/profile/subscription"
-            style={{ fontSize: 13, color: "var(--primary)", display: "inline-flex", alignItems: "center", gap: 6 }}>
+        <div className={styles.quickLinks}>
+          <Link
+            to="/profile/subscription"
+            className={`${styles.quickLink} ${styles.quickLinkPrimary}`}
+          >
             <i className="fas fa-gem" /> Xem gói đăng ký hiện tại
           </Link>
-          <span style={{ margin: "0 10px", color: "var(--border)" }}>|</span>
-          <Link to="/profile/payment-history"
-            style={{ fontSize: 13, color: "var(--text-muted)", display: "inline-flex", alignItems: "center", gap: 6 }}>
+          <Link to="/profile/payment-history" className={styles.quickLink}>
             <i className="fas fa-receipt" /> Lịch sử thanh toán
           </Link>
         </div>
@@ -90,15 +98,15 @@ export default function LearningSections({ profile }) {
               <h2 className={styles.sectionTitle}>
                 <i className="fas fa-book-open" /> Khóa học đã tham gia
               </h2>
-              {summary.totalCourses > enrollments.length && (
+              {summary.totalCourses > shownCourses.length && (
                 <Link to="/profile/courses" className={styles.viewAll}>
                   Xem tất cả ({summary.totalCourses}) <i className="fas fa-arrow-right" />
                 </Link>
               )}
             </div>
-            {enrollments.length > 0 ? (
+            {shownCourses.length > 0 ? (
               <div className={styles.courseGrid}>
-                {enrollments.slice(0, 5).map((en) => (
+                {shownCourses.map((en) => (
                   <CourseCard key={en.courseId} enrollment={en} />
                 ))}
               </div>
@@ -107,27 +115,30 @@ export default function LearningSections({ profile }) {
             )}
           </section>
 
-          {/* ── Lịch sử quiz ── */}
+          {/* ── Lịch sử bài kiểm tra ── */}
           <section className={styles.section}>
             <div className={styles.sectionHeader}>
               <h2 className={styles.sectionTitle}>
-                <i className="fas fa-clipboard-check" /> Lịch sử quiz đã làm
+                <i className="fas fa-clipboard-check" /> Lịch sử bài kiểm tra
               </h2>
-              {summary.totalQuizzesTaken > quizHistory.length && (
+              {summary.totalQuizzesTaken > shownQuizzes.length && (
                 <Link to="/profile/quiz-history" className={styles.viewAll}>
                   Xem tất cả ({summary.totalQuizzesTaken}){" "}
                   <i className="fas fa-arrow-right" />
                 </Link>
               )}
             </div>
-            {quizHistory.length > 0 ? (
+            {shownQuizzes.length > 0 ? (
               <div className={styles.quizList}>
-                {quizHistory.slice(0, 5).map((q) => (
+                {shownQuizzes.map((q) => (
                   <QuizHistoryRow key={q.attemptId} item={q} />
                 ))}
               </div>
             ) : (
-              <EmptyBlock icon="fa-clipboard" title="Bạn chưa làm bài quiz nào." />
+              <EmptyBlock
+                icon="fa-clipboard"
+                title="Bạn chưa làm bài kiểm tra nào."
+              />
             )}
           </section>
 
@@ -137,16 +148,16 @@ export default function LearningSections({ profile }) {
               <h2 className={styles.sectionTitle}>
                 <i className="fas fa-robot" /> Lịch sử luyện tập AI
               </h2>
-              {totalAiScenarios > aiScenarioHistory.length && (
+              {totalAiScenarios > shownScenarios.length && (
                 <Link to="/profile/ai-scenarios" className={styles.viewAll}>
                   Xem tất cả ({totalAiScenarios}){" "}
                   <i className="fas fa-arrow-right" />
                 </Link>
               )}
             </div>
-            {aiScenarioHistory.length > 0 ? (
+            {shownScenarios.length > 0 ? (
               <div className={styles.quizList}>
-                {aiScenarioHistory.slice(0, 5).map((a) => (
+                {shownScenarios.map((a) => (
                   <AiScenarioRow key={a.attemptId} item={a} />
                 ))}
               </div>

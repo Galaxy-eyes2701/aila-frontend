@@ -12,6 +12,7 @@ import {
 import QuestionFormModal from "./QuestionFormModal";
 import BulkCreateQuizModal from "./BulkCreateQuizModal";
 import QuestionImportModal from "./QuestionImportModal";
+import ConfirmModal from "../ConfirmModal";
 
 export default function QuizDetailModal({
   open,
@@ -36,6 +37,7 @@ export default function QuizDetailModal({
   // null | { mode: "create" } | { mode: "edit", question }
 
   const [importModalOpen, setImportModalOpen] = useState(false);
+  const [deleteTargetQuestion, setDeleteTargetQuestion] = useState(null);
 
   useEffect(() => {
     if (!open || !material) return;
@@ -128,13 +130,19 @@ export default function QuizDetailModal({
     }
   }
 
-  async function handleDeleteQuestion(question) {
-    if (!window.confirm(`Xóa câu hỏi "${question.content}"?`)) return;
+  function handleDeleteQuestion(question) {
+    setDeleteTargetQuestion(question);
+  }
+
+  async function confirmDeleteQuestion() {
+    if (!deleteTargetQuestion) return;
+    const question = deleteTargetQuestion;
 
     setBusyQuestionId(question.id);
 
     try {
       await deleteQuestion(material.id, question.id);
+      setDeleteTargetQuestion(null);
       await loadQuestions();
     } catch (err) {
       const apiMsg =
@@ -429,6 +437,17 @@ export default function QuizDetailModal({
           setImportModalOpen(false);
           loadQuestions();
         }}
+      />
+      <ConfirmModal
+        open={!!deleteTargetQuestion}
+        title="Xóa câu hỏi này?"
+        description={`Bạn có chắc chắn muốn xóa câu hỏi "${deleteTargetQuestion?.content}" khỏi bài Quiz?`}
+        confirmLabel="Xóa câu hỏi"
+        cancelLabel="Hủy"
+        tone="danger"
+        busy={!!busyQuestionId}
+        onConfirm={confirmDeleteQuestion}
+        onClose={() => setDeleteTargetQuestion(null)}
       />
     </div>
   );
