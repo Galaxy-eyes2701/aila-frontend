@@ -259,8 +259,34 @@ function PreviewContent({ material, loading, courseId }) {
         <QuizPreviewPanel materialId={material.id} />
       )}
 
+      {/* AI PRACTICE — hiển thị thông tin tình huống và chức năng simulate */}
+      {(type.includes('aipractice') || type === 'aipractice') && (
+        <div className={styles.aiPracticeSection}>
+          <div className={styles.aiPracticeInfo}>
+            <div className={styles.aiPracticeHeader}>
+              <i className="fas fa-robot" />
+              <span>Thực hành AI</span>
+            </div>
+            <p className={styles.aiPracticeNote}>
+              Đã thêm chức năng simulate thực hành trong học phần thực hành AI. 
+              Expert có thể chạy thử tình huống để kiểm tra trước khi xuất bản.
+            </p>
+            <div className={styles.aiPracticeActions}>
+              <a
+                href={`/expert/simulation/${material.id}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={styles.simulateBtn}
+              >
+                <i className="fas fa-flask" /> Chạy thử tình huống
+              </a>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* UNSUPPORTED */}
-      {!type.includes('video') && !type.includes('document') && !type.includes('quiz') && (
+      {!type.includes('video') && !type.includes('document') && !type.includes('quiz') && !type.includes('aipractice') && type !== 'aipractice' && (
         <div className={styles.noContent}>Định dạng chưa được hỗ trợ xem trước.</div>
       )}
     </div>
