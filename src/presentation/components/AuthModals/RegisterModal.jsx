@@ -59,8 +59,16 @@ export default function RegisterModal({ onClose, onSwitchToLogin, onRegisterSucc
     }
   };
 
-  const handleGoogle = () => {
-    window.location.href = 'https://localhost:7124/api/auth/learner/google';
+  const handleGoogle = async () => {
+    try {
+      const returnUrl = window.location.origin;
+      const res = await api.get(`/auth/google/url?returnUrl=${encodeURIComponent(returnUrl)}`);
+      if (res.data?.authorizationUrl) {
+        window.location.href = res.data.authorizationUrl;
+      }
+    } catch {
+      setError('Không thể kết nối Google. Vui lòng thử lại.');
+    }
   };
 
   const handleOverlay = (e) => { if (e.target === e.currentTarget) onClose(); };

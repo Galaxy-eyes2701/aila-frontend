@@ -157,7 +157,7 @@ export default function Header({ onLoginClick }) {
           {[
             ...NAV_LINKS,
             ...(user && user.role === "Learner"
-              ? [{ label: "Tài nguyên đăng ký", href: "/profile/subscription-usage" }]
+              ? [{ label: "Sử dụng tài nguyên", href: "/profile/subscription-usage" }]
               : []),
           ].map(({ label, href }) => (
             <li key={label}>
