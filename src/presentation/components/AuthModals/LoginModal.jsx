@@ -8,7 +8,7 @@ import { RESET_SUCCESS_MESSAGE } from './ResetPassword/constants';
 
 const PANELS = { LOGIN: 'login', RESET: 'reset' };
 
-export default function LoginModal({ onClose, onSwitchToRegister, onLoginSuccess }) {
+export default function LoginModal({ onClose, onSwitchToRegister, onLoginSuccess, initialError = '' }) {
   const { login } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
@@ -16,7 +16,7 @@ export default function LoginModal({ onClose, onSwitchToRegister, onLoginSuccess
   const [form, setForm]           = useState({ email: '', password: '' });
   const [showPwd, setShowPwd]     = useState(false);
   const [loading, setLoading]     = useState(false);
-  const [error, setError]         = useState('');
+  const [error, setError]         = useState(initialError);
   const [success, setSuccess]     = useState('');
   const [remember, setRemember]   = useState(false);
 
@@ -50,8 +50,9 @@ export default function LoginModal({ onClose, onSwitchToRegister, onLoginSuccess
       } else {
         setError(res.data.errorMessage || 'Đăng nhập thất bại.');
       }
-    } catch {
-      setError('Email hoặc mật khẩu không đúng.');
+    } catch (err) {
+      const apiMsg = err.response?.data?.errorMessage || err.response?.data?.message;
+      setError(apiMsg || 'Email hoặc mật khẩu không đúng.');
     } finally {
       setLoading(false);
     }

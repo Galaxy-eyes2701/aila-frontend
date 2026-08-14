@@ -71,11 +71,9 @@ export default function ExpertLogin() {
       } else {
         setError(res.data.errorMessage || 'Đăng nhập thất bại.');
       }
-    }  catch (err) {
-      console.log('Status:', err.response?.status);
-      console.log('Data:', err.response?.data);
-      console.log('Message:', err.message);
-      setError('Email hoặc mật khẩu không đúng. Vui lòng thử lại.');
+    } catch (err) {
+      const apiMsg = err.response?.data?.errorMessage || err.response?.data?.message;
+      setError(apiMsg || 'Email hoặc mật khẩu không đúng. Vui lòng thử lại.');
     } finally {
       setLoading(false);
     }
