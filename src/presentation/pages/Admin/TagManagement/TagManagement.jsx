@@ -63,7 +63,7 @@ function TagFormModal({ mode, initialData, onClose, onSaved }) {
   };
 
   return (
-    <div className={styles.modalOverlay} onClick={(e) => e.target === e.currentTarget && onClose()}>
+    <div className={styles.modalOverlay}>
       <div className={styles.modal}>
         <div className={styles.modalHeader}>
           <h2>{mode === "edit" ? "Chỉnh sửa tag" : "Tạo tag hệ thống mới"}</h2>
@@ -152,7 +152,7 @@ function ReviewTagModal({ request, detailLoading, reviewing, onClose, onSubmit }
   const statusLabel = REQUEST_STATUS_LABEL[request.requestStatus] || request.requestStatus || "Chờ duyệt";
 
   return (
-    <div className={styles.modalOverlay} onClick={(e) => e.target === e.currentTarget && onClose()}>
+    <div className={styles.modalOverlay}>
       <div className={styles.modal}>
         <div className={styles.modalHeader}>
           <h2>Duyệt yêu cầu xác minh tag</h2>

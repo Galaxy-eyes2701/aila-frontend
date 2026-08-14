@@ -261,12 +261,7 @@ export default function PlanFormModal({
   const groups = ['Thương mại', 'Quyền lợi'];
 
   return (
-    <div
-      className={styles.modalOverlay}
-      onMouseDown={(e) => {
-        if (e.target === e.currentTarget && !saving) onClose();
-      }}
-    >
+    <div className={styles.modalOverlay}>
       <div
         className={styles.modal}
         role="dialog"

@@ -9,10 +9,7 @@ export default function ModuleModal({
   onSubmit,
 }) {
   return (
-    <div
-      className={styles.modalOverlay}
-      onMouseDown={(event) => event.target === event.currentTarget && onClose()}
-    >
+    <div className={styles.modalOverlay}>
       <form className={styles.modal} onSubmit={onSubmit}>
         <div className={styles.modalHeader}>
           <div>

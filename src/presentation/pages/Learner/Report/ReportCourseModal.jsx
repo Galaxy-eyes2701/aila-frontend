@@ -145,7 +145,7 @@ export default function ReportCourseModal({
   };
 
   return (
-    <div className={styles.overlay} onMouseDown={onClose}>
+    <div className={styles.overlay}>
       <div
         className={styles.modal}
         role="dialog"
@@ -153,7 +153,6 @@ export default function ReportCourseModal({
         aria-labelledby="report-title"
         tabIndex={-1}
         ref={dialogRef}
-        onMouseDown={(e) => e.stopPropagation()}
       >
         <div className={styles.header}>
           <div>

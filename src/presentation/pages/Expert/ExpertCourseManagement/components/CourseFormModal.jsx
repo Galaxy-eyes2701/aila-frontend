@@ -330,7 +330,7 @@ export default function CourseFormModal({ mode, initialData, categories, onClose
   };
 
   return (
-    <div className={styles.overlay} onClick={e => e.target === e.currentTarget && onClose()}>
+    <div className={styles.overlay}>
       <div className={`${styles.modal} ${styles.formModal}`}>
         <div className={styles.modalHeader}>
           <div className={styles.modalTitle}>

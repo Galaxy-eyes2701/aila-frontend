@@ -843,11 +843,8 @@ export default function LearnerProfile() {
             <LearningSections profile={profile} />
 
             {showAvatarModal && (
-              <div className={styles.modalOverlay} onClick={closeAvatarModal}>
-                <div
-                  className={styles.avatarModal}
-                  onClick={(e) => e.stopPropagation()}
-                >
+              <div className={styles.modalOverlay}>
+                <div className={styles.avatarModal}>
                   <div className={styles.modalHeader}>
                     <span className={styles.cardTitle}>
                       <i className="fas fa-image" /> Ảnh đại diện

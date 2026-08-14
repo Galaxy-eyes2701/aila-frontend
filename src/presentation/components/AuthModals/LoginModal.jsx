@@ -92,10 +92,8 @@ export default function LoginModal({ onClose, onSwitchToRegister, onLoginSuccess
     setSuccess(RESET_SUCCESS_MESSAGE);
   };
 
-  const handleOverlay = (e) => { if (e.target === e.currentTarget) onClose(); };
-
   return (
-    <div className={styles.overlay} onClick={handleOverlay}>
+    <div className={styles.overlay}>
       <div className={styles.modal}>
         <button className={styles.closeBtn} onClick={onClose} aria-label="Đóng">
           <i className="fas fa-times" />

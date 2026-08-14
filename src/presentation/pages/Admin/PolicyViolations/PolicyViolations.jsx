@@ -9,10 +9,7 @@ function ViolationDetailModal({ violation, onClose }) {
   if (!violation) return null;
 
   return (
-    <div
-      className={styles.modalOverlay}
-      onClick={(e) => e.target === e.currentTarget && onClose()}
-    >
+    <div className={styles.modalOverlay}>
       <div className={styles.modal}>
         <div className={styles.modalHeader}>
           <h2>Chi tiết vi phạm chính sách</h2>

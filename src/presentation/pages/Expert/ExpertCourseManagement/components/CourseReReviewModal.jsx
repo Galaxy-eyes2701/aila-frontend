@@ -47,7 +47,7 @@ export default function CourseReReviewModal({ course, onClose, onSubmitted }) {
   };
 
   return (
-    <div className={styles.overlay} onClick={e => e.target === e.currentTarget && onClose()}>
+    <div className={styles.overlay}>
       <div className={styles.modal} style={{ maxWidth: 560 }}>
         <div className={styles.modalHeader}>
           <div className={styles.modalTitle}>

@@ -80,8 +80,8 @@ export default function OverrideDetailModal({
     .toUpperCase();
 
   return (
-    <div className={styles.overlay} onClick={onClose}>
-      <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
+    <div className={styles.overlay}>
+      <div className={styles.modal}>
         <div className={styles.modalHeader}>
           <div className={styles.modalTitleWrapper}>
             <div className={styles.modalHeaderIcon}>

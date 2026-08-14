@@ -78,10 +78,7 @@ function CategoryFormModal({ mode, initialData, onClose, onSaved }) {
   };
 
   return (
-    <div
-      className={styles.modalOverlay}
-      onClick={(e) => e.target === e.currentTarget && onClose()}
-    >
+    <div className={styles.modalOverlay}>
       <div className={styles.modal}>
         <div className={styles.modalHeader}>
           <h2>{mode === "edit" ? "Chỉnh sửa danh mục" : "Tạo danh mục mới"}</h2>

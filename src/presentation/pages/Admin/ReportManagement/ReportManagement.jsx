@@ -83,7 +83,7 @@ const RR_STATUS_CLASS = { Pending: styles.statusPending, Approved: styles.status
 function DismissModal({ report, onClose, onConfirm }) {
   const [note, setNote] = useState("");
   return (
-    <div className={styles.modalOverlay} onClick={e => e.target === e.currentTarget && onClose()}>
+    <div className={styles.modalOverlay}>
       <div className={styles.modal} style={{ maxWidth: 460 }}>
         <div className={styles.modalHeader}>
           <h2><i className="fas fa-times-circle" style={{ color: "#dc2626", marginRight: 8 }} />Từ chối báo cáo</h2>
@@ -531,7 +531,7 @@ function ReportDetailModal({ report, onClose, onResolve, onLock, onUnlock, onPre
   const isResolved = report.status === "Resolved";
 
   return (
-    <div className={styles.modalOverlay} onClick={(e) => e.target === e.currentTarget && onClose()}>
+    <div className={styles.modalOverlay}>
       <div className={styles.modal}>
         <div className={styles.modalHeader}>
           <h2>Chi tiết báo cáo</h2>

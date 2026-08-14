@@ -2,7 +2,7 @@ import styles from '../ExpertCourseManagement.module.css';
 
 export default function ConfirmDialog({ title, message, confirmLabel, danger, onConfirm, onCancel }) {
   return (
-    <div className={styles.overlay} onClick={e => e.target === e.currentTarget && onCancel()}>
+    <div className={styles.overlay}>
       <div className={styles.dialog}>
         <div className={styles.dialogIcon}>
           <i className={`fas ${danger ? 'fa-exclamation-triangle' : 'fa-question-circle'}`} />

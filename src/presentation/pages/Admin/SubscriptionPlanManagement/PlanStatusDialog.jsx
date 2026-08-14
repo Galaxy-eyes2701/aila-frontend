@@ -76,12 +76,7 @@ export default function PlanStatusDialog({ plan, onClose, onResolved }) {
   };
 
   return (
-    <div
-      className={styles.modalOverlay}
-      onMouseDown={(e) => {
-        if (e.target === e.currentTarget && !submitting) onClose();
-      }}
-    >
+    <div className={styles.modalOverlay}>
       <div
         className={`${styles.modal} ${styles.dialog}`}
         role="alertdialog"

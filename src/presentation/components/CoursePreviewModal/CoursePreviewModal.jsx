@@ -406,7 +406,7 @@ export default function CoursePreviewModal({ courseId, onClose, materialPreviewE
   };
 
   return (
-    <div className={styles.backdrop} onClick={e => e.target === e.currentTarget && onClose()}>
+    <div className={styles.backdrop}>
       <div className={styles.dialog} role="dialog" aria-modal="true">
 
         <div className={styles.previewBanner}>

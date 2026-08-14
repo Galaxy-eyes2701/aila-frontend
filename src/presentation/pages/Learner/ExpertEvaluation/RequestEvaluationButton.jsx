@@ -174,12 +174,7 @@ function QuotaExhaustedModal({ message, onClose }) {
   const containerRef = useModalA11y(onClose, linkRef);
 
   return (
-    <div
-      className={styles.overlay}
-      onMouseDown={(e) => {
-        if (e.target === e.currentTarget) onClose();
-      }}
-    >
+    <div className={styles.overlay}>
       <div
         className={styles.quotaModal}
         ref={containerRef}

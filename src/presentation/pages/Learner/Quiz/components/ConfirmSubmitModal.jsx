@@ -15,7 +15,27 @@ export default function ConfirmSubmitModal({
 
   return (
     <div className={styles.overlay} role="dialog" aria-modal="true">
-      <div className={styles.modal}>
+      <div className={styles.modal} style={{ position: "relative" }}>
+        <button
+          type="button"
+          onClick={onCancel}
+          disabled={submitting}
+          aria-label="Đóng"
+          style={{
+            position: "absolute",
+            top: 14,
+            right: 16,
+            background: "none",
+            border: "none",
+            fontSize: 18,
+            color: "#6b7280",
+            cursor: "pointer",
+            padding: 4,
+            lineHeight: 1,
+          }}
+        >
+          <i className="fas fa-times" />
+        </button>
         <h3 className={styles.modalTitle}>Nộp bài kiểm tra?</h3>
         <p className={styles.modalText}>
           Bạn đã trả lời <strong>{answeredCount}</strong>/{totalQuestions} câu

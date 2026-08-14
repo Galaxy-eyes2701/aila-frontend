@@ -15,17 +15,33 @@ export default function ConfirmModal({
   if (!open) return null;
 
   return (
-    <div
-      className={styles.overlay}
-      onClick={(e) => {
-        if (e.target === e.currentTarget && !busy) onClose();
-      }}
-    >
+    <div className={styles.overlay}>
       <div
         className={styles.modal}
         role="dialog"
         aria-modal="true"
+        style={{ position: "relative" }}
       >
+        <button
+          type="button"
+          onClick={onClose}
+          disabled={busy}
+          aria-label="Đóng"
+          style={{
+            position: "absolute",
+            top: 14,
+            right: 16,
+            background: "none",
+            border: "none",
+            fontSize: 16,
+            color: "#9ca3af",
+            cursor: "pointer",
+            padding: 4,
+            lineHeight: 1,
+          }}
+        >
+          <i className="fas fa-times" />
+        </button>
         <div className={`${styles.iconBox} ${styles[tone]}`}>
           <i className={`fas ${icon}`} aria-hidden="true" />
         </div>

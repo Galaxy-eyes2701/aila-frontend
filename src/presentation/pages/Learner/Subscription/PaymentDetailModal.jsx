@@ -62,7 +62,6 @@ export default function PaymentDetailModal({ paymentId, onClose }) {
     <div
       className={styles.overlay}
       ref={overlayRef}
-      onMouseDown={e => { if (e.target === overlayRef.current) onClose(); }}
       role="dialog"
       aria-modal="true"
       aria-label="Chi tiết giao dịch thanh toán"
