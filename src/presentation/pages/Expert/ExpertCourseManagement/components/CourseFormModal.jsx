@@ -64,7 +64,16 @@ export default function CourseFormModal({ mode, initialData, categories, onClose
         
         // Add personal tags if not already in merged
         my.forEach(t => { 
-          if (!merged.find(p => p.id === t.id)) merged.push(t); 
+          if (!merged.find(p => p.id === t.id)) {
+            // Mark personal tags to identify them later
+            merged.push({ ...t, isPersonalTag: true });
+          } else {
+            // If tag already exists in merged, mark it as personal
+            const existingTag = merged.find(p => p.id === t.id);
+            if (existingTag) {
+              existingTag.isPersonalTag = true;
+            }
+          }
         });
         
         // If editing a course, get course details to extract tags
@@ -568,6 +577,15 @@ export default function CourseFormModal({ mode, initialData, categories, onClose
                 <i className="fas fa-info-circle" />
                 Sau khi được admin duyệt, tag sẽ xuất hiện công khai và có thể gắn vào khóa học.
               </div>
+              
+              {/* Show if tag is already selected */}
+              {form.tagIds.includes(verifyTag.id) && (
+                <div className={styles.infoBoxBlue} style={{ background: '#fef3c7', borderColor: '#f59e0b', color: '#92400e' }}>
+                  <i className="fas fa-check-circle" />
+                  <span>Tag này đã được chọn trong khóa học của bạn.</span>
+                </div>
+              )}
+
               <div className={styles.formGroup}>
                 <label className={styles.formLabel}>
                   <i className="fas fa-comment-alt" /> Ghi chú cho admin{' '}
@@ -581,6 +599,21 @@ export default function CourseFormModal({ mode, initialData, categories, onClose
             </div>
             <div className={styles.modalFooter}>
               <button className={styles.btnCancel} onClick={() => setVerifyTag(null)}>Hủy</button>
+              
+              {/* Add to course button - show for unpublished tags that are not selected */}
+              {verifyTag && !form.tagIds.includes(verifyTag.id) && !verifyTag.isPublished && (
+                <button 
+                  type="button" 
+                  className={styles.btnAddToCourse} 
+                  onClick={() => {
+                    toggleTag(verifyTag.id);
+                    setVerifyTag(null);
+                  }}
+                >
+                  <i className="fas fa-plus" /> Thêm vào khóa học
+                </button>
+              )}
+              
               <button className={styles.btnSave} onClick={handleSendVerification} disabled={verifySaving}>
                 {verifySaving ? <><span className={styles.spinner} /> Đang gửi...</>
                   : <><i className="fas fa-paper-plane" /> {verifyTag.publishRequest?.status === 'Rejected' ? 'Gửi lại' : 'Gửi yêu cầu'}</>}

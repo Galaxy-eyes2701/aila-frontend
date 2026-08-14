@@ -748,6 +748,19 @@
   color: #b91c1c;
 }
 
+/* Tag chưa duyệt đã được chọn — màu đỏ đậm hơn để dễ nhìn */
+.tagBtnUnpub.tagBtnActive {
+  background: #dc2626 !important;
+  border-color: #b91c1c !important;
+  color: #fff !important;
+  font-weight: 700;
+}
+.tagBtnUnpub.tagBtnActive:hover {
+  background: #b91c1c !important;
+  border-color: #991b1b !important;
+  color: #fff !important;
+}
+
 /* Tag đang chờ duyệt — màu cam nhạt, cursor mặc định */
 .tagBtnPending {
   background: #fffbeb;
@@ -776,6 +789,20 @@
   color: #991b1b;
 }
 
+/* Tag bị từ chối đã được chọn — màu đỏ đậm với border dashed */
+.tagBtnRejected.tagBtnActive {
+  background: #b91c1c !important;
+  border-color: #991b1b !important;
+  color: #fff !important;
+  font-weight: 700;
+  border-style: dashed !important;
+}
+.tagBtnRejected.tagBtnActive:hover {
+  background: #991b1b !important;
+  border-color: #7f1d1d !important;
+  color: #fff !important;
+}
+
 /* Tag từ khóa học — màu xanh nhạt, để phân biệt */
 .tagBtnFromCourse {
   background: #f0f9ff;
@@ -787,6 +814,19 @@
   background: #e0f2fe;
   border-color: #38bdf8;
   color: #0284c7;
+}
+
+/* Tag từ khóa học đã được chọn — màu xanh đậm hơn */
+.tagBtnFromCourse.tagBtnActive {
+  background: #0284c7 !important;
+  border-color: #0369a1 !important;
+  color: #fff !important;
+  font-weight: 700;
+}
+.tagBtnFromCourse.tagBtnActive:hover {
+  background: #0369a1 !important;
+  border-color: #075985 !important;
+  color: #fff !important;
 }
 
 .tagStatusIcon {
@@ -919,6 +959,22 @@
 }
 .btnSave:hover:not(:disabled) { background: var(--primary-dark); transform: translateY(-1px); }
 .btnSave:disabled { opacity: .65; cursor: not-allowed; }
+
+.btnAddToCourse {
+  padding: 10px 20px;
+  border-radius: var(--radius-sm);
+  background: #10b981;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 700;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  transition: background var(--transition), transform var(--transition);
+}
+.btnAddToCourse:hover { background: #059669; transform: translateY(-1px); }
 
 /* ── CONFIRM DIALOG ────────────────────────────────────────── */
 .dialog {

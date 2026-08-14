@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import { HubConnectionBuilder, HubConnectionState } from "@microsoft/signalr";
 import api from "@services/api";
 import { resolveApiError } from "@services/api";
 import { formatPrice, formatDuration } from "@services/subscriptionPlan";
