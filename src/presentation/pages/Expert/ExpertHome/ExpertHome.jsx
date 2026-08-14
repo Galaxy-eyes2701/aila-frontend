@@ -381,10 +381,10 @@ export default function ExpertHome() {
               />
               <StatCard
                 icon="fa-chart-line"
-                label="Tiến độ trung bình hoàn thành"
+                label="Tiến độ học tập trung bình"
                 value={`${overview.averageCompletionRate ?? 0}%`}
                 color="#8b5cf6"
-                sub={`${overview.completedEnrollmentsCount ?? 0} lượt hoàn thành khóa học`}
+                sub={`${overview.completedEnrollmentsCount ?? 0} số lượng học viên đã hoàn thành khóa học`}
               />
               <StatCard
                 icon="fa-clipboard-check"
