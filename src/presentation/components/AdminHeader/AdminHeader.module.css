@@ -473,20 +473,35 @@
 }
 
 @media (max-width: 576px) {
+  .navContent {
+    gap: 8px;
+    padding: 0 12px;
+  }
+
   .logo {
-    font-size: 16px;
+    font-size: 15px;
   }
 
   .adminBadge {
     display: none;
   }
 
-  .logoutButton span {
-    display: none;
+  .logoutButton {
+    padding: 7px 10px;
+    font-size: 12px;
+    gap: 5px;
   }
 
-  .logoutButton {
-    padding: 8px 10px;
+  .logoutButton span {
+    display: inline-block;
+    white-space: nowrap;
+  }
+
+  .bellBtn,
+  .menuToggle {
+    width: 36px;
+    height: 36px;
+    font-size: 15px;
   }
 }
 
