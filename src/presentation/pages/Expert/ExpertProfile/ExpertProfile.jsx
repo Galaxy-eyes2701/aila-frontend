@@ -428,7 +428,7 @@ export default function ExpertProfile() {
 
         {/* Breadcrumb */}
         <div className={styles.breadcrumb}>
-          <Link to="/">Trang chủ</Link>
+          <Link to="/expert">Trang chủ</Link>
           <i className="fas fa-chevron-right" />
           <span>Hồ sơ cá nhân</span>
         </div>
