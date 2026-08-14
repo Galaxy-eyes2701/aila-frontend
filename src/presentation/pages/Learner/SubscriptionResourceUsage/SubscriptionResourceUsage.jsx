@@ -138,16 +138,16 @@ export default function SubscriptionResourceUsage() {
             <i className="fas fa-chevron-right" aria-hidden="true" />
             <Link to="/profile">Hồ sơ cá nhân</Link>
             <i className="fas fa-chevron-right" aria-hidden="true" />
-            <span>Sử dụng tài nguyên</span>
+            <span>Tài nguyên đăng ký</span>
           </nav>
 
           <div className={styles.heroHeader}>
             <div className={styles.heroTitleGroup}>
               <h1>
-                Sử dụng <em>Tài nguyên Gói học</em>
+                Sử dụng <em>Tài nguyên </em>
               </h1>
               <p>
-                Quản lý hạn mức được cấp, theo dõi mức độ tiêu thụ và số lượng tài nguyên còn
+                Quản lý hạn mức được cấp, theo dõi mức độ tiêu thụ và dung lượng tài nguyên còn
                 lại theo gói đăng ký hiện tại của bạn.
               </p>
             </div>
@@ -255,7 +255,7 @@ export default function SubscriptionResourceUsage() {
             <div className={styles.infoBox}>
               <h3 className={styles.sectionTitle}>
                 <i className="fas fa-circle-info" aria-hidden="true" />
-                Thông tin và quy tắc sử dụng tài nguyên
+                Quy tắc và thông tin tài nguyên
               </h3>
               <ul className={styles.infoList}>
                 <li className={styles.infoItem}>
@@ -263,10 +263,10 @@ export default function SubscriptionResourceUsage() {
                     <i className="fas fa-user-lock" aria-hidden="true" />
                   </div>
                   <div className={styles.infoItemText}>
-                    <h4>Phạm vi áp dụng tài khoản</h4>
+                    <h4>Quản lý tài khoản cá nhân</h4>
                     <p>
-                      Bạn đang theo dõi hạn mức và mức độ sử dụng tài nguyên dành riêng cho tài
-                      khoản cá nhân của mình.
+                      Bạn chỉ có thể theo dõi và xem hạn mức tài nguyên áp dụng cho chính tài khoản
+                      đã đăng nhập của mình.
                     </p>
                   </div>
                 </li>
@@ -275,10 +275,10 @@ export default function SubscriptionResourceUsage() {
                     <i className="fas fa-sliders" aria-hidden="true" />
                   </div>
                   <div className={styles.infoItemText}>
-                    <h4>Cập nhật theo gói dịch vụ</h4>
+                    <h4>Xác định theo gói đăng ký</h4>
                     <p>
-                      Hạn mức tài nguyên được hệ thống tự động cấp theo gói đăng ký đang hoạt động
-                      hoặc theo Gói mặc định (Miễn phí) của nền tảng.
+                      Định ngạch tài nguyên được tự động cập nhật theo gói đăng ký đang hoạt động của
+                      bạn hoặc hạn mức mặc định nền tảng.
                     </p>
                   </div>
                 </li>
@@ -287,10 +287,10 @@ export default function SubscriptionResourceUsage() {
                     <i className="fas fa-arrow-trend-up" aria-hidden="true" />
                   </div>
                   <div className={styles.infoItemText}>
-                    <h4>Trừ tài nguyên khi học tập</h4>
+                    <h4>Khấu trừ tài nguyên hoạt động</h4>
                     <p>
-                      Tài nguyên sẽ được trừ dần khi bạn tương tác với AI Token, thực hành tình huống
-                      tình huống AI hoặc gửi bài nhờ chuyên gia đánh giá.
+                      Tài nguyên sẽ được trừ dần khi bạn thực hiện các hoạt động học tập như hỏi đáp
+                      AI Token, thực hành kịch bản AI hoặc gửi bài cho chuyên gia.
                     </p>
                   </div>
                 </li>

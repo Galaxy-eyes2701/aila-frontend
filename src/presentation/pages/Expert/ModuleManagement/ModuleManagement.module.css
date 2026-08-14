@@ -316,13 +316,24 @@
   gap: 6px;
 }
 
+.primaryButton i,
+.secondaryButton i,
+.dangerButton i,
+.iconButton i {
+  font-size: 13px;
+  line-height: 1;
+  margin: 0;
+  opacity: 1;
+}
+
 .emptyState {
   padding: 64px 24px;
   text-align: center;
   color: var(--text-muted);
 }
 
-.emptyState i {
+.emptyState > i {
+  display: block;
   font-size: 42px;
   opacity: .36;
   margin-bottom: 16px;

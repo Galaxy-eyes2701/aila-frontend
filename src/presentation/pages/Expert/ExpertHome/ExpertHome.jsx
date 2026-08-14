@@ -461,7 +461,7 @@ export default function ExpertHome() {
                     <tr>
                       <th>Tên Khóa Học</th>
                       <th>Lượt Ghi Danh</th>
-                      <th>Tỷ Lệ Hoàn Thành Avg</th>
+                      <th>Tỷ Lệ Hoàn Thành Trung Bình</th>
                     </tr>
                   </thead>
                   <tbody>
