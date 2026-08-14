@@ -1,7 +1,7 @@
 import { useMemo, useRef, useState } from 'react';
 import useModalA11y from '@state/hooks/useModalA11y';
 import { resolveApiError } from '@services/api';
-import { formatDuration, formatNumber, formatPrice } from '@services/subscriptionPlan';
+import { formatNumber, formatPrice } from '@services/subscriptionPlan';
 import {
   createSubscriptionPlan,
   updateSubscriptionPlan,
@@ -52,7 +52,7 @@ const NUMBER_FIELDS = [
     label: 'Thời hạn (ngày)',
     group: 'Thương mại',
     hint: rangeHint('durationInDays'),
-    createOnly: true,
+    createOnly: false,
   },
   {
     name: 'aiTokenLimit',
@@ -293,7 +293,7 @@ export default function PlanFormModal({
 
           {isEdit && (
             <>
-              {/* §5.1 — ba trường bất biến, render read-only để admin không tưởng đã lưu */}
+              {/* §5.1 — hai trường bất biến, render read-only để admin không tưởng đã lưu */}
               <div className={styles.readonlyGrid}>
                 <div className={styles.readonlyCard}>
                   <span className={styles.readonlyLabel}>Tên gói</span>
@@ -303,20 +303,11 @@ export default function PlanFormModal({
                   <span className={styles.readonlyLabel}>Cấp độ gói (Tier)</span>
                   <div className={styles.readonlyValue}>{formatNumber(plan.tierLevel)}</div>
                 </div>
-                <div
-                  className={styles.readonlyCard}
-                  title="Backend hiện chưa hỗ trợ sửa thời hạn gói."
-                >
-                  <span className={styles.readonlyLabel}>
-                    Thời hạn <i className="fas fa-circle-info" aria-hidden="true" />
-                  </span>
-                  <div className={styles.readonlyValue}>{formatDuration(plan.durationInDays)}</div>
-                </div>
               </div>
 
               <p className={styles.modalNote}>
                 <i className="fas fa-lock" aria-hidden="true" />
-                Tên gói và cấp độ không thể thay đổi sau khi tạo. Thời hạn gói hiện chưa sửa được.
+                Tên gói và cấp độ không thể thay đổi sau khi tạo.
               </p>
 
               <p className={styles.modalNote}>
