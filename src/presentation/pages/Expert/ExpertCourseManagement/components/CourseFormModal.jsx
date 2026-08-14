@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import api from '@services/api';
 import styles from '../ExpertCourseManagement.module.css';
+import RichTextEditor from '../../ModuleManagement/components/common/RichTextEditor';
 
 const FALLBACK_THUMB = 'https://images.unsplash.com/photo-1677442135703-1787eea5ce01?w=480&q=75';
 const LEVELS = [
@@ -138,8 +139,8 @@ export default function CourseFormModal({ mode, initialData, categories, onClose
     
     if (form.thumbnailUrl.trim() && !isValidUrl(form.thumbnailUrl.trim()))
       errs.thumbnailUrl = 'URL ảnh bìa không hợp lệ. Phải bắt đầu bằng https://.';
-    if (form.description.length > 1000)
-      errs.description = `Mô tả không được vượt quá 1000 ký tự (hiện tại: ${form.description.length}).`;
+    if (form.description.length > 5000)
+      errs.description = `Mô tả không được vượt quá 5000 ký tự.`;
     return errs;
   };
 
@@ -409,13 +410,20 @@ export default function CourseFormModal({ mode, initialData, categories, onClose
             {/* Description */}
             <div className={styles.formGroup}>
               <label className={styles.formLabel}><i className="fas fa-align-left" /> Mô tả khóa học</label>
-              <textarea name="description"
-                className={`${styles.formTextarea} ${fieldErrors.description ? styles.inputError : ''}`}
-                value={form.description} onChange={handleChange}
-                placeholder="Mô tả nội dung, mục tiêu, đối tượng học viên..." />
-              {fieldErrors.description
-                ? <span className={styles.fieldError}><i className="fas fa-exclamation-circle" /> {fieldErrors.description}</span>
-                : <span className={styles.charCount}>{form.description.length}/1000</span>}
+              <RichTextEditor
+                value={form.description}
+                onChange={(content) => {
+                  setFormError('');
+                  clearFieldError('description');
+                  setForm((prev) => ({ ...prev, description: content }));
+                }}
+                placeholder="Mô tả nội dung, mục tiêu, đối tượng học viên..."
+              />
+              {fieldErrors.description && (
+                <span className={styles.fieldError}>
+                  <i className="fas fa-exclamation-circle" /> {fieldErrors.description}
+                </span>
+              )}
             </div>
 
             {/* Tags */}

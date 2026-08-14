@@ -316,9 +316,10 @@ export default function CourseDetail() {
           {course.description && (
             <section className={styles.sectionCard} id="description">
               <h2 className={styles.sectionTitle}>Mô tả khóa học</h2>
-              <div className={styles.descriptionContent}>
-                <p>{course.description}</p>
-              </div>
+              <div
+                className={styles.descriptionContent}
+                dangerouslySetInnerHTML={{ __html: course.description }}
+              />
             </section>
           )}
 

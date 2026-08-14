@@ -306,7 +306,12 @@ function PreviewOverview({ course }) {
         <div className={styles.overviewHeroInfo}>
           <span className={styles.overviewCategory}>{course.category?.name}</span>
           <h2 className={styles.overviewTitle}>{course.name}</h2>
-          {course.description && <p className={styles.overviewDesc}>{course.description}</p>}
+          {course.description && (
+            <div
+              className={styles.overviewDesc}
+              dangerouslySetInnerHTML={{ __html: course.description }}
+            />
+          )}
           <div className={styles.overviewMeta}>
             <span><i className="fas fa-layer-group" /> {LEVEL_LABELS[course.level] ?? course.level}</span>
             <span><i className="fas fa-clock" /> {course.durationHours}h</span>
