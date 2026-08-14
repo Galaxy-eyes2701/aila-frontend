@@ -113,6 +113,10 @@ export default function LearnerProfile() {
   const [pwError, setPwError] = useState("");
   const [pwSuccess, setPwSuccess] = useState(false);
 
+  // BE trả hasPassword = false cho tài khoản Google chưa từng đặt mật khẩu.
+  // Mặc định true khi profile chưa tải xong để không hiện nhầm form "đặt mật khẩu lần đầu".
+  const hasPassword = profile?.hasPassword !== false;
+
   useEffect(() => {
     if (!localStorage.getItem("accessToken")) {
       setLoadError("no_token");
@@ -277,6 +281,10 @@ export default function LearnerProfile() {
   };
 
   const handleChangePassword = async () => {
+    if (hasPassword && !pwForm.currentPassword) {
+      setPwError("Mật khẩu hiện tại không được để trống.");
+      return;
+    }
     if (!pwForm.newPassword) {
       setPwError("Mật khẩu mới không được để trống.");
       return;
@@ -300,16 +308,20 @@ export default function LearnerProfile() {
           newPassword: "",
           confirmPassword: "",
         });
+        // Tài khoản Google vừa đặt mật khẩu lần đầu ⇒ lần sau phải nhập mật khẩu hiện tại.
+        setProfile((prev) => (prev ? { ...prev, hasPassword: true } : prev));
       } else {
         const c = res.data.errorCode;
         setPwError(
           c === "WRONG_PASSWORD"
             ? "Mật khẩu hiện tại không đúng."
-            : c === "VALIDATION_ERROR"
-              ? "Mật khẩu mới không hợp lệ (phải đủ độ mạnh)."
-              : c === "ACCOUNT_INACTIVE"
-                ? "Tài khoản bị vô hiệu hóa."
-                : res.data.errorMessage || "Đổi mật khẩu thất bại.",
+            : c === "PASSWORD_NOT_SET"
+              ? "Tài khoản chưa có mật khẩu. Vui lòng dùng chức năng quên mật khẩu để thiết lập."
+              : c === "VALIDATION_ERROR"
+                ? "Mật khẩu mới không hợp lệ (phải đủ độ mạnh)."
+                : c === "ACCOUNT_INACTIVE"
+                  ? "Tài khoản bị vô hiệu hóa."
+                  : res.data.errorMessage || "Đổi mật khẩu thất bại.",
         );
       }
     } catch (err) {
@@ -317,12 +329,14 @@ export default function LearnerProfile() {
       setPwError(
         c === "WRONG_PASSWORD"
           ? "Mật khẩu hiện tại không đúng."
-          : c === "VALIDATION_ERROR"
-            ? "Mật khẩu mới không hợp lệ (phải đủ độ mạnh)."
-            : c === "ACCOUNT_INACTIVE"
-              ? "Tài khoản bị vô hiệu hóa."
-              : (err.response?.data?.errorMessage ??
-                "Lỗi kết nối máy chủ. Vui lòng thử lại."),
+          : c === "PASSWORD_NOT_SET"
+            ? "Tài khoản chưa có mật khẩu. Vui lòng dùng chức năng quên mật khẩu để thiết lập."
+            : c === "VALIDATION_ERROR"
+              ? "Mật khẩu mới không hợp lệ (phải đủ độ mạnh)."
+              : c === "ACCOUNT_INACTIVE"
+                ? "Tài khoản bị vô hiệu hóa."
+                : (err.response?.data?.errorMessage ??
+                  "Lỗi kết nối máy chủ. Vui lòng thử lại."),
       );
     } finally {
       setPwSaving(false);
@@ -686,7 +700,9 @@ export default function LearnerProfile() {
                       <div className={styles.securityTitle}>Mật khẩu</div>
                       {!showPwForm && !pwSuccess && (
                         <div className={styles.securityDesc}>
-                          Bảo vệ tài khoản bằng mật khẩu mạnh.
+                          {hasPassword
+                            ? "Bảo vệ tài khoản bằng mật khẩu mạnh."
+                            : "Tài khoản Google chưa có mật khẩu."}
                         </div>
                       )}
                       {!showPwForm && pwSuccess && (
@@ -704,32 +720,41 @@ export default function LearnerProfile() {
                           setPwSuccess(false);
                         }}
                       >
-                        Đổi
+                        {hasPassword ? "Đổi" : "Đặt"}
                       </button>
                     )}
                   </div>
 
                   {showPwForm && (
                     <div className={styles.pwFormWrap}>
-                      <div
-                        className={styles.fieldItem}
-                        style={{ marginBottom: 12 }}
-                      >
-                        <label className={styles.fieldLabel}>
-                          MẬT KHẨU HIỆN TẠI
-                        </label>
-                        <input
-                          className={styles.fieldBox}
-                          type="password"
-                          value={pwForm.currentPassword}
-                          onChange={(e) =>
-                            setPwForm((f) => ({
-                              ...f,
-                              currentPassword: e.target.value,
-                            }))
-                          }
-                        />
-                      </div>
+                      {hasPassword ? (
+                        <div
+                          className={styles.fieldItem}
+                          style={{ marginBottom: 12 }}
+                        >
+                          <label className={styles.fieldLabel}>
+                            MẬT KHẨU HIỆN TẠI{" "}
+                            <span className={styles.required}>*</span>
+                          </label>
+                          <input
+                            className={styles.fieldBox}
+                            type="password"
+                            value={pwForm.currentPassword}
+                            onChange={(e) =>
+                              setPwForm((f) => ({
+                                ...f,
+                                currentPassword: e.target.value,
+                              }))
+                            }
+                          />
+                        </div>
+                      ) : (
+                        <div className={styles.formHint}>
+                          <i className="fas fa-info-circle" /> Tài khoản của bạn
+                          đăng nhập bằng Google và chưa có mật khẩu. Hãy đặt mật
+                          khẩu mới để đăng nhập được bằng email.
+                        </div>
+                      )}
                       <div
                         className={styles.fieldItem}
                         style={{ marginBottom: 12 }}
