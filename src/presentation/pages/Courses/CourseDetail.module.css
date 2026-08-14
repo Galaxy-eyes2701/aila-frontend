@@ -61,6 +61,7 @@
   pointer-events: none;
 }
 
+/* ── HERO CONTENT ──────────────────────────────────────────────────── */
 .heroInner {
   max-width: 1200px;
   margin: 0 auto;
@@ -135,6 +136,83 @@
   gap: 5px;
 }
 
+/* ── HERO INSTRUCTOR ───────────────────────────────────────────────── */
+.heroInstructor {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-top: 24px;
+  padding: 16px 20px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.heroInstructorLink {
+  flex-shrink: 0;
+  text-decoration: none;
+}
+
+.heroInstructorAvatar {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  transition: border-color 0.2s ease;
+}
+
+.heroInstructorLink:hover .heroInstructorAvatar {
+  border-color: rgba(255, 255, 255, 0.6);
+}
+
+.heroInstructorInfo {
+  flex: 1;
+  min-width: 0;
+}
+
+.heroInstructorLabel {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.7);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 4px;
+}
+
+.heroInstructorName {
+  font-size: 1.1rem;
+  color: #fff;
+  font-weight: 600;
+  text-decoration: none;
+  margin-bottom: 4px;
+  display: block;
+  transition: color 0.2s ease;
+}
+
+.heroInstructorName:hover {
+  color: #a8c4ff;
+}
+
+.heroInstructorSpecialty {
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.8);
+  margin-bottom: 6px;
+}
+
+.heroInstructorExp {
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.7);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.heroInstructorExp i {
+  font-size: 0.75rem;
+}
+
 /* ── PAGE WRAPPER ──────────────────────────────────────────────────── */
 .pageWrapper {
   max-width: 1200px;
@@ -173,6 +251,14 @@
   color: #1c1d1f;
   font-family: 'Source Serif 4', Georgia, serif;
   font-weight: 700;
+}
+
+/* ── DESCRIPTION CONTENT ───────────────────────────────────────────── */
+.descriptionContent p {
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: #1c1d1f;
+  margin: 0;
 }
 
 /* ── LEARN GRID ────────────────────────────────────────────────────── */

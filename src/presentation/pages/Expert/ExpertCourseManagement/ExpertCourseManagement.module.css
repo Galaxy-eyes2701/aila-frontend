@@ -542,6 +542,13 @@
   margin-top: 3px;
 }
 
+.fieldHint {
+  font-size: 11px;
+  color: var(--text-muted);
+  font-style: italic;
+  margin-top: 4px;
+}
+
 .formTextarea {
   min-height: 100px;
   resize: vertical;

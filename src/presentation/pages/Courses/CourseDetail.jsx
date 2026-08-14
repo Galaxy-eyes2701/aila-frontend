@@ -211,6 +211,34 @@ export default function CourseDetail() {
     );
   }
 
+  // Check if course is published
+  if (!course.isPublished) {
+    return (
+      <div className={styles.errorPage}>
+        <i className="fas fa-lock" />
+        <h2>Khóa học chưa được công khai</h2>
+        <p>Khóa học này đang trong quá trình xây dựng và chưa sẵn sàng cho học viên.</p>
+        <button className={styles.backBtn} onClick={() => navigate('/courses')}>
+          <i className="fas fa-arrow-left" /> Quay lại danh sách
+        </button>
+      </div>
+    );
+  }
+
+  // Check if course is locked due to policy violation
+  if (course.isPublicationLocked) {
+    return (
+      <div className={styles.errorPage}>
+        <i className="fas fa-ban" />
+        <h2>Khóa học tạm thời bị khóa</h2>
+        <p>Khóa học này hiện không khả dụng.</p>
+        <button className={styles.backBtn} onClick={() => navigate('/courses')}>
+          <i className="fas fa-arrow-left" /> Quay lại danh sách
+        </button>
+      </div>
+    );
+  }
+
   const totalMaterials  = course.modules.reduce((s, m) => s + m.materials.length, 0);
   const progressPercent = learningProgress ? Math.round(learningProgress.percent) : 0;
 
@@ -236,6 +264,31 @@ export default function CourseDetail() {
             <span className={styles.metaItem}><i className="fas fa-book-open" />{course.totalModules} học phần · {course.totalMaterials} bài học</span>
             <span className={styles.metaItem}><i className="fas fa-tag" />{course.category?.name}</span>
           </div>
+
+          {/* INSTRUCTOR IN HERO */}
+          <div className={styles.heroInstructor}>
+            <Link to={`/experts/${course.author?.userId}`} className={styles.heroInstructorLink}>
+              <img
+                src={course.author?.avatarUrl || DEFAULT_AVATAR}
+                alt={course.author?.fullName}
+                className={styles.heroInstructorAvatar}
+                onError={e => { e.target.src = DEFAULT_AVATAR; }}
+              />
+            </Link>
+            <div className={styles.heroInstructorInfo}>
+              <div className={styles.heroInstructorLabel}>Giảng viên</div>
+              <Link to={`/experts/${course.author?.userId}`} className={styles.heroInstructorName}>
+                {course.author?.fullName}
+              </Link>
+              <div className={styles.heroInstructorSpecialty}>{course.author?.specialty}</div>
+              {course.author?.yearsOfExperience > 0 && (
+                <div className={styles.heroInstructorExp}>
+                  <i className="fas fa-briefcase" />
+                  {course.author.yearsOfExperience} năm kinh nghiệm
+                </div>
+              )}
+            </div>
+          </div>
         </div>
       </section>
 
@@ -245,37 +298,15 @@ export default function CourseDetail() {
         {/* ══ CONTENT COLUMN ══ */}
         <div className={styles.contentCol}>
 
-          {/* INSTRUCTOR */}
-          <section className={styles.sectionCard} id="instructor">
-            <h2 className={styles.sectionTitle}>Giảng viên</h2>
-            <div className={styles.instructorCard}>
-              <Link to={`/experts/${course.author?.userId}`}>
-                <img
-                  src={course.author?.avatarUrl || DEFAULT_AVATAR}
-                  alt={course.author?.fullName}
-                  className={styles.instructorAvatar}
-                  onError={e => { e.target.src = DEFAULT_AVATAR; }}
-                />
-              </Link>
-              <div className={styles.instructorInfo}>
-                <Link to={`/experts/${course.author?.userId}`} className={styles.instructorName}>
-                  {course.author?.fullName}
-                </Link>
-                <div className={styles.instructorHeadline}>{course.author?.specialty}</div>
-                <div className={styles.instructorStats}>
-                  {course.author?.yearsOfExperience > 0 && (
-                    <span className={styles.instructorStat}>
-                      <i className="fas fa-briefcase" />
-                      <strong>{course.author.yearsOfExperience}</strong> năm kinh nghiệm
-                    </span>
-                  )}
-                </div>
-                {course.author?.bio && (
-                  <p className={styles.instructorBio}>{course.author.bio}</p>
-                )}
+          {/* COURSE DESCRIPTION */}
+          {course.description && (
+            <section className={styles.sectionCard} id="description">
+              <h2 className={styles.sectionTitle}>Mô tả khóa học</h2>
+              <div className={styles.descriptionContent}>
+                <p>{course.description}</p>
               </div>
-            </div>
-          </section>
+            </section>
+          )}
 
           {/* CURRICULUM */}
           <section className={styles.sectionCard} id="curriculum">
@@ -308,9 +339,6 @@ export default function CourseDetail() {
                   alt={course.name}
                   onError={e => { e.target.src = FALLBACK_THUMB; }}
                 />
-                <div className={styles.playOverlay}>
-                  <i className="fas fa-play-circle" />
-                </div>
               </div>
             </div>
 
@@ -337,7 +365,7 @@ export default function CourseDetail() {
                 <li><i className="fas fa-clock" /> {course.durationHours}h nội dung học</li>
                 <li><i className="fas fa-infinity" /> Truy cập trọn đời</li>
                 <li><i className="fas fa-book-open" /> {totalMaterials} bài học</li>
-                <li><i className="fas fa-layer-group" /> {course.totalModules} module</li>
+                <li><i className="fas fa-layer-group" /> {course.totalModules} học phần</li>
                 <li><i className="fas fa-mobile-alt" /> Học trên mọi thiết bị</li>
               </ul>
             </div>

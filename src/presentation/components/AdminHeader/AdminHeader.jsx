@@ -23,8 +23,7 @@ const NAV_ITEMS = [
     label: "Hệ thống AI",
     icon: "fas fa-brain",
     children: [
-      { label: "Tiêu thụ AI", href: "/admin/ai-reports", icon: "fas fa-chart-bar" },
-      { label: "Giá dịch vụ AI", href: "/admin/ai-pricing", icon: "fas fa-coins" },
+      { label: "Tiêu thụ & Đơn giá AI", href: "/admin/ai-reports", icon: "fas fa-chart-bar" },
       { label: "Quản lý tài nguyên", href: "/admin/resource-limit-management", icon: "fas fa-cubes" },
     ],
   },
