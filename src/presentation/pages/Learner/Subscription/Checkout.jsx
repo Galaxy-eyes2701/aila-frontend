@@ -44,7 +44,7 @@ function CopyButton({ text, label }) {
     navigator.clipboard.writeText(text).then(() => {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
-    }).catch(() => {});
+    }).catch(() => { });
   };
   return (
     <button
@@ -80,13 +80,13 @@ export default function Checkout() {
   const { planId } = useParams();
 
   // ── Phases: loading | ready | success | expired | error ──
-  const [phase,    setPhase]    = useState("loading");
-  const [plan,     setPlan]     = useState(null);
-  const [payment,  setPayment]  = useState(null);  // CreatePaymentResultDto
-  const [error,    setError]    = useState("");
+  const [phase, setPhase] = useState("loading");
+  const [plan, setPlan] = useState(null);
+  const [payment, setPayment] = useState(null);  // CreatePaymentResultDto
+  const [error, setError] = useState("");
   const [creating, setCreating] = useState(false);
 
-  const pollRef    = useRef(null);
+  const pollRef = useRef(null);
   const mountedRef = useRef(true);
   useEffect(() => () => { mountedRef.current = false; }, []);
 
@@ -350,7 +350,7 @@ export default function Checkout() {
   /* ── phase: qr ── */
   const timerCls =
     remaining > 120 ? styles.timerActive :
-    remaining > 30  ? styles.timerWarn   : styles.timerExpired;
+      remaining > 30 ? styles.timerWarn : styles.timerExpired;
 
   return (
     <div className={styles.page}>
