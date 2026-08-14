@@ -289,7 +289,7 @@ export default function SubscriptionResourceUsage() {
                   <div className={styles.infoItemText}>
                     <h4>Trừ tài nguyên khi học tập</h4>
                     <p>
-                      Tài nguyên sẽ được trừ dần khi bạn tương tác với AI Token, thực hành kịch bản
+                      Tài nguyên sẽ được trừ dần khi bạn tương tác với AI Token, thực hành tình huống
                       tình huống AI hoặc gửi bài nhờ chuyên gia đánh giá.
                     </p>
                   </div>

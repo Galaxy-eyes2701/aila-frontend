@@ -8,7 +8,7 @@ import { useOutletContext } from 'react-router-dom';
 /* ── Banner slides (static) ─────────────────────────────────────────────── */
 const BANNER_SLIDES = [
   { img: 'https://vndigitech.com/wp-content/uploads/2024/01/xu-huong-ung-dung-ai-vao-cac-phan-mem-nam-2024-digitech-solutions.webp', title: 'AI cho Văn phòng', desc: 'Học cách tự động hóa Excel, viết email chuyên nghiệp và tối ưu quy trình.' },
-  { img: 'https://tse3.mm.bing.net/th/id/OIP.OWGxWcZb3QGVTyfvpHzP3wHaD4?rs=1&pid=ImgDetMain', title: 'AI cho Content Creator', desc: 'Viết blog, caption và kịch bản video nhanh chóng với prompt thông minh.' },
+  { img: 'https://tse3.mm.bing.net/th/id/OIP.OWGxWcZb3QGVTyfvpHzP3wHaD4?rs=1&pid=ImgDetMain', title: 'AI cho Content Creator', desc: 'Viết blog, caption và tình huống video nhanh chóng với prompt thông minh.' },
   { img: 'https://danadigital.vn/wp-content/uploads/2026/01/2-6-scaled.png', title: 'AI cho Marketing', desc: 'Thiết kế chiến dịch quảng cáo tự động và tối ưu nội dung bán hàng.' },
   { img: 'https://gaditi.com/wp-content/uploads/2026/03/ai-cho-lap-trinh-vien.jpg', title: 'AI cho Lập trình viên', desc: 'Sử dụng Copilot và LLM để tăng tốc viết code, debug và tài liệu.' },
 ];

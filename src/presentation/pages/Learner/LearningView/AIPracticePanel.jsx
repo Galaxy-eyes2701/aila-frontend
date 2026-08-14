@@ -8,7 +8,7 @@ import styles from "./LearningView.module.css";
 
 /**
  * Panel hiển thị trong LearningContent khi học liệu là AiPractice.
- * Hiển thị tóm tắt kịch bản + nút "Bắt đầu thực hành" và lịch sử các lượt đã làm.
+ * Hiển thị tóm tắt tình huống + nút "Bắt đầu thực hành" và lịch sử các lượt đã làm.
  */
 export default function AIPracticePanel({
   courseId,
@@ -86,7 +86,7 @@ export default function AIPracticePanel({
     return (
       <div className={styles.aiPracticePanel}>
         <div className={styles.aiPracticeLoading}>
-          <i className="fas fa-spinner fa-spin" /> Đang tải kịch bản...
+          <i className="fas fa-spinner fa-spin" /> Đang tải tình huống...
         </div>
       </div>
     );
@@ -108,7 +108,7 @@ export default function AIPracticePanel({
       {/* Scenario summary */}
       {material && (
         <div className={styles.aiPracticeBody}>
-          <p className={styles.aiPracticeScenarioLabel}>Kịch bản</p>
+          <p className={styles.aiPracticeScenarioLabel}>Tình huống</p>
           <p className={styles.aiPracticeScenario}>{material.scenario}</p>
 
           <div className={styles.aiPracticeMeta}>

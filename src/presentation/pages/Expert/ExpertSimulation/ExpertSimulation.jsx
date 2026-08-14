@@ -239,7 +239,7 @@ export default function ExpertSimulation() {
         <div className={styles.container}>
           <div className={styles.center}>
             <div className={styles.spinnerLg} />
-            <p>Đang tải cấu hình kịch bản...</p>
+            <p>Đang tải cấu hình tình huống...</p>
           </div>
         </div>
       </div>
@@ -289,7 +289,7 @@ export default function ExpertSimulation() {
         {/* ── Scenario card ── */}
         {material && (
           <div className={styles.scenarioCard}>
-            <p className={styles.scenarioTitle}>Kịch bản thực hành</p>
+            <p className={styles.scenarioTitle}>Tình huống thực hành</p>
             <p className={styles.scenarioText}>{material.scenario}</p>
             <div className={styles.scenarioMeta}>
               <span className={styles.metaTag}>

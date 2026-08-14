@@ -75,7 +75,7 @@ export default function AIPracticePage() {
       .catch((err) => {
         setMaterialError(
           err?.response?.data?.errorMessage ||
-          "Không thể tải thông tin kịch bản. Vui lòng thử lại."
+          "Không thể tải thông tin tình huống. Vui lòng thử lại."
         );
         setPhase("error");
       })
@@ -292,7 +292,7 @@ export default function AIPracticePage() {
         <div className={styles.container}>
           <div className={styles.center}>
             <div className={styles.spinnerLg} />
-            <p>Đang tải kịch bản thực hành...</p>
+            <p>Đang tải tình huống thực hành...</p>
           </div>
         </div>
       </div>
@@ -352,7 +352,7 @@ export default function AIPracticePage() {
         {/* Scenario card */}
         {material && (
           <div className={styles.scenarioCard}>
-            <p className={styles.scenarioLabel}>Kịch bản</p>
+            <p className={styles.scenarioLabel}>Tình huống</p>
             <p className={styles.scenarioText}>{material.scenario}</p>
             <div className={styles.scenarioMeta}>
               <span className={styles.metaChip}>
@@ -476,7 +476,7 @@ export default function AIPracticePage() {
                     setPrompt(e.target.value);
                     setBanner(null);
                     e.target.style.height = "auto";
-                    e.target.style.height = Math.min(e.target.scrollHeight, 110) + "px";
+                    e.target.style.height = Math.min(e.target.scrollHeight, 200) + "px";
                   }}
                   onKeyDown={handleKeyDown}
                   placeholder={atLimit ? "Đã hết lượt" : "Nhập tin nhắn... (Enter gửi, Shift+Enter xuống dòng)"}
