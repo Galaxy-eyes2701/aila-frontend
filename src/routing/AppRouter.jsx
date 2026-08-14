@@ -56,10 +56,11 @@ import AIReports from "@presentation/pages/Admin/AIReports/AIReports";
 import PolicyViolations from "@presentation/pages/Admin/PolicyViolations/PolicyViolations";
 
 const router = createBrowserRouter([
-  // ── Auth pages (không có Header) ─────────────────────────────
+  // ── Standalone / Auth pages (không có Header) ────────────────
   { path: "/admin/login", element: <AdminLogin /> },
   { path: "/expert/login", element: <ExpertLogin /> },
   { path: "/auth/google/callback", element: <GoogleCallback /> },
+  { path: "*", element: <PageNotFound /> },
 
   // ── Admin ─────────────────────────────────────────────────────
   {
@@ -298,7 +299,6 @@ const router = createBrowserRouter([
         ),
       },
 
-      { path: "*", element: <PageNotFound /> },
     ],
   },
 ]);

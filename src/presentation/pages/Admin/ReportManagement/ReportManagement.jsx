@@ -32,13 +32,13 @@ const TYPE_OPTIONS = [
 
 const REASON_LABELS = {
   InappropriateContent: "Nội dung không phù hợp",
-  HateSpeech:           "Ngôn ngữ thù địch",
-  Violence:             "Bạo lực",
-  SexualContent:        "Nội dung tình dục",
-  Spam:                 "Spam / Quảng cáo",
-  CopyrightViolation:   "Vi phạm bản quyền",
+  HateSpeech: "Ngôn ngữ thù địch",
+  Violence: "Bạo lực",
+  SexualContent: "Nội dung tình dục",
+  Spam: "Spam / Quảng cáo",
+  CopyrightViolation: "Vi phạm bản quyền",
   IncorrectInformation: "Thông tin sai lệch",
-  Other:                "Khác",
+  Other: "Khác",
 };
 
 function getReasonLabel(reason) {
@@ -77,7 +77,7 @@ function getTypeLabel(contentType) {
 
 /* ── Re-Review Request Status helpers ─────────────────────── */
 const RR_STATUS_LABELS = { Pending: "Đang chờ", Approved: "Đã duyệt", Rejected: "Từ chối" };
-const RR_STATUS_CLASS  = { Pending: styles.statusPending, Approved: styles.statusResolved, Rejected: styles.statusRejected };
+const RR_STATUS_CLASS = { Pending: styles.statusPending, Approved: styles.statusResolved, Rejected: styles.statusRejected };
 
 /* ── DismissModal — admin từ chối báo cáo kèm ghi chú ────── */
 function DismissModal({ report, onClose, onConfirm }) {
@@ -125,18 +125,18 @@ function DismissModal({ report, onClose, onConfirm }) {
 
 /* ── ReReviewRequestsPanel ────────────────────────────────── */
 function ReReviewRequestsPanel({ onPreview, showToast }) {
-  const [requests,     setRequests]     = useState([]);
-  const [loading,      setLoading]      = useState(true);
-  const [error,        setError]        = useState("");
+  const [requests, setRequests] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
-  const [selectedReq,  setSelectedReq]  = useState(null); // request đang xử lý
-  const [comment,      setComment]      = useState("");
-  const [processing,   setProcessing]   = useState(false);
-  const [actionType,   setActionType]   = useState(null); // "approve" | "reject"
-  const [reasonPopup,  setReasonPopup]  = useState(null); // { reason, reviewComment }
+  const [selectedReq, setSelectedReq] = useState(null); // request đang xử lý
+  const [comment, setComment] = useState("");
+  const [processing, setProcessing] = useState(false);
+  const [actionType, setActionType] = useState(null); // "approve" | "reject"
+  const [reasonPopup, setReasonPopup] = useState(null); // { reason, reviewComment }
 
   // Lịch sử báo cáo của course đang được xét
-  const [courseReports,        setCourseReports]        = useState([]);
+  const [courseReports, setCourseReports] = useState([]);
   const [courseReportsLoading, setCourseReportsLoading] = useState(false);
 
   const fetchRequests = useCallback(async () => {
@@ -163,7 +163,7 @@ function ReReviewRequestsPanel({ onPreview, showToast }) {
     setCourseReportsLoading(true);
     getCourseReports(req.courseId)
       .then(res => { if (res.success) setCourseReports(res.data ?? []); })
-      .catch(() => {})
+      .catch(() => { })
       .finally(() => setCourseReportsLoading(false));
   };
 
@@ -296,7 +296,7 @@ function ReReviewRequestsPanel({ onPreview, showToast }) {
                         onClick={() => onPreview(req.courseId)}
                         title="Xem trước khóa học"
                       >
-                        <i className="fas fa-eye" /> Xem course
+                        <i className="fas fa-eye" /> Xem khóa học
                       </button>
                     )}
                     {req.status === "Pending" && (
@@ -363,7 +363,7 @@ function ReReviewRequestsPanel({ onPreview, showToast }) {
                   {!courseReportsLoading && (
                     <span style={{
                       background: courseReports.length > 0 ? "#fee2e2" : "#f3f4f6",
-                      color:      courseReports.length > 0 ? "#dc2626" : "#6b7280",
+                      color: courseReports.length > 0 ? "#dc2626" : "#6b7280",
                       borderRadius: 999, fontSize: 11, fontWeight: 700,
                       padding: "1px 7px",
                     }}>
@@ -413,7 +413,7 @@ function ReReviewRequestsPanel({ onPreview, showToast }) {
                             <span style={{
                               fontSize: 11, padding: "2px 8px", borderRadius: 999, fontWeight: 600,
                               background: rpt.status === "Resolved" ? "#dcfce7" : "#fef9c3",
-                              color:      rpt.status === "Resolved" ? "#16a34a" : "#a16207",
+                              color: rpt.status === "Resolved" ? "#16a34a" : "#a16207",
                             }}>
                               {rpt.status === "Resolved" ? "Đã xử lý" : "Đang chờ"}
                             </span>
@@ -526,8 +526,8 @@ function ReReviewRequestsPanel({ onPreview, showToast }) {
 function ReportDetailModal({ report, onClose, onResolve, onLock, onUnlock, onPreview, onDismiss, resolving, locking }) {
   if (!report) return null;
 
-  const hasCourse  = !!report.courseId;   // cả course report lẫn content report đều có courseId
-  const isLocked   = !!report.isCourseLocked;
+  const hasCourse = !!report.courseId;   // cả course report lẫn content report đều có courseId
+  const isLocked = !!report.isCourseLocked;
   const isResolved = report.status === "Resolved";
 
   return (
@@ -908,182 +908,182 @@ export default function ReportManagement() {
 
         {/* ── TAB: REPORTS ─────────────────────────────────────── */}
         {activeTab === "reports" && (<>
-        <div className={styles.filterBar}>
-          <select
-            className={styles.filterSelect}
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-          >
-            {STATUS_OPTIONS.map((option) => (
-              <option key={option.value} value={option.value}>
-                {option.label}
-              </option>
-            ))}
-          </select>
-
-          <select
-            className={styles.filterSelect}
-            value={typeFilter}
-            onChange={(e) => setTypeFilter(e.target.value)}
-          >
-            {TYPE_OPTIONS.map((option) => (
-              <option key={option.value} value={option.value}>
-                {option.label}
-              </option>
-            ))}
-          </select>
-
-          <button className={styles.secondaryButton} onClick={fetchReports} disabled={loading}>
-            <i className="fas fa-rotate-right" />
-            Tải lại
-          </button>
-        </div>
-
-        <div className={styles.tableWrapper}>
-          <table className={styles.table}>
-            <thead>
-              <tr>
-                <th>Loại</th>
-                <th>Lý do</th>
-                <th>Người báo cáo</th>
-                <th>Trạng thái</th>
-                <th>Ngày tạo</th>
-                <th>Hành động</th>
-              </tr>
-            </thead>
-            <tbody>
-              {loading && (
-                <tr className={styles.loadingRow}>
-                  <td colSpan={6}>Đang tải danh sách báo cáo...</td>
-                </tr>
-              )}
-
-              {!loading && pageError && (
-                <tr>
-                  <td colSpan={6}>
-                    <div className={styles.errorState}>
-                      <i className="fas fa-triangle-exclamation" />
-                      <p>{pageError}</p>
-                      <button className={styles.secondaryButton} onClick={fetchReports}>
-                        Thử lại
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              )}
-
-              {!loading && !pageError && reports.length === 0 && (
-                <tr>
-                  <td colSpan={6}>
-                    <div className={styles.emptyState}>
-                      <i className="fas fa-inbox" />
-                      <p>Không có báo cáo nào phù hợp.</p>
-                    </div>
-                  </td>
-                </tr>
-              )}
-
-              {!loading && !pageError && reports.map((report) => (
-                <tr key={report.id}>
-                  <td>
-                    <span className={`${styles.badge} ${styles.typeBadge}`}>
-                      {getTypeLabel(report.contentType)}
-                    </span>
-                    {report.isCourseLocked && (
-                      <span className={styles.lockedBadge} style={{ marginLeft: 6 }}>
-                        <i className="fas fa-lock" /> Bị khoá
-                      </span>
-                    )}
-                  </td>
-                  <td>{getReasonLabel(report.reason)}</td>
-                  <td>{report.learnerName || "—"}</td>
-                  <td>
-                    <span className={`${styles.badge} ${getStatusClass(report.status)}`}>
-                      {report.status || "Pending"}
-                    </span>
-                  </td>
-                  <td>{formatDate(report.createdAt)}</td>
-                  <td>
-                    <div className={styles.actionsCell}>
-                      <button className={styles.detailButton} onClick={() => openDetail(report)}>
-                        <i className="fas fa-eye" /> Chi tiết
-                      </button>
-
-                      {/* Nút Xem trước course — content report → chỉ thẳng đến material bị report */}
-                      {report.courseId && (
-                        <button
-                          className={styles.detailButton}
-                          onClick={() => openPreview(
-                            report.courseId,
-                            report.materialId ?? null   // content report có materialId, course report = null
-                          )}
-                          title={report.materialId
-                            ? "Xem trước nội dung bị report trong khóa học"
-                            : "Xem trước khóa học"}
-                        >
-                          <i className="fas fa-search" />
-                          {report.materialId ? "Xem nội dung" : "Xem course"}
-                        </button>
-                      )}
-
-                      {/* Nút Lock — có courseId, chưa bị lock, chưa resolved */}
-                      {report.courseId && !report.isCourseLocked && report.status !== "Resolved" && (
-                        <button
-                          className={styles.lockButton}
-                          onClick={() => handleLock(report.id)}
-                          disabled={lockingId === report.id}
-                          title="Khoá khóa học và xử lý báo cáo"
-                        >
-                          {lockingId === report.id
-                            ? <i className="fas fa-spinner fa-spin" />
-                            : <i className="fas fa-lock" />}
-                        </button>
-                      )}
-
-                      {/* Nút Unlock — course đang bị lock */}
-                      {report.courseId && report.isCourseLocked && (
-                        <button
-                          className={styles.unlockButton}
-                          onClick={() => handleUnlock(report.courseId)}
-                          disabled={lockingId === report.courseId}
-                          title="Gỡ khoá khóa học"
-                        >
-                          {lockingId === report.courseId
-                            ? <i className="fas fa-spinner fa-spin" />
-                            : <i className="fas fa-lock-open" />}
-                        </button>
-                      )}
-
-                      {/* Nút Resolve — hiện khi không có courseId hoặc course đã bị lock */}
-                      {report.status !== "Resolved" && !(report.courseId && !report.isCourseLocked) && (
-                        <button
-                          className={styles.resolveButton}
-                          onClick={() => handleResolve(report.id)}
-                          disabled={resolvingId === report.id}
-                        >
-                          {resolvingId === report.id
-                            ? <i className="fas fa-spinner fa-spin" />
-                            : <i className="fas fa-check" />}
-                        </button>
-                      )}
-
-                      {/* Nút Từ chối — Pending report */}
-                      {report.status !== "Resolved" && (
-                        <button
-                          className={styles.unlockButton}
-                          onClick={() => setDismissModal({ reportId: report.id })}
-                          title="Từ chối — nội dung không vi phạm"
-                        >
-                          <i className="fas fa-times-circle" />
-                        </button>
-                      )}
-                    </div>
-                  </td>
-                </tr>
+          <div className={styles.filterBar}>
+            <select
+              className={styles.filterSelect}
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+            >
+              {STATUS_OPTIONS.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
               ))}
-            </tbody>
-          </table>
-        </div>
+            </select>
+
+            <select
+              className={styles.filterSelect}
+              value={typeFilter}
+              onChange={(e) => setTypeFilter(e.target.value)}
+            >
+              {TYPE_OPTIONS.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+
+            <button className={styles.secondaryButton} onClick={fetchReports} disabled={loading}>
+              <i className="fas fa-rotate-right" />
+              Tải lại
+            </button>
+          </div>
+
+          <div className={styles.tableWrapper}>
+            <table className={styles.table}>
+              <thead>
+                <tr>
+                  <th>Loại</th>
+                  <th>Lý do</th>
+                  <th>Người báo cáo</th>
+                  <th>Trạng thái</th>
+                  <th>Ngày tạo</th>
+                  <th>Hành động</th>
+                </tr>
+              </thead>
+              <tbody>
+                {loading && (
+                  <tr className={styles.loadingRow}>
+                    <td colSpan={6}>Đang tải danh sách báo cáo...</td>
+                  </tr>
+                )}
+
+                {!loading && pageError && (
+                  <tr>
+                    <td colSpan={6}>
+                      <div className={styles.errorState}>
+                        <i className="fas fa-triangle-exclamation" />
+                        <p>{pageError}</p>
+                        <button className={styles.secondaryButton} onClick={fetchReports}>
+                          Thử lại
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                )}
+
+                {!loading && !pageError && reports.length === 0 && (
+                  <tr>
+                    <td colSpan={6}>
+                      <div className={styles.emptyState}>
+                        <i className="fas fa-inbox" />
+                        <p>Không có báo cáo nào phù hợp.</p>
+                      </div>
+                    </td>
+                  </tr>
+                )}
+
+                {!loading && !pageError && reports.map((report) => (
+                  <tr key={report.id}>
+                    <td>
+                      <span className={`${styles.badge} ${styles.typeBadge}`}>
+                        {getTypeLabel(report.contentType)}
+                      </span>
+                      {report.isCourseLocked && (
+                        <span className={styles.lockedBadge} style={{ marginLeft: 6 }}>
+                          <i className="fas fa-lock" /> Bị khoá
+                        </span>
+                      )}
+                    </td>
+                    <td>{getReasonLabel(report.reason)}</td>
+                    <td>{report.learnerName || "—"}</td>
+                    <td>
+                      <span className={`${styles.badge} ${getStatusClass(report.status)}`}>
+                        {report.status || "Pending"}
+                      </span>
+                    </td>
+                    <td>{formatDate(report.createdAt)}</td>
+                    <td>
+                      <div className={styles.actionsCell}>
+                        <button className={styles.detailButton} onClick={() => openDetail(report)}>
+                          <i className="fas fa-eye" /> Chi tiết
+                        </button>
+
+                        {/* Nút Xem trước course — content report → chỉ thẳng đến material bị report */}
+                        {report.courseId && (
+                          <button
+                            className={styles.detailButton}
+                            onClick={() => openPreview(
+                              report.courseId,
+                              report.materialId ?? null   // content report có materialId, course report = null
+                            )}
+                            title={report.materialId
+                              ? "Xem trước nội dung bị report trong khóa học"
+                              : "Xem trước khóa học"}
+                          >
+                            <i className="fas fa-search" />
+                            {report.materialId ? "Xem nội dung" : "Xem khóa học"}
+                          </button>
+                        )}
+
+                        {/* Nút Lock — có courseId, chưa bị lock, chưa resolved */}
+                        {report.courseId && !report.isCourseLocked && report.status !== "Resolved" && (
+                          <button
+                            className={styles.lockButton}
+                            onClick={() => handleLock(report.id)}
+                            disabled={lockingId === report.id}
+                            title="Khoá khóa học và xử lý báo cáo"
+                          >
+                            {lockingId === report.id
+                              ? <i className="fas fa-spinner fa-spin" />
+                              : <i className="fas fa-lock" />}
+                          </button>
+                        )}
+
+                        {/* Nút Unlock — course đang bị lock */}
+                        {report.courseId && report.isCourseLocked && (
+                          <button
+                            className={styles.unlockButton}
+                            onClick={() => handleUnlock(report.courseId)}
+                            disabled={lockingId === report.courseId}
+                            title="Gỡ khoá khóa học"
+                          >
+                            {lockingId === report.courseId
+                              ? <i className="fas fa-spinner fa-spin" />
+                              : <i className="fas fa-lock-open" />}
+                          </button>
+                        )}
+
+                        {/* Nút Resolve — hiện khi không có courseId hoặc course đã bị lock */}
+                        {report.status !== "Resolved" && !(report.courseId && !report.isCourseLocked) && (
+                          <button
+                            className={styles.resolveButton}
+                            onClick={() => handleResolve(report.id)}
+                            disabled={resolvingId === report.id}
+                          >
+                            {resolvingId === report.id
+                              ? <i className="fas fa-spinner fa-spin" />
+                              : <i className="fas fa-check" />}
+                          </button>
+                        )}
+
+                        {/* Nút Từ chối — Pending report */}
+                        {report.status !== "Resolved" && (
+                          <button
+                            className={styles.unlockButton}
+                            onClick={() => setDismissModal({ reportId: report.id })}
+                            title="Từ chối — nội dung không vi phạm"
+                          >
+                            <i className="fas fa-times-circle" />
+                          </button>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </>)} {/* end tab reports */}
 
       </div> {/* end container */}

@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { Outlet } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { Outlet, useLocation } from 'react-router-dom';
 import Header from '@presentation/components/Header/Header';
 import Footer from '@presentation/components/Footer/Footer';
 import LoginModal from '@presentation/components/AuthModals/LoginModal';
@@ -8,9 +8,21 @@ import OnboardingModal from '@presentation/components/OnboardingModal/Onboarding
 import api from '@services/api';
 
 const MainLayout = () => {
+  const location = useLocation();
   const [modal, setModal] = useState(null);
+  const [authError, setAuthError] = useState('');
 
-  const closeModal = () => setModal(null);
+  useEffect(() => {
+    if (location.state?.authError) {
+      setAuthError(location.state.authError);
+      setModal('login');
+    }
+  }, [location.state]);
+
+  const closeModal = () => {
+    setAuthError('');
+    setModal(null);
+  };
 
   const handleLoginSuccess = async () => {
     closeModal();
@@ -38,8 +50,9 @@ const MainLayout = () => {
 
       {modal === 'login' && (
         <LoginModal
+          initialError={authError}
           onClose={closeModal}
-          onSwitchToRegister={() => setModal('register')}
+          onSwitchToRegister={() => { setAuthError(''); setModal('register'); }}
           onLoginSuccess={handleLoginSuccess}
         />
       )}

@@ -7,12 +7,20 @@ export default function GoogleCallback() {
   const { login } = useAuth();
 
   useEffect(() => {
-    // Đọc fragment từ URL: #accessToken=...&refreshToken=...
+    // Đọc fragment/query từ URL: #accessToken=... HOẶC #error=ACCOUNT_BANNED&errorMessage=...
     const hash = window.location.hash.substring(1); // bỏ dấu #
     const params = new URLSearchParams(hash);
+    const searchParams = new URLSearchParams(window.location.search);
 
-    const accessToken  = params.get('accessToken');
-    const refreshToken = params.get('refreshToken');
+    const accessToken  = params.get('accessToken') || searchParams.get('accessToken');
+    const error        = params.get('error') || searchParams.get('error');
+    const errorMessage = params.get('errorMessage') || searchParams.get('errorMessage');
+
+    if (error || errorMessage) {
+      window.history.replaceState(null, '', '/');
+      navigate('/', { replace: true, state: { authError: errorMessage || 'Tài khoản của bạn đã bị khóa.' } });
+      return;
+    }
 
     if (!accessToken) {
       // Không có token → về home
