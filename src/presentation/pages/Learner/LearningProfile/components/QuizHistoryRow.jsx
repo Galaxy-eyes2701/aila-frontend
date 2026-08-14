@@ -2,14 +2,20 @@ import { Link } from "react-router-dom";
 import { formatDateTime, formatScore } from "./helpers";
 import styles from "../LearningProfile.module.css";
 
-/** Một dòng lịch sử quiz. Link "Xem chi tiết" → màn kết quả UC-27. */
+/** Một dòng lịch sử bài kiểm tra. Link "Xem chi tiết" → màn kết quả UC-27. */
 export default function QuizHistoryRow({ item }) {
   const detailUrl = `/courses/${item.courseId}/materials/${item.materialId}/quiz/result`;
 
   return (
     <div className={styles.quizRow}>
+      <div className={styles.rowIcon}>
+        <i className="fas fa-clipboard-check" />
+      </div>
+
       <div className={styles.quizMain}>
-        <div className={styles.quizTitle}>{item.quizTitle}</div>
+        <div className={styles.quizTitle} title={item.quizTitle}>
+          {item.quizTitle}
+        </div>
         <div className={styles.quizCourse}>Khóa: {item.courseName}</div>
         <div className={styles.quizMetaRow}>
           <span className={styles.quizScore}>{formatScore(item.score)}/100</span>
@@ -23,7 +29,7 @@ export default function QuizHistoryRow({ item }) {
           </span>
           {item.submittedAt && (
             <span className={styles.quizDate}>
-              Nộp: {formatDateTime(item.submittedAt)}
+              <i className="fas fa-clock" /> Nộp: {formatDateTime(item.submittedAt)}
             </span>
           )}
         </div>

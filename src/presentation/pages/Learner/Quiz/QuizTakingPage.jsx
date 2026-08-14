@@ -8,6 +8,18 @@ import ConfirmSubmitModal from "./components/ConfirmSubmitModal";
 import { LoadingState, ErrorState } from "./components/QuizStates";
 import styles from "./Quiz.module.css";
 
+/**
+ * Lỗi nộp bài có thể thử lại (mất mạng / backend chết) → giữ nguyên bài làm.
+ * Trả về thông báo hiển thị, hoặc null nếu là lỗi nghiệp vụ (phải chuyển màn lỗi).
+ */
+function getRetryableSubmitMessage(err) {
+  if (err?.errorCode === "NETWORK_ERROR" || !err?.status)
+    return "Mất kết nối với server, vui lòng thử lại.";
+  if (err.status >= 500)
+    return "Máy chủ đang gặp sự cố, vui lòng thử lại.";
+  return null;
+}
+
 export default function QuizTakingPage() {
   const { courseId, materialId } = useParams();
   const navigate = useNavigate();
@@ -19,6 +31,7 @@ export default function QuizTakingPage() {
   const [showConfirm, setShowConfirm] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [locked, setLocked] = useState(false); // khóa form khi hết giờ / đang nộp
+  const [submitError, setSubmitError] = useState(null); // lỗi kết nối khi nộp bài
 
   // Tránh nộp trùng: giữ cờ đã nộp qua các lần render.
   const submittedRef = useRef(false);
@@ -66,6 +79,7 @@ export default function QuizTakingPage() {
       submittedRef.current = true;
       setSubmitting(true);
       setLocked(true);
+      setSubmitError(null);
 
       const payload = questions.map((q) => ({
         questionId: q.questionId,
@@ -84,15 +98,22 @@ export default function QuizTakingPage() {
           state: { justSubmitted: result },
         });
       } catch (err) {
-        // Cho phép thử lại nếu lỗi mạng khi nộp tay
+        // Cho phép nộp lại
         submittedRef.current = false;
         setSubmitting(false);
-        setShowConfirm(false);
-        if (auto) {
-          setLocked(true); // hết giờ vẫn khóa, nhưng báo lỗi
-        } else {
-          setLocked(false);
+
+        const retryMessage = getRetryableSubmitMessage(err);
+        if (retryMessage) {
+          // Giữ nguyên trang & đáp án đã chọn, chỉ báo lỗi trong modal nộp bài.
+          // Hết giờ thì vẫn khóa form nhưng vẫn cho bấm "Thử lại".
+          setLocked(auto);
+          setSubmitError(retryMessage);
+          setShowConfirm(true); // tự nộp khi hết giờ chưa mở modal → mở để báo lỗi
+          return;
         }
+
+        setShowConfirm(false);
+        setLocked(auto); // hết giờ vẫn khóa, nhưng báo lỗi
         setError(err);
         setStatus("error");
       }
@@ -169,7 +190,8 @@ export default function QuizTakingPage() {
           <button
             className={`${styles.btn} ${styles.btnPrimary}`}
             onClick={() => setShowConfirm(true)}
-            disabled={locked || submitting}
+            // Hết giờ mà nộp lỗi thì vẫn phải cho mở lại modal để nộp lại.
+            disabled={(locked && !submitError) || submitting}
           >
             <i className="fas fa-paper-plane" /> Nộp bài
           </button>
@@ -181,8 +203,14 @@ export default function QuizTakingPage() {
           answeredCount={answeredCount}
           totalQuestions={questions.length}
           submitting={submitting}
-          onConfirm={() => doSubmit({ auto: false })}
-          onCancel={() => setShowConfirm(false)}
+          errorMessage={submitError}
+          onConfirm={() => doSubmit({ auto: locked })}
+          onCancel={() => {
+            // Quay lại làm bài thì bỏ thông báo lỗi, chỉ hiện lại khi nộp lỗi lần nữa.
+            // Hết giờ (locked) thì giữ lỗi để nút "Nộp bài" còn bấm lại được.
+            if (!locked) setSubmitError(null);
+            setShowConfirm(false);
+          }}
         />
       )}
     </div>

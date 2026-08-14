@@ -39,7 +39,7 @@ export function SkeletonList({ count = 5 }) {
   );
 }
 
-export function SkeletonGrid({ count = 6 }) {
+export function SkeletonGrid({ count = 8 }) {
   return (
     <div className={styles.courseGrid}>
       {Array.from({ length: count }).map((_, i) => (
