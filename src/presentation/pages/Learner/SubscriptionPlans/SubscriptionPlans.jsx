@@ -26,24 +26,27 @@ const BENEFITS = [
 ];
 
 /**
- * Xác định trạng thái nút mua cho một gói so với gói đang active.
- * - activeTier = null  → chưa có gói → "Mua ngay"
- * - plan.tier > active → "Nâng cấp"
- * - plan.tier === active → "Gia hạn"
- * - plan.tier < active → disabled (BR-05)
+ * Trạng thái nút mua theo `purchaseAction` — BE so tier của gói với gói đang active rồi trả
+ * sẵn kết quả, nên endpoint công khai không phải lộ tierLevel.
+ * BLOCKED = gói tier thấp hơn gói đang dùng (BR-05).
  */
-function resolveBuyLabel(planTier, activeTier) {
-  if (activeTier === null) return { label: 'Mua ngay', disabled: false };
-  if (planTier > activeTier)  return { label: 'Nâng cấp',  disabled: false };
-  if (planTier === activeTier) return { label: 'Gia hạn',   disabled: false };
-  return { label: 'Không khả dụng', disabled: true }; // BR-05
+const PURCHASE_ACTIONS = {
+  BUY:     { label: 'Mua ngay',       disabled: false, icon: 'fa-gem'                 },
+  UPGRADE: { label: 'Nâng cấp',       disabled: false, icon: 'fa-arrow-up-right-dots' },
+  RENEW:   { label: 'Gia hạn',        disabled: false, icon: 'fa-rotate-right'        },
+  BLOCKED: { label: 'Không khả dụng', disabled: true,  icon: 'fa-lock'                },
+};
+
+function resolveBuyLabel(purchaseAction) {
+  return PURCHASE_ACTIONS[purchaseAction] ?? PURCHASE_ACTIONS.BUY;
 }
 
-function PlanCard({ plan, checking, anyChecking, activeTier, isCurrentPlan, onBuy }) {
-  const { label: buyLabel, disabled: tierDisabled } = resolveBuyLabel(
-    plan.tierLevel ?? 0,
-    activeTier
-  );
+function PlanCard({ plan, checking, anyChecking, isCurrentPlan, onBuy }) {
+  const {
+    label: buyLabel,
+    disabled: tierDisabled,
+    icon: buyIcon,
+  } = resolveBuyLabel(plan.purchaseAction);
 
   const isDisabled = anyChecking || tierDisabled;
 
@@ -92,10 +95,7 @@ function PlanCard({ plan, checking, anyChecking, activeTier, isCurrentPlan, onBu
             <><i className="fas fa-spinner fa-spin" aria-hidden="true" /> Đang kiểm tra...</>
           ) : (
             <>
-              <i className={`fas ${
-                buyLabel === 'Gia hạn'  ? 'fa-rotate-right' :
-                buyLabel === 'Nâng cấp' ? 'fa-arrow-up-right-dots' : 'fa-gem'
-              }`} aria-hidden="true" />
+              <i className={`fas ${buyIcon}`} aria-hidden="true" />
               {' '}{buyLabel}
             </>
           )}
@@ -154,7 +154,9 @@ export default function SubscriptionPlans() {
     } catch { /* im lặng — không block trang */ }
   }, [user]);
 
-  useEffect(() => { fetchPlans();    }, [fetchPlans]);
+  // purchaseAction được BE tính theo caller nên phải fetch lại khi đăng nhập / đăng xuất,
+  // nếu không nút mua sẽ giữ trạng thái của phiên trước.
+  useEffect(() => { fetchPlans();     }, [fetchPlans, user]);
   useEffect(() => { fetchActiveSub(); }, [fetchActiveSub]);
 
   // Re-fetch active sub khi user thay đổi (đăng nhập / đăng xuất)
@@ -211,11 +213,6 @@ export default function SubscriptionPlans() {
     pendingPlanIdRef.current = '';
     startPurchase(planId);
   }, [user, startPurchase]);
-
-  // Tier của gói đang active (null = không có)
-  const activeTier = activeSub?.hasActiveSubscription
-    ? (activeSub.tierLevel ?? null)
-    : null;
 
   return (
     <div className={styles.page}>
@@ -281,22 +278,17 @@ export default function SubscriptionPlans() {
 
           {status === 'ready' && plans.length > 0 && (
             <div className={styles.grid}>
-              {plans.map((plan) => {
-                const isCurrentPlan =
-                  activeSub?.hasActiveSubscription &&
-                  plan.tierLevel === activeTier;
-                return (
-                  <PlanCard
-                    key={plan.id}
-                    plan={plan}
-                    checking={checkingPlanId === plan.id}
-                    anyChecking={Boolean(checkingPlanId)}
-                    activeTier={activeTier}
-                    isCurrentPlan={isCurrentPlan}
-                    onBuy={handleBuyNow}
-                  />
-                );
-              })}
+              {plans.map((plan) => (
+                <PlanCard
+                  key={plan.id}
+                  plan={plan}
+                  checking={checkingPlanId === plan.id}
+                  anyChecking={Boolean(checkingPlanId)}
+                  // RENEW = trùng tier với gói đang dùng → chính là gói hiện tại
+                  isCurrentPlan={plan.purchaseAction === 'RENEW'}
+                  onBuy={handleBuyNow}
+                />
+              ))}
             </div>
           )}
 
