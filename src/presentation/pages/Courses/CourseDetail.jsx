@@ -2,15 +2,15 @@ import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import api from '@services/api';
 import useAuth from '@state/hooks/useAuth';
-import LoginModal    from '@presentation/components/AuthModals/LoginModal';
+import LoginModal from '@presentation/components/AuthModals/LoginModal';
 import RegisterModal from '@presentation/components/AuthModals/RegisterModal';
 import ReportCourseModal from '../Learner/Report/ReportCourseModal';
 import styles from './CourseDetail.module.css';
 
 const LEVEL_LABELS = {
-  Beginner:     'Mới bắt đầu',
-  Intermediate: 'Trình độ cơ bản',
-  Advanced:     'Nâng cao',
+  Beginner: 'Mới bắt đầu',
+  Intermediate: 'Cơ bản',
+  Advanced: 'Nâng cao',
 };
 
 import { DEFAULT_AVATAR } from '@infrastructure/constants/defaultAvatar';
@@ -42,7 +42,7 @@ function ModuleItem({ module, index, initialOpen }) {
             const materialType = mat.type ?? mat.materialType;
             let iconClass = 'fa-file-alt'; // default
             let typeLabel = 'Tài liệu'; // default
-            
+
             if (materialType === 'Video') {
               iconClass = 'fa-play-circle';
               typeLabel = 'Video';
@@ -74,13 +74,13 @@ export default function CourseDetail() {
   const { user } = useAuth();
   const sidebarRef = useRef(null);
 
-  const [course,           setCourse]           = useState(null);
-  const [loading,          setLoading]          = useState(true);
-  const [enrolling,        setEnrolling]        = useState(false);
-  const [error,            setError]            = useState('');
+  const [course, setCourse] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [enrolling, setEnrolling] = useState(false);
+  const [error, setError] = useState('');
 
   // null = đang check API, true = đã enroll, false = chưa enroll
-  const [enrolled,         setEnrolled]         = useState(false);
+  const [enrolled, setEnrolled] = useState(false);
   const [learningProgress, setLearningProgress] = useState(null);
 
   // Auth modal: null | 'login' | 'register'
@@ -127,7 +127,7 @@ export default function CourseDetail() {
             .then(lv => {
               if (lv.data.success) setLearningProgress(lv.data.data?.progress ?? null);
             })
-            .catch(() => {});
+            .catch(() => { });
         } else {
           setEnrolled(false);
         }
@@ -152,7 +152,7 @@ export default function CourseDetail() {
       }
     } catch (err) {
       const status = err.response?.status;
-      const msg    = err.response?.data?.errorMessage;
+      const msg = err.response?.data?.errorMessage;
       if (status === 401) { setAuthModal('login'); return; }
       if (status === 403) {
         alert('Chức năng này chỉ dành cho học viên. Vui lòng đăng nhập bằng tài khoản học viên.');
@@ -254,7 +254,7 @@ export default function CourseDetail() {
     );
   }
 
-  const totalMaterials  = course.modules.reduce((s, m) => s + m.materials.length, 0);
+  const totalMaterials = course.modules.reduce((s, m) => s + m.materials.length, 0);
   const progressPercent = learningProgress ? Math.round(learningProgress.percent) : 0;
 
   return (
@@ -290,7 +290,7 @@ export default function CourseDetail() {
               />
             </Link>
             <div className={styles.heroInstructorInfo}>
-              <div className={styles.heroInstructorLabel}>Giảng viên</div>
+              <div className={styles.heroInstructorLabel}>Tác giả</div>
               <Link to={`/experts/${course.author?.userId}`} className={styles.heroInstructorName}>
                 {course.author?.fullName}
               </Link>
