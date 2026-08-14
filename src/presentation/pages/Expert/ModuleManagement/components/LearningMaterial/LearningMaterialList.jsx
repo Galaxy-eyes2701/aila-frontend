@@ -6,6 +6,7 @@ import {
   deleteLearningMaterial,
   reorderLearningMaterials,
 } from "@services/materialApi";
+import ConfirmModal from "../ConfirmModal";
 
 export default function LearningMaterialList({
   moduleId,
@@ -18,6 +19,8 @@ export default function LearningMaterialList({
   const [loading, setLoading] = useState(false);
   const [hasOrderChanges, setHasOrderChanges] = useState(false);
   const [savingOrder, setSavingOrder] = useState(false);
+  const [deleteTargetMaterial, setDeleteTargetMaterial] = useState(null);
+  const [deleting, setDeleting] = useState(false);
 
   const sortedMaterials = useMemo(
     () => [...materials].sort((a, b) => a.orderIndex - b.orderIndex),
@@ -41,13 +44,21 @@ export default function LearningMaterialList({
     }
   }
 
-  async function handleDelete(material) {
-    if (!window.confirm(`Xóa học liệu "${material.title}"?`)) return;
+  function handleDelete(material) {
+    setDeleteTargetMaterial(material);
+  }
+
+  async function confirmDeleteMaterial() {
+    if (!deleteTargetMaterial) return;
+    const material = deleteTargetMaterial;
+
+    setDeleting(true);
     try {
       const res = await deleteLearningMaterial(moduleId, material.id);
       if (res.success) {
         setMaterials((prev) => prev.filter((m) => m.id !== material.id));
         onDeleted?.(true);
+        setDeleteTargetMaterial(null);
       } else {
         onDeleted?.(false, "Không thể xóa học liệu.");
       }
@@ -56,6 +67,8 @@ export default function LearningMaterialList({
         false,
         err.response?.data?.errorMessage ?? "Lỗi kết nối máy chủ.",
       );
+    } finally {
+      setDeleting(false);
     }
   }
 
@@ -139,6 +152,17 @@ export default function LearningMaterialList({
           </button>
         )}
       </div>
+      <ConfirmModal
+        open={!!deleteTargetMaterial}
+        title={`Xóa học liệu "${deleteTargetMaterial?.title}"?`}
+        description="Học liệu này sẽ bị xóa khỏi học phần. Hành động này không thể hoàn tác."
+        confirmLabel="Xóa học liệu"
+        cancelLabel="Hủy"
+        tone="danger"
+        busy={deleting}
+        onConfirm={confirmDeleteMaterial}
+        onClose={() => setDeleteTargetMaterial(null)}
+      />
     </div>
   );
 }
