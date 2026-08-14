@@ -60,7 +60,7 @@ export default function ModuleCard({
             module.description ? styles.description : styles.mutedDescription
           }
         >
-          {module.description || "Chưa có mô tả cho chương này."}
+          {module.description || "Chưa có mô tả cho học phần này."}
         </p>
 
         <div className={styles.metaRow}>

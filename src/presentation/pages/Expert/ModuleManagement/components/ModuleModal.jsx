@@ -17,10 +17,10 @@ export default function ModuleModal({
         <div className={styles.modalHeader}>
           <div>
             <p className={styles.modalEyebrow}>
-              {mode === "create" ? "Chương mới" : "Cập nhật chương"}
+              {mode === "create" ? "Học phần mới" : "Cập nhật học phần"}
             </p>
             <h2>
-              {mode === "create" ? "Tạo chương học" : "Chỉnh sửa chương học"}
+              {mode === "create" ? "Tạo học phần" : "Chỉnh sửa học phần"}
             </h2>
           </div>
           <button
@@ -41,7 +41,7 @@ export default function ModuleModal({
               value={form.title}
               onChange={onChange}
               maxLength={180}
-              placeholder="Nhập tên chương học"
+              placeholder="Nhập tên học phần"
               autoFocus
             />
           </label>
@@ -53,7 +53,7 @@ export default function ModuleModal({
               value={form.description}
               onChange={onChange}
               rows={5}
-              placeholder="Tóm tắt nội dung chương, mục tiêu học tập..."
+              placeholder="Tóm tắt nội dung học phần, mục tiêu học tập..."
             />
           </label>
 
@@ -86,7 +86,7 @@ export default function ModuleModal({
             ) : (
               <>
                 <i className="fas fa-save" />
-                Lưu chương
+                Lưu học phần
               </>
             )}
           </button>

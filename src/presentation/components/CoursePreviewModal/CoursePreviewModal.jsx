@@ -150,7 +150,7 @@ function PreviewSidebar({ modules, currentMaterialId, onSelect }) {
           return (
             <div key={mod.id} className={styles.sidebarModule}>
               <div className={styles.sidebarModuleTitle}>
-                Chương {mod.orderIndex}: {mod.title}
+                Học phần {mod.orderIndex}: {mod.title}
               </div>
               <ul className={styles.sidebarMaterialList}>
                 {mats.map(m => (

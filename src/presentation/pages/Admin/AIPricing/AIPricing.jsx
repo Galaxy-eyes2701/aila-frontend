@@ -390,7 +390,7 @@ export default function AIPricing() {
                     <td>{config.currency || 'USD'}</td>
                     <td>
                       <span className={`${styles.badge} ${config.isActive ? styles.statusActive : styles.statusInactive}`}>
-                        {config.isActive ? 'Đang hoạt động' : 'Vô hiệu'}
+                        {config.isActive ? 'Đang hoạt động' : 'Đã vô hiệu hóa'}
                       </span>
                     </td>
                     <td>

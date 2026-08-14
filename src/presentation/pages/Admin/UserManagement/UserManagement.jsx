@@ -7,9 +7,9 @@ import Pagination from "@presentation/components/Pagination/Pagination";
 import { getUsers, updateUserStatus } from "@services/userApi";
 
 const ROLE_LABEL = {
-  Admin: { text: "Admin", cls: "roleAdmin" },
-  Expert: { text: "Expert", cls: "roleExpert" },
-  Learner: { text: "Learner", cls: "roleLearner" },
+  Admin: { text: "Quản trị viên", cls: "roleAdmin" },
+  Expert: { text: "Chuyên gia", cls: "roleExpert" },
+  Learner: { text: "Học viên", cls: "roleLearner" },
 };
 
 function formatDate(value) {
@@ -131,7 +131,7 @@ export default function UserManagement() {
             <h1>Quản lý người dùng</h1>
             <p className={styles.headerText}>
               Xem, tìm kiếm, thay đổi trạng thái tài khoản và tạo tài khoản
-              Expert mới cho hệ thống.
+              Chuyên gia mới cho hệ thống.
             </p>
           </div>
 
@@ -140,7 +140,7 @@ export default function UserManagement() {
             onClick={() => setCreateModalOpen(true)}
           >
             <i className="fas fa-user-plus" />
-            Tạo tài khoản Expert
+            Tạo tài khoản Chuyên gia
           </button>
         </section>
 
@@ -162,9 +162,9 @@ export default function UserManagement() {
             onChange={(e) => setRoleFilter(e.target.value)}
           >
             <option value="">Tất cả vai trò</option>
-            <option value="Learner">Learner</option>
-            <option value="Expert">Expert</option>
-            <option value="Admin">Admin</option>
+            <option value="Learner">Học viên</option>
+            <option value="Expert">Chuyên gia</option>
+            <option value="Admin">Quản trị viên</option>
           </select>
 
           <select

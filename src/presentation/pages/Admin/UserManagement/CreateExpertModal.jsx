@@ -50,7 +50,7 @@ export default function CreateExpertModal({ open, onClose, onCreated }) {
       });
 
       if (!res.success) {
-        setError(res.errorMessage ?? "Không thể tạo tài khoản Expert.");
+        setError(res.errorMessage ?? "Không thể tạo tài khoản Chuyên gia.");
         return;
       }
 
@@ -76,7 +76,7 @@ export default function CreateExpertModal({ open, onClose, onCreated }) {
     <div className={styles.modalOverlay}>
       <div className={styles.modal}>
         <div className={styles.modalHeader}>
-          <h2>Tạo tài khoản Expert</h2>
+          <h2>Tạo tài khoản Chuyên gia</h2>
           <button className={styles.closeButton} onClick={handleClose}>
             <i className="fas fa-times" />
           </button>

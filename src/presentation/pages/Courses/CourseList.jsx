@@ -5,10 +5,10 @@ import useAuth from '@state/hooks/useAuth';
 import styles from './CourseList.module.css';
 
 const LEVELS = [
-  { value: 'all', label: 'Tất cả', sub: 'Mọi trình độ', num: 'LEVEL 0' },
-  { value: 'Beginner', label: 'Mới bắt đầu', sub: 'Chưa biết gì về AI', num: 'LEVEL 1' },
-  { value: 'Intermediate', label: 'Trình độ cơ bản', sub: 'Đã có kinh nghiệm', num: 'LEVEL 2' },
-  { value: 'Advanced', label: 'Nâng cao', sub: 'Chuyên sâu', num: 'LEVEL 3' },
+  { value: 'all', label: 'Tất cả', sub: 'Mọi trình độ', num: 'CẤP ĐỘ 0' },
+  { value: 'Beginner', label: 'Mới bắt đầu', sub: 'Chưa biết gì về AI', num: 'CẤP ĐỘ 1' },
+  { value: 'Intermediate', label: 'Trình độ cơ bản', sub: 'Đã có kinh nghiệm', num: 'CẤP ĐỘ 2' },
+  { value: 'Advanced', label: 'Nâng cao', sub: 'Chuyên sâu', num: 'CẤP ĐỘ 3' },
 ];
 
 const LEVEL_MAP = { Beginner: 'Mới bắt đầu', Intermediate: 'Trung cấp', Advanced: 'Nâng cao' };

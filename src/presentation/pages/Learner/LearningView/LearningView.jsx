@@ -58,7 +58,7 @@ export default function LearningView() {
           if (targetMaterialId) {
             fetchMaterialDetail(targetMaterialId, normalizedModules);
           } else {
-            // Trường hợp dự phòng (Fallback): Chọn bài đầu tiên của chương đầu tiên
+            // Trường hợp dự phòng (Fallback): Chọn bài đầu tiên của học phần đầu tiên
             const sortedModules = [...normalizedModules].sort(
               (a, b) => a.orderIndex - b.orderIndex,
             );
@@ -187,14 +187,14 @@ export default function LearningView() {
     );
     if (!currentModule) return null;
 
-    // Tìm bài có thứ tự lớn hơn bài hiện tại trong cùng chương
+    // Tìm bài có thứ tự lớn hơn bài hiện tại trong cùng học phần
     const nextInModule = currentModule.materials
       ?.filter((m) => m.orderIndex > currentMaterial.orderIndex)
       ?.sort((a, b) => a.orderIndex - b.orderIndex)[0];
 
     if (nextInModule) return nextInModule.id;
 
-    // Nếu đã hết bài trong chương hiện tại, tìm sang bài đầu tiên của chương tiếp theo
+    // Nếu đã hết bài trong học phần hiện tại, tìm sang bài đầu tiên của học phần tiếp theo
     const nextModule = modules
       ?.filter((m) => m.orderIndex > currentModule.orderIndex)
       ?.sort((a, b) => a.orderIndex - b.orderIndex)[0];
