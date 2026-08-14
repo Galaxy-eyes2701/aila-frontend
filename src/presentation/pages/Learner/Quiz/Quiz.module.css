@@ -199,6 +199,28 @@
 .btnGhost:hover { border-color: var(--text-muted); color: var(--text); }
 .btn:disabled { opacity: 0.6; cursor: not-allowed; }
 
+/* ── Alert mất kết nối khi nộp bài (trong modal nộp bài) ────────────────── */
+.alertError {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  background: #fdf0f0;
+  border: 1px solid #f2c4c4;
+  border-radius: var(--radius);
+  padding: 14px 18px;
+  margin-bottom: 16px;
+}
+.alertError i { color: #c62828; font-size: 18px; }
+.alertErrorText {
+  flex: 1;
+  min-width: 220px;
+  font-size: 15px;
+  font-weight: 600;
+  color: #c62828;
+  line-height: 1.5;
+}
+
 /* ── Modal ──────────────────────────────────────────────────────────────── */
 .overlay {
   position: fixed;

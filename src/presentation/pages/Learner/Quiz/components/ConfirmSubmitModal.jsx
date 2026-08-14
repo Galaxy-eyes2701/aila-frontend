@@ -7,6 +7,7 @@ export default function ConfirmSubmitModal({
   answeredCount,
   totalQuestions,
   submitting,
+  errorMessage,
   onConfirm,
   onCancel,
 }) {
@@ -27,6 +28,13 @@ export default function ConfirmSubmitModal({
           </p>
         )}
 
+        {errorMessage && (
+          <div className={styles.alertError} role="alert">
+            <i className="fas fa-plug-circle-xmark" />
+            <span className={styles.alertErrorText}>{errorMessage}</span>
+          </div>
+        )}
+
         <div className={styles.modalActions}>
           <button
             className={`${styles.btn} ${styles.btnGhost}`}
@@ -43,6 +51,10 @@ export default function ConfirmSubmitModal({
             {submitting ? (
               <>
                 <i className="fas fa-spinner fa-spin" /> Đang nộp...
+              </>
+            ) : errorMessage ? (
+              <>
+                <i className="fas fa-rotate-right" /> Thử lại
               </>
             ) : (
               "Nộp bài"
