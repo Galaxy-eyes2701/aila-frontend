@@ -2,10 +2,20 @@
 import styles from "./LearningView.module.css";
 
 function getMaterialIcon(type = "") {
-  const t = type.toLowerCase();
+  const materialType = type || '';
+  
+  if (materialType === 'Video') return "fa-play-circle";
+  if (materialType === 'Quiz') return "fa-vial";
+  if (materialType === 'AiPractice') return "fa-robot";
+  if (materialType === 'Document') return "fa-file-pdf";
+  
+  // Fallback for legacy string-based checks
+  const t = materialType.toLowerCase();
   if (t.includes("video")) return "fa-play-circle";
   if (t.includes("pdf") || t.includes("document")) return "fa-file-pdf";
   if (t.includes("quiz") || t.includes("test")) return "fa-vial";
+  if (t.includes("ai") || t.includes("practice")) return "fa-robot";
+  
   return "fa-file-alt";
 }
 

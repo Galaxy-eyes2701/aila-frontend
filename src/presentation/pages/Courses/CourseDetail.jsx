@@ -38,15 +38,30 @@ function ModuleItem({ module, index, initialOpen }) {
       </button>
       {open && (
         <ul className={styles.lessonList} role="list">
-          {module.materials.map(mat => (
-            <li key={mat.id} className={styles.lessonItem}>
-              <i className={`fas ${(mat.type ?? mat.materialType) === 'Video' ? 'fa-play-circle' : (mat.type ?? mat.materialType) === 'Quiz' ? 'fa-vial' : 'fa-file-alt'} ${styles.lessonIcon}`} />
-              <span className={styles.lessonTitle}>{mat.title}</span>
-              <span className={styles.lessonType}>
-                {(mat.type ?? mat.materialType) === 'Video' ? 'Video' : (mat.type ?? mat.materialType) === 'Quiz' ? 'Bài kiểm tra' : 'Tài liệu'}
-              </span>
-            </li>
-          ))}
+          {module.materials.map(mat => {
+            const materialType = mat.type ?? mat.materialType;
+            let iconClass = 'fa-file-alt'; // default
+            let typeLabel = 'Tài liệu'; // default
+            
+            if (materialType === 'Video') {
+              iconClass = 'fa-play-circle';
+              typeLabel = 'Video';
+            } else if (materialType === 'Quiz') {
+              iconClass = 'fa-vial';
+              typeLabel = 'Bài kiểm tra';
+            } else if (materialType === 'AiPractice') {
+              iconClass = 'fa-robot';
+              typeLabel = 'Thực hành AI';
+            }
+
+            return (
+              <li key={mat.id} className={styles.lessonItem}>
+                <i className={`fas ${iconClass} ${styles.lessonIcon}`} />
+                <span className={styles.lessonTitle}>{mat.title}</span>
+                <span className={styles.lessonType}>{typeLabel}</span>
+              </li>
+            );
+          })}
         </ul>
       )}
     </div>
@@ -257,7 +272,6 @@ export default function CourseDetail() {
           </nav>
 
           <h1 className={styles.heroTitle}>{course.name}</h1>
-          {course.description && <p className={styles.heroSubtitle}>{course.description}</p>}
 
           <div className={styles.metaRow}>
             <span className={styles.metaItem}><i className="fas fa-layer-group" />{LEVEL_LABELS[course.level] ?? course.level}</span>

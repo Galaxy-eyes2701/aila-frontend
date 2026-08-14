@@ -291,37 +291,6 @@ export default function CourseList() {
             <span className={styles.exploreCount}>{total} khóa học</span>
           </div>
 
-          {/* Recommended courses — chỉ hiện cho Learner */}
-          {user?.role === 'Learner' && (recLoading || recCourses.length > 0) && (
-            <div className={styles.recSection}>
-              <div className={styles.recHeader}>
-                <div className={styles.recTitleGroup}>
-                  <h2 className={styles.recHeading}>Đề xuất dành cho bạn</h2>
-                </div>
-              </div>
-              {recLoading ? (
-                <div className={styles.recGrid}>
-                  {Array.from({ length: 4 }).map((_, i) => (
-                    <div key={i} className={styles.recSkeleton} />
-                  ))}
-                </div>
-              ) : (
-                <div className={styles.recGrid}>
-                  {recCourses.map(course => {
-                    const courseId = course.courseId || course.id;
-                    return (
-                      <RecommendCard
-                        key={courseId}
-                        course={course}
-                        onClick={id => navigate(`/courses/${id}`)}
-                      />
-                    );
-                  })}
-                </div>
-              )}
-            </div>
-          )}
-
           {/* Level cards */}
           <div className={styles.levelCards}>
             {LEVELS.map(lv => (
@@ -417,6 +386,38 @@ export default function CourseList() {
           {loading && courses.length > 0 && (
             <div className={styles.showMoreWrap}>
               <span className={styles.loadingSpinner} />
+            </div>
+          )}
+
+          {/* Recommended courses — moved to end, only show for Learner and when there are main courses */}
+          {user?.role === 'Learner' && visibleCourses.length > 0 && (recLoading || recCourses.length > 0) && (
+            <div className={styles.recSection}>
+              <div className={styles.recHeader}>
+                <div className={styles.recTitleGroup}>
+                  <h2 className={styles.recHeading}>Có thể bạn sẽ thích</h2>
+                  <p className={styles.recSubheading}>Dựa trên sở thích và khóa học đã tham gia của bạn</p>
+                </div>
+              </div>
+              {recLoading ? (
+                <div className={styles.recGrid}>
+                  {Array.from({ length: 4 }).map((_, i) => (
+                    <div key={i} className={styles.recSkeleton} />
+                  ))}
+                </div>
+              ) : (
+                <div className={styles.recGrid}>
+                  {recCourses.map(course => {
+                    const courseId = course.courseId || course.id;
+                    return (
+                      <RecommendCard
+                        key={courseId}
+                        course={course}
+                        onClick={id => navigate(`/courses/${id}`)}
+                      />
+                    );
+                  })}
+                </div>
+              )}
             </div>
           )}
         </div>
