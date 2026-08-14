@@ -1,8 +1,8 @@
 import api, { resolveApiError } from './api';
 
 /**
- * Fetch all AI pricing configurations
- * UC-89: Lấy danh sách cấu hình giá
+ * UC-89: Lấy danh sách cấu hình giá AI
+ * BE trả ResponseDto<AIPricingListResponseDto>
  */
 export const getAIPricingConfigs = async () => {
   try {
@@ -10,13 +10,13 @@ export const getAIPricingConfigs = async () => {
     return res.data;
   } catch (err) {
     const { errorMessage } = resolveApiError(err);
-    return { success: false, errorMessage };
+    return { success: false, data: null, errorMessage: errorMessage || 'Không thể tải cấu hình giá.' };
   }
 };
 
 /**
- * Create new AI pricing configuration
  * UC-89: Tạo mới cấu hình giá
+ * BE trả ResponseDto<AIPricingConfigDto>
  */
 export const createAIPricingConfig = async (data) => {
   try {
@@ -24,13 +24,13 @@ export const createAIPricingConfig = async (data) => {
     return res.data;
   } catch (err) {
     const { errorMessage } = resolveApiError(err);
-    return { success: false, errorMessage };
+    return { success: false, data: null, errorMessage: errorMessage || 'Không thể tạo cấu hình giá.' };
   }
 };
 
 /**
- * Update AI pricing configuration
  * UC-89: Cập nhật cấu hình giá
+ * BE trả ResponseDto<AIPricingConfigDto>
  */
 export const updateAIPricingConfig = async (id, data) => {
   try {
@@ -38,13 +38,13 @@ export const updateAIPricingConfig = async (id, data) => {
     return res.data;
   } catch (err) {
     const { errorMessage } = resolveApiError(err);
-    return { success: false, errorMessage };
+    return { success: false, data: null, errorMessage: errorMessage || 'Không thể cập nhật cấu hình giá.' };
   }
 };
 
 /**
- * Delete AI pricing configuration
  * UC-89: Xóa cấu hình giá
+ * BE trả ResponseDto<bool>
  */
 export const deleteAIPricingConfig = async (id) => {
   try {
@@ -52,6 +52,6 @@ export const deleteAIPricingConfig = async (id) => {
     return res.data;
   } catch (err) {
     const { errorMessage } = resolveApiError(err);
-    return { success: false, errorMessage };
+    return { success: false, data: null, errorMessage: errorMessage || 'Không thể xóa cấu hình giá.' };
   }
 };

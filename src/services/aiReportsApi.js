@@ -1,8 +1,8 @@
 import api, { resolveApiError } from './api';
 
 /**
- * Fetch AI resource consumption report
- * UC-87: Lấy báo cáo tiêu thụ tài nguyên AI
+ * UC-87: Báo cáo tiêu thụ tài nguyên AI
+ * BE trả ResponseDto<AIResourceConsumptionReportDto>
  */
 export const getAIResourceConsumptionReport = async (startDate, endDate) => {
   try {
@@ -11,16 +11,16 @@ export const getAIResourceConsumptionReport = async (startDate, endDate) => {
     if (endDate) params.endDate = endDate;
 
     const res = await api.get('/admin/ai-reports/resource-consumption', { params });
+    // res.data = ResponseDto { success, data, errorCode, errorMessage }
     return res.data;
   } catch (err) {
     const { errorMessage } = resolveApiError(err);
-    return { success: false, errorMessage };
+    return { success: false, data: null, errorMessage: errorMessage || 'Không thể tải báo cáo tiêu thụ.' };
   }
 };
 
 /**
- * Fetch AI consumption trend data
- * UC-87: Dashboard analytics - dữ liệu vẽ biểu đồ xu hướng
+ * UC-87: Xu hướng tiêu thụ theo thời gian
  */
 export const getAIConsumptionTrend = async (startDate, endDate, interval = 'day') => {
   try {
@@ -32,12 +32,11 @@ export const getAIConsumptionTrend = async (startDate, endDate, interval = 'day'
     return res.data;
   } catch (err) {
     const { errorMessage } = resolveApiError(err);
-    return { success: false, errorMessage };
+    return { success: false, data: null, errorMessage: errorMessage || 'Không thể tải xu hướng tiêu thụ.' };
   }
 };
 
 /**
- * Fetch AI service breakdown
  * UC-87: Cơ cấu tỷ trọng chi phí theo dịch vụ
  */
 export const getAIServiceBreakdown = async (startDate, endDate) => {
@@ -50,13 +49,12 @@ export const getAIServiceBreakdown = async (startDate, endDate) => {
     return res.data;
   } catch (err) {
     const { errorMessage } = resolveApiError(err);
-    return { success: false, errorMessage };
+    return { success: false, data: null, errorMessage: errorMessage || 'Không thể tải phân tích dịch vụ.' };
   }
 };
 
 /**
- * Fetch top consumers
- * UC-87: Top người dùng và top bài học tiêu tốn nhiều token
+ * UC-87: Top người dùng tiêu tốn nhiều token nhất
  */
 export const getAITopConsumers = async (startDate, endDate, top = 5) => {
   try {
@@ -68,13 +66,12 @@ export const getAITopConsumers = async (startDate, endDate, top = 5) => {
     return res.data;
   } catch (err) {
     const { errorMessage } = resolveApiError(err);
-    return { success: false, errorMessage };
+    return { success: false, data: null, errorMessage: errorMessage || 'Không thể tải top người tiêu thụ.' };
   }
 };
 
 /**
- * Fetch AI policy violations
- * UC-88: Giám sát vi phạm chính sách & an toàn nội dung AI
+ * UC-88: Vi phạm chính sách AI
  */
 export const getAIPolicyViolations = async (violationType, pageNumber = 1, pageSize = 20) => {
   try {
@@ -85,6 +82,6 @@ export const getAIPolicyViolations = async (violationType, pageNumber = 1, pageS
     return res.data;
   } catch (err) {
     const { errorMessage } = resolveApiError(err);
-    return { success: false, errorMessage };
+    return { success: false, data: null, errorMessage: errorMessage || 'Không thể tải danh sách vi phạm.' };
   }
 };

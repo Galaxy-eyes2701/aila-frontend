@@ -29,7 +29,7 @@ function ViolationDetailModal({ violation, onClose }) {
 
           <div className={styles.detailRow}>
             <label>Người dùng</label>
-            <p>{violation.userIdentifier || '—'}</p>
+            <p>{violation.fullName || '—'} {violation.email ? `(${violation.email})` : ''}</p>
           </div>
 
           <div className={styles.detailRow}>
@@ -42,34 +42,28 @@ function ViolationDetailModal({ violation, onClose }) {
           </div>
 
           <div className={styles.detailRow}>
-            <label>Mô tả</label>
-            <p className={styles.descriptionText}>{violation.description || '—'}</p>
+            <label>Chính sách vi phạm</label>
+            <p>{violation.policyName || '—'}</p>
+          </div>
+
+          <div className={styles.detailRow}>
+            <label>Lý do</label>
+            <p className={styles.descriptionText}>{violation.reason || '—'}</p>
+          </div>
+
+          <div className={styles.detailRow}>
+            <label>Nội dung vi phạm</label>
+            <p className={styles.contextText}>{violation.violatingPrompt || '—'}</p>
           </div>
 
           <div className={styles.detailRow}>
             <label>Ngày phát hiện</label>
             <p>
-              {violation.detectedAt
-                ? new Date(violation.detectedAt).toLocaleString('vi-VN')
+              {violation.createdAt
+                ? new Date(violation.createdAt).toLocaleString('vi-VN')
                 : '—'}
             </p>
           </div>
-
-          <div className={styles.detailRow}>
-            <label>Trạng thái</label>
-            <p>
-              <span className={styles.statusBadge}>
-                {violation.status || 'Chưa xử lý'}
-              </span>
-            </p>
-          </div>
-
-          {violation.context && (
-            <div className={styles.detailRow}>
-              <label>Bối cảnh</label>
-              <p className={styles.contextText}>{violation.context}</p>
-            </div>
-          )}
         </div>
 
         <div className={styles.modalActions}>
@@ -237,7 +231,8 @@ export default function PolicyViolations() {
                   violations.items.map((violation) => (
                     <tr key={violation.id}>
                       <td className={styles.userCell}>
-                        {violation.userIdentifier || '—'}
+                        <div>{violation.fullName || '—'}</div>
+                        <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>{violation.email}</div>
                       </td>
                       <td>
                         <span className={styles.violationType}>
@@ -245,16 +240,16 @@ export default function PolicyViolations() {
                         </span>
                       </td>
                       <td className={styles.descriptionCell}>
-                        {violation.description || '—'}
+                        {violation.reason || '—'}
                       </td>
                       <td>
-                        {violation.detectedAt
-                          ? new Date(violation.detectedAt).toLocaleDateString('vi-VN')
+                        {violation.createdAt
+                          ? new Date(violation.createdAt).toLocaleDateString('vi-VN')
                           : '—'}
                       </td>
                       <td>
                         <span className={styles.statusBadge}>
-                          {violation.status || 'Chưa xử lý'}
+                          {violation.policyName || '—'}
                         </span>
                       </td>
                       <td>
@@ -281,7 +276,7 @@ export default function PolicyViolations() {
               currentPage={pageNumber}
               totalPages={violations.totalPages}
               itemsPerPage={pageSize}
-              totalItems={violations.totalItems}
+              totalItems={violations.totalCount}
               onPageChange={setPageNumber}
               onItemsPerPageChange={(n) => {
                 setPageSize(n);

@@ -10,9 +10,10 @@ import {
 } from '@services/aiPricingApi';
 
 const emptyForm = {
+  modelId: '',
   serviceName: '',
-  costPerToken: 0,
-  costPerRequestUsd: 0,
+  costPerInputToken: 0,
+  costPerOutputToken: 0,
   currency: 'USD',
   isActive: true,
 };
@@ -33,15 +34,11 @@ function AIPricingFormModal({ mode, initialData, onClose, onSaved }) {
     if (serviceName.length < 2) return 'Tên dịch vụ phải có ít nhất 2 ký tự.';
     if (serviceName.length > 100) return 'Tên dịch vụ không được vượt quá 100 ký tự.';
 
-    const costPerToken = Number(form.costPerToken ?? 0);
-    if (isNaN(costPerToken) || costPerToken < 0) {
-      return 'Chi phí trên token phải là số dương.';
-    }
+    const costPerInput = Number(form.costPerInputToken ?? 0);
+    if (isNaN(costPerInput) || costPerInput < 0) return 'Chi phí Input Token phải là số không âm.';
 
-    const costPerRequest = Number(form.costPerRequestUsd ?? 0);
-    if (isNaN(costPerRequest) || costPerRequest < 0) {
-      return 'Chi phí trên yêu cầu phải là số dương.';
-    }
+    const costPerOutput = Number(form.costPerOutputToken ?? 0);
+    if (isNaN(costPerOutput) || costPerOutput < 0) return 'Chi phí Output Token phải là số không âm.';
 
     return '';
   };
@@ -49,19 +46,17 @@ function AIPricingFormModal({ mode, initialData, onClose, onSaved }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     const validationError = validate();
-    if (validationError) {
-      setError(validationError);
-      return;
-    }
+    if (validationError) { setError(validationError); return; }
 
     setSaving(true);
     setError('');
 
     try {
       const payload = {
+        modelId: form.modelId?.trim() || '',
         serviceName: form.serviceName.trim(),
-        costPerToken: Number(form.costPerToken || 0),
-        costPerRequestUsd: Number(form.costPerRequestUsd || 0),
+        costPerInputToken: Number(form.costPerInputToken || 0),
+        costPerOutputToken: Number(form.costPerOutputToken || 0),
         currency: form.currency || 'USD',
         isActive: form.isActive ?? true,
       };
@@ -100,11 +95,20 @@ function AIPricingFormModal({ mode, initialData, onClose, onSaved }) {
 
         <form onSubmit={handleSubmit}>
           <div className={styles.formGroup}>
+            <label>Model ID</label>
+            <input
+              value={form.modelId || ''}
+              onChange={(e) => setForm({ ...form, modelId: e.target.value })}
+              placeholder="VD: llama-3.3-70b-versatile"
+            />
+          </div>
+
+          <div className={styles.formGroup}>
             <label>Tên dịch vụ *</label>
             <input
               value={form.serviceName || ''}
               onChange={(e) => setForm({ ...form, serviceName: e.target.value })}
-              placeholder="VD: OpenAI GPT-4, Groq Llama"
+              placeholder="VD: Groq, OpenAI GPT-4"
               autoFocus
               required
             />
@@ -112,31 +116,27 @@ function AIPricingFormModal({ mode, initialData, onClose, onSaved }) {
 
           <div className={styles.formRow}>
             <div className={styles.formGroup}>
-              <label>Chi phí trên Token *</label>
+              <label>Chi phí / Input Token (USD) *</label>
               <input
                 type="number"
-                step="0.000001"
+                step="0.0000001"
                 min="0"
-                value={form.costPerToken ?? 0}
-                onChange={(e) =>
-                  setForm({ ...form, costPerToken: Number(e.target.value) })
-                }
-                placeholder="0.00"
+                value={form.costPerInputToken ?? 0}
+                onChange={(e) => setForm({ ...form, costPerInputToken: Number(e.target.value) })}
+                placeholder="0.000001"
                 required
               />
             </div>
 
             <div className={styles.formGroup}>
-              <label>Chi phí trên Yêu cầu (USD) *</label>
+              <label>Chi phí / Output Token (USD) *</label>
               <input
                 type="number"
-                step="0.01"
+                step="0.0000001"
                 min="0"
-                value={form.costPerRequestUsd ?? 0}
-                onChange={(e) =>
-                  setForm({ ...form, costPerRequestUsd: Number(e.target.value) })
-                }
-                placeholder="0.00"
+                value={form.costPerOutputToken ?? 0}
+                onChange={(e) => setForm({ ...form, costPerOutputToken: Number(e.target.value) })}
+                placeholder="0.000001"
                 required
               />
             </div>
@@ -222,7 +222,8 @@ export default function AIPricing() {
     try {
       const res = await getAIPricingConfigs();
       if (res.success) {
-        setPricingConfigs(res.data ?? []);
+        // BE returns AIPricingListResponseDto: { isConfigured, defaultModelId, exchangeRateUsdToVnd, items: [...] }
+        setPricingConfigs(res.data?.items ?? []);
       } else {
         setPageError(res.errorMessage || 'Không thể tải cấu hình giá.');
       }
@@ -328,9 +329,10 @@ export default function AIPricing() {
           <table className={styles.table}>
             <thead>
               <tr>
+                <th>Model ID</th>
                 <th>Tên dịch vụ</th>
-                <th>Chi phí / Token</th>
-                <th>Chi phí / Yêu cầu</th>
+                <th>Input Token / 1M (USD)</th>
+                <th>Output Token / 1M (USD)</th>
                 <th>Tiền tệ</th>
                 <th>Trạng thái</th>
                 <th>Hành động</th>
@@ -340,7 +342,7 @@ export default function AIPricing() {
               {loading &&
                 Array.from({ length: 5 }).map((_, i) => (
                   <tr key={`skeleton-${i}`} className={styles.loadingRow}>
-                    <td colSpan={6}>
+                    <td colSpan={7}>
                       <div className={styles.skeletonRow}>
                         <div className={styles.skeletonLine} />
                       </div>
@@ -350,16 +352,11 @@ export default function AIPricing() {
 
               {!loading && pageError && (
                 <tr>
-                  <td colSpan={6}>
+                  <td colSpan={7}>
                     <div className={styles.errorState}>
                       <i className="fas fa-triangle-exclamation" />
                       <p>{pageError}</p>
-                      <button
-                        className={styles.secondaryButton}
-                        onClick={fetchConfigs}
-                      >
-                        Thử lại
-                      </button>
+                      <button className={styles.secondaryButton} onClick={fetchConfigs}>Thử lại</button>
                     </div>
                   </td>
                 </tr>
@@ -367,7 +364,7 @@ export default function AIPricing() {
 
               {!loading && !pageError && pricingConfigs.length === 0 && (
                 <tr>
-                  <td colSpan={6}>
+                  <td colSpan={7}>
                     <div className={styles.emptyState}>
                       <i className="fas fa-tag" />
                       <p>Chưa có cấu hình giá nào. Hãy thêm cấu hình đầu tiên.</p>
@@ -381,21 +378,18 @@ export default function AIPricing() {
                 pricingConfigs.map((config) => (
                   <tr key={config.id}>
                     <td>
-                      <span className={styles.serviceName}>
-                        {config.serviceName}
+                      <span style={{ fontFamily: 'monospace', fontSize: '12px' }}>
+                        {config.modelId || '—'}
                       </span>
                     </td>
-                    <td>{(config.costPerToken || 0).toFixed(6)}</td>
-                    <td>${(config.costPerRequestUsd || 0).toFixed(4)}</td>
+                    <td>
+                      <span className={styles.serviceName}>{config.serviceName}</span>
+                    </td>
+                    <td>${(config.costPer1MInputTokens || 0).toFixed(4)}</td>
+                    <td>${(config.costPer1MOutputTokens || 0).toFixed(4)}</td>
                     <td>{config.currency || 'USD'}</td>
                     <td>
-                      <span
-                        className={`${styles.badge} ${
-                          config.isActive
-                            ? styles.statusActive
-                            : styles.statusInactive
-                        }`}
-                      >
+                      <span className={`${styles.badge} ${config.isActive ? styles.statusActive : styles.statusInactive}`}>
                         {config.isActive ? 'Đang hoạt động' : 'Vô hiệu'}
                       </span>
                     </td>
@@ -409,7 +403,6 @@ export default function AIPricing() {
                         >
                           <i className="fas fa-pen" />
                         </button>
-
                         <button
                           className={styles.deleteButton}
                           disabled={busyConfigId === config.id}
