@@ -115,6 +115,28 @@ export default function ExpertCourseManagement() {
     } catch (err) { showToast(err.response?.data?.errorMessage || 'Hủy xuất bản thất bại.', 'error'); }
   };
 
+  const handleSyncRag = useCallback(async courseId => {
+    try {
+      const res = await api.post(`/rag/courses/${courseId}/sync-materials`);
+      if (res.data) {
+        const data = res.data;
+        const { totalMaterialsIndexed, totalChunksGenerated, status } = data;
+        if (status === 'Success') {
+          showToast(
+            `Đồng bộ thành công! Đã xử lý ${totalMaterialsIndexed} tài liệu và tạo ${totalChunksGenerated} đoạn văn bản.`
+          );
+        } else {
+          showToast(data.message || 'Đồng bộ hoàn tất nhưng có lỗi.', 'error');
+        }
+      } else {
+        showToast('Đồng bộ thành công!');
+      }
+    } catch (err) {
+      console.error('Sync RAG error:', err);
+      showToast(err.response?.data?.errorMessage || 'Đồng bộ thất bại. Vui lòng thử lại.', 'error');
+    }
+  }, []);
+
   const loadMore = () => { const next = pageIndex + 1; setPageIndex(next); fetchCourses(next); };
 
   const publishedCount = courses.filter(c => c.isPublished).length;
@@ -189,7 +211,7 @@ export default function ExpertCourseManagement() {
               <CourseRow key={course.id} course={course}
                 onEdit={handleEdit} onPublish={handlePublish}
                 onUnpublish={handleUnpublish} onPreview={setPreviewCourseId}
-                onReReview={setReReviewCourse}
+                onReReview={setReReviewCourse} onSyncRag={handleSyncRag}
                 onLockedPublish={() => showToast(
                   'Khóa học đang bị khoá do vi phạm nội quy. Vui lòng nhấn "Yêu cầu mở lại" để gửi yêu cầu xem xét.',
                   'error'

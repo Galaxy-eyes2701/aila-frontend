@@ -10,16 +10,26 @@ const LEVEL_LABELS = {
   Advanced:     'Nâng cao',
 };
 
-export default function CourseRow({ course, onEdit, onPublish, onUnpublish, onPreview, onReReview, onLockedPublish }) {
+export default function CourseRow({ course, onEdit, onPublish, onUnpublish, onPreview, onReReview, onLockedPublish, onSyncRag }) {
   const isPublished = course.isPublished;
   const isLocked    = !!course.isPublicationLocked;
   const [busy, setBusy] = useState(false);
+  const [syncingRag, setSyncingRag] = useState(false);
 
   const handlePublishToggle = async () => {
     setBusy(true);
     if (isPublished) await onUnpublish(course.id);
     else await onPublish(course.id);
     setBusy(false);
+  };
+
+  const handleSyncRag = async () => {
+    setSyncingRag(true);
+    try {
+      await onSyncRag(course.id);
+    } finally {
+      setSyncingRag(false);
+    }
   };
 
   return (
@@ -87,6 +97,20 @@ export default function CourseRow({ course, onEdit, onPublish, onUnpublish, onPr
         >
           <i className="fas fa-list-ul" /> Học phần
         </Link>
+
+        {/* Sync RAG Button - only show for published courses */}
+        {isPublished && (
+          <button
+            className={`${styles.actionBtn} ${styles.actionBtnSync}`}
+            onClick={handleSyncRag}
+            disabled={syncingRag}
+            title="Đồng bộ nội dung khóa học với hệ thống AI để hỗ trợ tư vấn tự động"
+          >
+            {syncingRag
+              ? <span className={styles.spinner} />
+              : <><i className="fas fa-sync-alt" /> Đồng bộ AI</>}
+          </button>
+        )}
 
         {isPublished ? (
           <button
