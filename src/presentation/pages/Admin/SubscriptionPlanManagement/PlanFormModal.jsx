@@ -1,7 +1,7 @@
 import { useMemo, useRef, useState } from 'react';
 import useModalA11y from '@state/hooks/useModalA11y';
 import { resolveApiError } from '@services/api';
-import { INT32_MAX, formatDuration, formatNumber } from '@services/subscriptionPlan';
+import { formatDuration, formatNumber, formatPrice } from '@services/subscriptionPlan';
 import {
   createSubscriptionPlan,
   updateSubscriptionPlan,
@@ -12,56 +12,67 @@ import {
   EDIT_FIELD_ORDER,
   FIELD_BY_ERROR_CODE,
   NAME_MAX_LENGTH,
+  NAME_MIN_LENGTH,
+  NUMBER_FIELD_RULES,
   buildPlanPayload,
   emptyPlanForm,
   planToForm,
+  sanitizeIntegerInput,
+  sanitizeNameInput,
+  sanitizePriceInput,
+  validatePlanField,
   validatePlanForm,
 } from './planValidation';
 import styles from './SubscriptionPlanManagement.module.css';
 
+/** Khoảng giá trị hợp lệ lấy thẳng từ NUMBER_FIELD_RULES để hint và lỗi không lệch nhau. */
+const rangeHint = (field) => {
+  const { min, max, unit } = NUMBER_FIELD_RULES[field];
+  const suffix = unit ? ` ${unit}` : '';
+  return `Từ ${formatNumber(min)}${suffix} đến ${formatNumber(max)}${suffix}.`;
+};
+
 const NUMBER_FIELDS = [
   {
     name: 'price',
-    label: 'Giá gói',
+    label: 'Giá gói (VND)',
     group: 'Thương mại',
-    min: '0.01',
-    step: '0.01',
-    hint: 'Tối đa 2 chữ số thập phân.',
+    hint: `${rangeHint('price')} Nhập số nguyên — dấu chấm/phẩy phân cách sẽ tự bị bỏ.`,
     createOnly: false,
   },
-  { name: 'tierLevel', label: 'Cấp độ gói (Tier)', group: 'Thương mại', min: '1', step: '1', createOnly: true },
+  {
+    name: 'tierLevel',
+    label: 'Cấp độ gói (Tier)',
+    group: 'Thương mại',
+    hint: `${rangeHint('tierLevel')} Không trùng với gói khác, không sửa được sau khi tạo.`,
+    createOnly: true,
+  },
   {
     name: 'durationInDays',
     label: 'Thời hạn (ngày)',
     group: 'Thương mại',
-    min: '1',
-    step: '1',
+    hint: rangeHint('durationInDays'),
     createOnly: true,
   },
-  { name: 'aiTokenLimit', label: 'Giới hạn AI Token', group: 'Quyền lợi', min: '0', step: '1', createOnly: false },
+  {
+    name: 'aiTokenLimit',
+    label: 'Giới hạn AI Token',
+    group: 'Quyền lợi',
+    hint: `${rangeHint('aiTokenLimit')} 0 = không bao gồm.`,
+    createOnly: false,
+  },
   {
     name: 'aiPracticeScenarioLimit',
     label: 'Lượt AI Practice',
     group: 'Quyền lợi',
-    min: '0',
-    step: '1',
+    hint: `${rangeHint('aiPracticeScenarioLimit')} 0 = không bao gồm.`,
     createOnly: false,
   },
   {
     name: 'expertEvaluationLimit',
     label: 'Lượt đánh giá chuyên gia',
     group: 'Quyền lợi',
-    min: '0',
-    step: '1',
-    createOnly: false,
-  },
-  {
-    name: 'displayOrder',
-    label: 'Thứ tự hiển thị',
-    group: 'Hiển thị',
-    min: '0',
-    step: '1',
-    hint: '0 là giá trị hợp lệ — số nhỏ hiển thị trước.',
+    hint: `${rangeHint('expertEvaluationLimit')} 0 = không bao gồm.`,
     createOnly: false,
   },
 ];
@@ -75,8 +86,18 @@ function FieldError({ id, message }) {
   );
 }
 
-export default function PlanFormModal({ mode, plan, onClose, onSaved, onNotFound }) {
+export default function PlanFormModal({
+  mode,
+  plan,
+  nextDisplayOrder,
+  onClose,
+  onSaved,
+  onNotFound,
+}) {
   const isEdit = mode === 'edit';
+
+  // Thứ tự hiển thị không nhập tay: tạo mới → số kế tiếp, sửa → giữ nguyên số hiện tại.
+  const displayOrder = isEdit ? Number(plan?.displayOrder ?? 0) : nextDisplayOrder;
 
   const [form, setForm] = useState(() => (isEdit ? planToForm(plan) : { ...emptyPlanForm }));
   const [errors, setErrors] = useState({});
@@ -103,6 +124,12 @@ export default function PlanFormModal({ mode, plan, onClose, onSaved, onNotFound
     setForm((prev) => ({ ...prev, [name]: value }));
     setErrors((prev) => (prev[name] ? { ...prev, [name]: '' } : prev));
     setBanner('');
+  };
+
+  // Báo lỗi ngay khi rời ô thay vì đợi tới lúc bấm "Tạo gói".
+  const handleBlur = (name) => {
+    const message = validatePlanField(name, form, mode);
+    setErrors((prev) => (prev[name] === message ? prev : { ...prev, [name]: message }));
   };
 
   const applyServerError = ({ errorCode, errorMessage }) => {
@@ -137,7 +164,7 @@ export default function PlanFormModal({ mode, plan, onClose, onSaved, onNotFound
     setBanner('');
 
     try {
-      const payload = buildPlanPayload(form, mode);
+      const payload = buildPlanPayload(form, mode, displayOrder);
       const res = isEdit
         ? await updateSubscriptionPlan(plan.id, payload)
         : await createSubscriptionPlan(payload);
@@ -174,28 +201,39 @@ export default function PlanFormModal({ mode, plan, onClose, onSaved, onNotFound
     }
   };
 
-  const renderNumberField = ({ name, label, min, step, hint }) => {
+  const renderNumberField = ({ name, label, hint }) => {
     const errorId = `plan-${name}-error`;
     const hintId = `plan-${name}-hint`;
     const describedBy = [hint ? hintId : null, errors[name] ? errorId : null]
       .filter(Boolean)
       .join(' ');
 
+    const isDecimal = NUMBER_FIELD_RULES[name].kind === 'decimal';
+    const sanitize = isDecimal ? sanitizePriceInput : sanitizeIntegerInput;
+
     return (
       <div className={styles.formGroup} key={name}>
         <label htmlFor={`plan-${name}`}>
           {label} <span className={styles.required}>*</span>
         </label>
+        {/*
+          type="text" + lọc ký tự thủ công thay cho type="number": input number trả về chuỗi
+          rỗng khi nội dung không parse được, nên admin gõ "12e5" hay "--" thì ô tự trống mà
+          không hiểu vì sao. Ở đây ký tự lạ bị chặn ngay lúc gõ.
+        */}
         <input
           id={`plan-${name}`}
           name={name}
-          type="number"
-          inputMode="decimal"
-          min={min}
-          step={step}
-          max={INT32_MAX}
+          type="text"
+          inputMode={isDecimal ? 'decimal' : 'numeric'}
+          autoComplete="off"
           value={form[name]}
-          onChange={(e) => setValue(name, e.target.value)}
+          onChange={(e) => setValue(name, sanitize(e.target.value))}
+          onBlur={() => handleBlur(name)}
+          onPaste={(e) => {
+            e.preventDefault();
+            setValue(name, sanitize(e.clipboardData.getData('text')));
+          }}
           disabled={saving}
           aria-invalid={errors[name] ? 'true' : 'false'}
           aria-describedby={describedBy || undefined}
@@ -208,12 +246,19 @@ export default function PlanFormModal({ mode, plan, onClose, onSaved, onNotFound
             {hint}
           </p>
         )}
+        {/* Giá là ô dễ nhập nhầm số 0 nhất — cho xem trước đúng con số sẽ được lưu. */}
+        {name === 'price' && form.price !== '' && !errors.price && (
+          <p className={styles.fieldPreview}>
+            <i className="fas fa-eye" aria-hidden="true" /> Hiển thị cho học viên:{' '}
+            <strong>{formatPrice(form.price)}</strong>
+          </p>
+        )}
         <FieldError id={errorId} message={errors[name]} />
       </div>
     );
   };
 
-  const groups = ['Thương mại', 'Quyền lợi', 'Hiển thị'];
+  const groups = ['Thương mại', 'Quyền lợi'];
 
   return (
     <div
@@ -300,16 +345,26 @@ export default function PlanFormModal({ mode, plan, onClose, onSaved, onNotFound
                   name="name"
                   type="text"
                   maxLength={NAME_MAX_LENGTH}
+                  autoComplete="off"
                   value={form.name}
-                  onChange={(e) => setValue('name', e.target.value)}
+                  // Chỉ lọc ký tự điều khiển/xuống dòng — không lọc chữ để gõ tiếng Việt
+                  // (Telex/VNI) không bị vỡ giữa chừng; bộ ký tự hợp lệ kiểm ở blur/submit.
+                  onChange={(e) => setValue('name', sanitizeNameInput(e.target.value))}
+                  onBlur={() => handleBlur('name')}
                   placeholder="Ví dụ: Premium"
                   disabled={saving}
                   aria-invalid={errors.name ? 'true' : 'false'}
-                  aria-describedby={errors.name ? 'plan-name-error' : undefined}
+                  aria-describedby={
+                    errors.name ? 'plan-name-error plan-name-hint' : 'plan-name-hint'
+                  }
                   ref={(el) => {
                     fieldRefs.current.name = el;
                   }}
                 />
+                <p className={styles.fieldHint} id="plan-name-hint">
+                  {NAME_MIN_LENGTH}–{NAME_MAX_LENGTH} ký tự, gồm chữ, số và các dấu . , - _ + &amp;
+                  ( ) / &apos; — không sửa được sau khi tạo.
+                </p>
                 <FieldError id="plan-name-error" message={errors.name} />
               </div>
             </>
@@ -323,6 +378,7 @@ export default function PlanFormModal({ mode, plan, onClose, onSaved, onNotFound
               maxLength={DESCRIPTION_MAX_LENGTH}
               value={form.description}
               onChange={(e) => setValue('description', e.target.value)}
+              onBlur={() => handleBlur('description')}
               placeholder="Mô tả ngắn gọn quyền lợi của gói (không bắt buộc)"
               disabled={saving}
               aria-invalid={errors.description ? 'true' : 'false'}
@@ -348,6 +404,22 @@ export default function PlanFormModal({ mode, plan, onClose, onSaved, onNotFound
               </div>
             );
           })}
+
+          <p className={styles.modalNote}>
+            <i className="fas fa-arrow-down-1-9" aria-hidden="true" />
+            {isEdit ? (
+              <>
+                Thứ tự hiển thị hiện tại là <strong>{formatNumber(displayOrder)}</strong>. Dùng nút
+                mũi tên ở cột <strong>Thứ tự</strong> trong bảng để thay đổi.
+              </>
+            ) : (
+              <>
+                Thứ tự hiển thị được gán tự động (<strong>{formatNumber(displayOrder)}</strong> —
+                cuối danh sách). Sau khi tạo, dùng nút mũi tên ở cột <strong>Thứ tự</strong> trong
+                bảng để sắp xếp lại.
+              </>
+            )}
+          </p>
 
           {!isEdit && (
             <p className={styles.modalNote}>

@@ -1,14 +1,64 @@
-import { INT32_MAX, PRICE_MAX_INTEGER_DIGITS } from '@services/subscriptionPlan';
+import { PRICE_MAX_INTEGER_DIGITS, formatNumber } from '@services/subscriptionPlan';
 
 /**
  * Mirror client-side của rule validation phía server (§0.4).
  * Backend fail-fast (chỉ trả lỗi ĐẦU TIÊN) nên FE phải validate đủ và hiện mọi lỗi cùng lúc.
+ *
+ * Ngoài rule của BE, FE còn siết thêm trần nghiệp vụ (NUMBER_FIELD_RULES) và bộ ký tự cho
+ * tên gói — BE chỉ chặn "âm / bằng 0 / tràn int32" nên nếu không siết thì vẫn nhập được
+ * những giá trị vô nghĩa như tier 999999 hay gói dài 2 tỷ ngày.
  */
 
+export const NAME_MIN_LENGTH = 2;
 export const NAME_MAX_LENGTH = 100;
 export const DESCRIPTION_MAX_LENGTH = 1000;
 
-const INT_OVERFLOW_MESSAGE = `Giá trị không được vượt quá ${INT32_MAX.toLocaleString('vi-VN')}.`;
+/**
+ * Tên gói: chữ (kể cả tiếng Việt có dấu), số, khoảng trắng và một vài dấu thông dụng.
+ * Chặn emoji, ký tự điều khiển và các ký tự dễ gây rối như `<` `>` `{` `}` `|` `\`.
+ */
+const NAME_PATTERN = /^[\p{L}\p{N} .,\-_+&()/']+$/u;
+
+const SPACE_CODE = 32;
+const DELETE_CODE = 127;
+const TAB_CODE = 9;
+const NEWLINE_CODE = 10;
+
+/**
+ * Ký tự điều khiển thường lọt vào khi copy-paste từ file lạ. Dùng codePoint thay vì regex
+ * để không phải nhúng ký tự điều khiển vào chính source file này.
+ */
+const isControlChar = (char, { allowLineBreak = false } = {}) => {
+  const code = char.codePointAt(0);
+  if (allowLineBreak && (code === TAB_CODE || code === NEWLINE_CODE)) return false;
+  return code < SPACE_CODE || code === DELETE_CODE;
+};
+
+const hasControlChar = (value, options) =>
+  Array.from(value).some((char) => isControlChar(char, options));
+
+const stripControlChars = (value) =>
+  Array.from(value)
+    .filter((char) => !isControlChar(char))
+    .join('');
+
+/**
+ * Trần nghiệp vụ cho các trường số. BE chỉ chặn tới int32 nên đây là quy ước của FE —
+ * chỉnh ở đúng một chỗ này nếu BA chốt lại con số khác.
+ */
+export const NUMBER_FIELD_RULES = {
+  /*
+   * Giá để `integer` dù BE nhận decimal(18,2): tiền VND không có phần lẻ, mà trong vi-VN dấu
+   * `.` là phân cách hàng nghìn — nhận số lẻ thì "199.000" (ý là 199 nghìn) sẽ thành 199 đồng.
+   * Đổi lại `kind: 'decimal'` nếu BA chốt đơn vị tiền có phần lẻ.
+   */
+  price: { label: 'Giá gói', kind: 'integer', min: 1, max: 1_000_000_000 },
+  tierLevel: { label: 'Cấp độ gói', kind: 'integer', min: 1, max: 100 },
+  durationInDays: { label: 'Thời hạn gói', kind: 'integer', min: 1, max: 3650, unit: 'ngày' },
+  aiTokenLimit: { label: 'Giới hạn AI Token', kind: 'integer', min: 0, max: 100_000_000 },
+  aiPracticeScenarioLimit: { label: 'Lượt AI Practice', kind: 'integer', min: 0, max: 10_000 },
+  expertEvaluationLimit: { label: 'Lượt đánh giá chuyên gia', kind: 'integer', min: 0, max: 10_000 },
+};
 
 /** errorCode → field để gắn lỗi inline (§0.6). */
 export const FIELD_BY_ERROR_CODE = {
@@ -23,7 +73,7 @@ export const FIELD_BY_ERROR_CODE = {
   INVALID_AI_TOKEN_LIMIT: 'aiTokenLimit',
   INVALID_AI_PRACTICE_SCENARIO_LIMIT: 'aiPracticeScenarioLimit',
   INVALID_EXPERT_EVALUATION_LIMIT: 'expertEvaluationLimit',
-  INVALID_DISPLAY_ORDER: 'displayOrder',
+  // INVALID_DISPLAY_ORDER không map vào field nào: displayOrder do FE tự gán, không có ô nhập.
 };
 
 export const emptyPlanForm = {
@@ -35,7 +85,6 @@ export const emptyPlanForm = {
   aiTokenLimit: '',
   aiPracticeScenarioLimit: '',
   expertEvaluationLimit: '',
-  displayOrder: '',
 };
 
 /** Thứ tự field trong form — dùng để focus vào ô lỗi đầu tiên. */
@@ -48,17 +97,18 @@ export const CREATE_FIELD_ORDER = [
   'aiTokenLimit',
   'aiPracticeScenarioLimit',
   'expertEvaluationLimit',
-  'displayOrder',
 ];
 
-/** UC-91 chỉ sửa được 6 trường; name/tierLevel/durationInDays bất biến (§5.1). */
+/**
+ * UC-91 chỉ sửa được 6 trường; name/tierLevel/durationInDays bất biến (§5.1).
+ * displayOrder vẫn nằm trong payload nhưng không hiện trong form — đổi bằng reorder ở bảng.
+ */
 export const EDIT_FIELD_ORDER = [
   'description',
   'price',
   'aiTokenLimit',
   'aiPracticeScenarioLimit',
   'expertEvaluationLimit',
-  'displayOrder',
 ];
 
 export function planToForm(plan) {
@@ -73,35 +123,112 @@ export function planToForm(plan) {
     aiTokenLimit: plan.aiTokenLimit ?? '',
     aiPracticeScenarioLimit: plan.aiPracticeScenarioLimit ?? '',
     expertEvaluationLimit: plan.expertEvaluationLimit ?? '',
-    displayOrder: plan.displayOrder ?? '',
   };
 }
 
-function validateInteger(raw, { min, message }) {
-  const value = String(raw ?? '').trim();
-  if (!value) return message;
-  if (!/^-?\d+$/.test(value)) return message;
+/* ────────────────────────────── Lọc ký tự khi gõ ────────────────────────────── */
 
-  const num = Number(value);
-  if (!Number.isSafeInteger(num) || num < min) return message;
-  if (num > INT32_MAX) return INT_OVERFLOW_MESSAGE;
+/**
+ * Ô số nguyên: chỉ giữ chữ số, bỏ số 0 thừa ở đầu.
+ * Lọc ngay lúc gõ nên `e`, `+`, `-`, dấu cách... không bao giờ vào được state.
+ */
+export function sanitizeIntegerInput(raw) {
+  return String(raw ?? '')
+    .replace(/\D/g, '')
+    .replace(/^0+(?=\d)/, '')
+    .slice(0, 12);
+}
+
+/** Ô giá: chữ số + tối đa một dấu thập phân + tối đa 2 chữ số lẻ (dấu `,` quy về `.`). */
+export function sanitizePriceInput(raw) {
+  const cleaned = String(raw ?? '')
+    .replace(/,/g, '.')
+    .replace(/[^\d.]/g, '');
+
+  const [head, ...rest] = cleaned.split('.');
+  const integerPart = head.replace(/^0+(?=\d)/, '').slice(0, PRICE_MAX_INTEGER_DIGITS);
+
+  if (rest.length === 0) return integerPart;
+  // Gõ dấu chấm đầu tiên → tự thêm số 0 để không còn chuỗi cụt kiểu ".5".
+  return `${integerPart || '0'}.${rest.join('').slice(0, 2)}`;
+}
+
+/** Tên gói: chỉ bỏ ký tự điều khiển và xuống dòng — KHÔNG lọc chữ, để gõ tiếng Việt không vỡ. */
+export function sanitizeNameInput(raw) {
+  const singleLine = String(raw ?? '').replace(/[\r\n\t]/g, ' ');
+  return stripControlChars(singleLine).slice(0, NAME_MAX_LENGTH);
+}
+
+/* ────────────────────────────── Validate ────────────────────────────── */
+
+const rangeMessage = ({ label, min, max, unit }) => {
+  const suffix = unit ? ` ${unit}` : '';
+  return `${label} phải nằm trong khoảng ${formatNumber(min)}${suffix} – ${formatNumber(max)}${suffix}.`;
+};
+
+function validateNumberField(raw, field) {
+  const rule = NUMBER_FIELD_RULES[field];
+  const value = String(raw ?? '').trim();
+
+  if (!value) return `${rule.label} không được để trống.`;
+
+  if (rule.kind === 'integer') {
+    if (!/^\d+$/.test(value)) return `${rule.label} phải là số nguyên, không chứa ký tự khác.`;
+
+    const num = Number(value);
+    if (!Number.isSafeInteger(num) || num < rule.min || num > rule.max) return rangeMessage(rule);
+
+    return '';
+  }
+
+  // decimal — dùng cho giá gói.
+  const normalized = value.replace(',', '.');
+  if (!/^\d+(\.\d{1,2})?$/.test(normalized))
+    return `${rule.label} phải là số dương, tối đa 2 chữ số thập phân.`;
+
+  const num = Number(normalized);
+  if (!Number.isFinite(num) || num < rule.min || num > rule.max) return rangeMessage(rule);
 
   return '';
 }
 
-function validatePrice(raw) {
+function validateName(raw) {
   const value = String(raw ?? '').trim();
-  if (!value) return 'Giá gói phải lớn hơn 0.';
 
-  const num = Number(value.replace(',', '.'));
-  if (!Number.isFinite(num) || num <= 0) return 'Giá gói phải lớn hơn 0.';
-  if (!/^\d+([.,]\d{1,2})?$/.test(value)) return 'Giá gói chỉ được có tối đa 2 chữ số thập phân.';
-
-  // decimal(18,2) — chặn phần nguyên dài hơn 16 chữ số.
-  const integerDigits = value.split(/[.,]/)[0].replace(/^0+(?=\d)/, '').length;
-  if (integerDigits > PRICE_MAX_INTEGER_DIGITS) return 'Giá gói vượt quá giới hạn cho phép.';
+  if (!value) return 'Tên gói đăng ký không được để trống.';
+  if (value.length < NAME_MIN_LENGTH)
+    return `Tên gói đăng ký phải có ít nhất ${NAME_MIN_LENGTH} ký tự.`;
+  if (value.length > NAME_MAX_LENGTH)
+    return `Tên gói đăng ký không được vượt quá ${NAME_MAX_LENGTH} ký tự.`;
+  if (!NAME_PATTERN.test(value))
+    return "Tên gói chỉ gồm chữ, số, khoảng trắng và các dấu . , - _ + & ( ) / '";
+  // Tên toàn dấu câu kiểu "---" hay "..." không phải là tên gói.
+  if (!/[\p{L}\p{N}]/u.test(value)) return 'Tên gói phải chứa ít nhất một chữ cái hoặc chữ số.';
 
   return '';
+}
+
+function validateDescription(raw) {
+  const value = String(raw ?? '').trim();
+
+  if (value.length > DESCRIPTION_MAX_LENGTH)
+    return `Mô tả gói không được vượt quá ${DESCRIPTION_MAX_LENGTH} ký tự.`;
+  if (hasControlChar(value, { allowLineBreak: true }))
+    return 'Mô tả gói chứa ký tự không hợp lệ.';
+
+  return '';
+}
+
+/** Danh sách field cần validate theo từng mode (edit: BE bỏ qua name/tierLevel/durationInDays). */
+function fieldsToValidate(mode) {
+  const numberFields = Object.keys(NUMBER_FIELD_RULES);
+
+  if (mode === 'create') return ['name', 'description', ...numberFields];
+
+  return [
+    'description',
+    ...numberFields.filter((field) => field !== 'tierLevel' && field !== 'durationInDays'),
+  ];
 }
 
 /**
@@ -112,62 +239,30 @@ function validatePrice(raw) {
 export function validatePlanForm(form, mode = 'create') {
   const errors = {};
 
-  if (mode === 'create') {
-    const name = String(form.name ?? '').trim();
-    if (!name) errors.name = 'Tên gói đăng ký không được để trống.';
-    else if (name.length > NAME_MAX_LENGTH)
-      errors.name = `Tên gói đăng ký không được vượt quá ${NAME_MAX_LENGTH} ký tự.`;
+  for (const field of fieldsToValidate(mode)) {
+    let message = '';
 
-    const tierLevel = validateInteger(form.tierLevel, {
-      min: 1,
-      message: 'Cấp độ gói phải lớn hơn 0.',
-    });
-    if (tierLevel) errors.tierLevel = tierLevel;
+    if (field === 'name') message = validateName(form.name);
+    else if (field === 'description') message = validateDescription(form.description);
+    else message = validateNumberField(form[field], field);
 
-    const durationInDays = validateInteger(form.durationInDays, {
-      min: 1,
-      message: 'Thời hạn gói phải lớn hơn 0 ngày.',
-    });
-    if (durationInDays) errors.durationInDays = durationInDays;
+    if (message) errors[field] = message;
   }
-
-  const description = String(form.description ?? '').trim();
-  if (description.length > DESCRIPTION_MAX_LENGTH)
-    errors.description = `Mô tả gói không được vượt quá ${DESCRIPTION_MAX_LENGTH} ký tự.`;
-
-  const price = validatePrice(form.price);
-  if (price) errors.price = price;
-
-  // 0 là giá trị hợp lệ cho cả ba *Limit và DisplayOrder.
-  const aiTokenLimit = validateInteger(form.aiTokenLimit, {
-    min: 0,
-    message: 'Giới hạn AI Token không hợp lệ.',
-  });
-  if (aiTokenLimit) errors.aiTokenLimit = aiTokenLimit;
-
-  const aiPracticeScenarioLimit = validateInteger(form.aiPracticeScenarioLimit, {
-    min: 0,
-    message: 'Giới hạn số lần AI Practice không hợp lệ.',
-  });
-  if (aiPracticeScenarioLimit) errors.aiPracticeScenarioLimit = aiPracticeScenarioLimit;
-
-  const expertEvaluationLimit = validateInteger(form.expertEvaluationLimit, {
-    min: 0,
-    message: 'Giới hạn số lần đánh giá chuyên gia không hợp lệ.',
-  });
-  if (expertEvaluationLimit) errors.expertEvaluationLimit = expertEvaluationLimit;
-
-  const displayOrder = validateInteger(form.displayOrder, {
-    min: 0,
-    message: 'Thứ tự hiển thị không hợp lệ.',
-  });
-  if (displayOrder) errors.displayOrder = displayOrder;
 
   return errors;
 }
 
-/** Chuẩn hóa form → payload gửi lên server (đã trim, đã ép kiểu số). */
-export function buildPlanPayload(form, mode = 'create') {
+/** Validate đúng một trường — dùng cho onBlur để báo lỗi sớm thay vì đợi submit. */
+export function validatePlanField(field, form, mode = 'create') {
+  return validatePlanForm(form, mode)[field] ?? '';
+}
+
+/**
+ * Chuẩn hóa form → payload gửi lên server (đã trim, đã ép kiểu số).
+ * @param {number} displayOrder  do trang gọi truyền vào: gói mới lấy số kế tiếp,
+ *                               gói đang sửa giữ nguyên số hiện tại (đổi bằng reorder).
+ */
+export function buildPlanPayload(form, mode = 'create', displayOrder = 0) {
   const description = String(form.description ?? '').trim();
 
   const shared = {
@@ -176,13 +271,16 @@ export function buildPlanPayload(form, mode = 'create') {
     aiTokenLimit: Number(String(form.aiTokenLimit).trim()),
     aiPracticeScenarioLimit: Number(String(form.aiPracticeScenarioLimit).trim()),
     expertEvaluationLimit: Number(String(form.expertEvaluationLimit).trim()),
-    displayOrder: Number(String(form.displayOrder).trim()),
+    displayOrder,
   };
 
   if (mode === 'edit') return shared;
 
   return {
-    name: String(form.name ?? '').trim(),
+    // Gộp khoảng trắng thừa để "Gói   Premium" và "Gói Premium" không thành hai gói khác nhau.
+    name: String(form.name ?? '')
+      .trim()
+      .replace(/\s+/g, ' '),
     ...shared,
     tierLevel: Number(String(form.tierLevel).trim()),
     durationInDays: Number(String(form.durationInDays).trim()),
