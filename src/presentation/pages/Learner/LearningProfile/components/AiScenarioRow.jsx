@@ -19,8 +19,14 @@ export default function AiScenarioRow({ item }) {
 
   return (
     <div className={styles.quizRow}>
+      <div className={styles.rowIcon}>
+        <i className="fas fa-robot" />
+      </div>
+
       <div className={styles.quizMain}>
-        <div className={styles.quizTitle}>{item.scenarioName}</div>
+        <div className={styles.quizTitle} title={item.scenarioName}>
+          {item.scenarioName}
+        </div>
         <div className={styles.quizCourse}>Khóa: {item.courseName}</div>
         <div className={styles.quizMetaRow}>
           <span className={styles.quizScore}>
