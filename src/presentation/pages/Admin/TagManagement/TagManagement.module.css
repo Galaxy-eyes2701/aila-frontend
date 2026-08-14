@@ -292,8 +292,8 @@
   color: var(--muted);
 }
 
-.emptyState i,
-.errorState i {
+.emptyState > i,
+.errorState > i {
   display: inline-flex;
   align-items: center;
   justify-content: center;
