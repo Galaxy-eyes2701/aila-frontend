@@ -8,9 +8,9 @@ import { DEFAULT_AVATAR } from '@infrastructure/constants/defaultAvatar';
 const FALLBACK_THUMB = 'https://images.unsplash.com/photo-1677442135703-1787eea5ce01?w=480&q=75';
 
 const LEVEL_LABELS = {
-  Beginner:     'Mới bắt đầu',
+  Beginner: 'Mới bắt đầu',
   Intermediate: 'Trung cấp',
-  Advanced:     'Nâng cao',
+  Advanced: 'Nâng cao',
 };
 
 const REPORTING_PERIOD_OPTIONS = [
@@ -93,19 +93,19 @@ function HomeSkeleton() {
 export default function ExpertHome() {
   const navigate = useNavigate();
 
-  const [profile, setProfile]         = useState(null);
-  const [courses, setCourses]         = useState([]);
-  const [dashboard, setDashboard]     = useState(null);
-  const [loading, setLoading]         = useState(true);
+  const [profile, setProfile] = useState(null);
+  const [courses, setCourses] = useState([]);
+  const [dashboard, setDashboard] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [dashLoading, setDashLoading] = useState(false);
-  const [error, setError]             = useState('');
+  const [error, setError] = useState('');
 
   // UC-65 Filter Scope state
-  const [courseId, setCourseId]               = useState('');
+  const [courseId, setCourseId] = useState('');
   const [reportingPeriod, setReportingPeriod] = useState('Last30Days');
-  const [startDate, setStartDate]             = useState('');
-  const [endDate, setEndDate]                 = useState('');
-  const [scopeError, setScopeError]           = useState('');
+  const [startDate, setStartDate] = useState('');
+  const [endDate, setEndDate] = useState('');
+  const [scopeError, setScopeError] = useState('');
 
   // 1. Fetch initial profile & courses list
   const fetchProfileAndCourses = useCallback(async () => {
@@ -381,14 +381,14 @@ export default function ExpertHome() {
               />
               <StatCard
                 icon="fa-chart-line"
-                label="Tỷ Lệ Hoàn Thành"
+                label="Tiến độ trung bình hoàn thành"
                 value={`${overview.averageCompletionRate ?? 0}%`}
                 color="#8b5cf6"
-                sub={`${overview.completedEnrollmentsCount ?? 0} lượt hoàn thành`}
+                sub={`${overview.completedEnrollmentsCount ?? 0} lượt hoàn thành khóa học`}
               />
               <StatCard
                 icon="fa-clipboard-check"
-                label="Lượt Làm Quiz"
+                label="Lượt Làm Bài Kiểm Tra"
                 value={overview.totalQuizAttempts ?? 0}
                 color="#f59e0b"
                 sub="Bài kiểm tra đã làm"
