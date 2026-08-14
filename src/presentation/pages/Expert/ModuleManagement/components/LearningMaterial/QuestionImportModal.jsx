@@ -5,12 +5,13 @@ import {
   downloadImportTemplate,
   previewImportQuestions,
   confirmImportQuestions,
+  resolveApiError,
 } from "@services/expertQuizApi";
 
 // ── Bước hiện tại của wizard ─────────────────────────────────
 // "upload"  → chọn file & download template
 // "review"  → xem kết quả preview
-// "done"    → import thành công
+// "done"    → kết quả lưu DB thành công
 const STEP = { UPLOAD: "upload", REVIEW: "review", DONE: "done" };
 
 export default function QuestionImportModal({ open, quizMaterialId, onClose, onImported }) {
@@ -52,7 +53,8 @@ export default function QuestionImportModal({ open, quizMaterialId, onClose, onI
       link.remove();
       window.URL.revokeObjectURL(url);
     } catch (err) {
-      setError(err.response?.data?.errorMessage ?? "Không thể tải template.");
+      const apiMsg = err.response?.data?.errorMessage || resolveApiError(err).errorMessage;
+      setError(apiMsg ?? "Không thể tải template.");
     } finally {
       setDownloading(false);
     }
@@ -87,7 +89,8 @@ export default function QuestionImportModal({ open, quizMaterialId, onClose, onI
       setPreviewData(res.data);
       setStep(STEP.REVIEW);
     } catch (err) {
-      setError(err.response?.data?.errorMessage ?? "Lỗi kết nối. Vui lòng thử lại.");
+      const apiMsg = err.response?.data?.errorMessage || resolveApiError(err).errorMessage;
+      setError(apiMsg ?? "Lỗi kết nối. Vui lòng thử lại.");
     } finally {
       setPreviewing(false);
     }
@@ -101,14 +104,16 @@ export default function QuestionImportModal({ open, quizMaterialId, onClose, onI
       setError("");
       const res = await confirmImportQuestions(quizMaterialId, selectedFile);
       if (!res.success) {
-        setError(res.errorMessage ?? "Import thất bại.");
+        setError(res.errorMessage || "Import thất bại.");
         return;
       }
       setImportResult(res.data);
       setStep(STEP.DONE);
       onImported?.();
     } catch (err) {
-      setError(err.response?.data?.errorMessage ?? "Lỗi kết nối. Vui lòng thử lại.");
+      const apiMsg =
+        err.response?.data?.errorMessage || resolveApiError(err).errorMessage;
+      setError(apiMsg || "Lỗi kết nối. Vui lòng thử lại.");
     } finally {
       setConfirming(false);
     }

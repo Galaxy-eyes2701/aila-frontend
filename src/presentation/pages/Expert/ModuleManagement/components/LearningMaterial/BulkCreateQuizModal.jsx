@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import styles from "./LearningMaterial.module.css";
 import quizStyles from "./Quiz.module.css";
-import { bulkCreateQuiz } from "@services/expertQuizApi";
+import { bulkCreateQuiz, resolveApiError } from "@services/expertQuizApi";
 
 const emptyAnswer = () => ({ content: "", isCorrect: false });
 
@@ -126,7 +126,7 @@ export default function BulkCreateQuizModal({
     if (Number(passingScore) < 0 || Number(passingScore) > 100)
       return "Điểm đạt phải nằm trong khoảng từ 0 đến 100.";
 
-    if (questions.length === 0) return "Quiz phải có ít nhất một câu hỏi.";
+    if (!questions.length) return "Quiz phải có ít nhất một câu hỏi.";
 
     for (let i = 0; i < questions.length; i += 1) {
       const q = questions[i];
@@ -164,7 +164,7 @@ export default function BulkCreateQuizModal({
       setSaving(true);
       setError("");
 
-      await bulkCreateQuiz(material.id, {
+      const res = await bulkCreateQuiz(material.id, {
         timeLimitMinutes: Number(timeLimitMinutes),
         passingScore: Number(passingScore),
         showCorrectAnswersAfterSubmission: showCorrectAnswers,
@@ -178,9 +178,16 @@ export default function BulkCreateQuizModal({
         })),
       });
 
+      if (!res.success) {
+        setError(res.errorMessage || "Không thể tạo nhanh Quiz.");
+        return;
+      }
+
       onSuccess();
     } catch (err) {
-      setError(err.response?.data?.errorMessage ?? "Không thể tạo nhanh Quiz.");
+      const apiMsg =
+        err.response?.data?.errorMessage || resolveApiError(err).errorMessage;
+      setError(apiMsg || "Không thể tạo nhanh Quiz.");
     } finally {
       setSaving(false);
     }

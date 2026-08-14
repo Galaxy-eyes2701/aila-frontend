@@ -270,9 +270,6 @@ export default function Home() {
               <div className={styles.sectionHeader}>
                 <div className={styles.recommendedTitleGroup}>
                   <h2 className={styles.sectionTitle}>Khóa học đề xuất cho bạn</h2>
-                  <span className={styles.aiBadge}>
-                    <i className="fas fa-sparkles" /> Gợi ý AI
-                  </span>
                 </div>
                 <Link to="/courses" className={styles.seeAll}>
                   Xem tất cả <i className="fas fa-arrow-right" />

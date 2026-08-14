@@ -30,7 +30,7 @@ export default function LearningSidebar({
             <div key={mod.id} className={styles.sectionItem}>
               <div className={styles.sectionHeader}>
                 <h4>
-                  Chương {mod.orderIndex}: {mod.title}
+                  Học phần {mod.orderIndex}: {mod.title}
                 </h4>
               </div>
               <ul className={styles.materialList}>

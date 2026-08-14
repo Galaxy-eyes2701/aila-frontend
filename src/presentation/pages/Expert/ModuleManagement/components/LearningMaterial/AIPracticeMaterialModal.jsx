@@ -601,7 +601,7 @@ export default function AIPracticeMaterialModal({
                   onChange={(e) =>
                     updateScoringCriteria(index, "description", e.target.value)
                   }
-                  placeholder="Mô tả tiêu chí (không bắt buộc)"
+                  placeholder="Mô tả tiêu chí (không bắt buộc nhưng nếu có hệ thống sẽ có thể chấm điểm tốt hơn)"
                   style={{ marginBottom: 8 }}
                 />
                 <input

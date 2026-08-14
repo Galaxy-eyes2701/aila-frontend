@@ -5,10 +5,10 @@ import useAuth from '@state/hooks/useAuth';
 import styles from './CourseList.module.css';
 
 const LEVELS = [
-  { value: 'all',       label: 'Tất cả',        sub: 'Mọi trình độ',       num: 'LEVEL 0' },
-  { value: 'Beginner',  label: 'Mới bắt đầu',   sub: 'Chưa biết gì về AI', num: 'LEVEL 1' },
-  { value: 'Intermediate', label: 'Trình độ cơ bản',  sub: 'Đã có kinh nghiệm',  num: 'LEVEL 2' },
-  { value: 'Advanced',  label: 'Nâng cao',       sub: 'Chuyên sâu',         num: 'LEVEL 3' },
+  { value: 'all', label: 'Tất cả', sub: 'Mọi trình độ', num: 'CẤP ĐỘ 0' },
+  { value: 'Beginner', label: 'Mới bắt đầu', sub: 'Chưa biết gì về AI', num: 'CẤP ĐỘ 1' },
+  { value: 'Intermediate', label: 'Trình độ cơ bản', sub: 'Đã có kinh nghiệm', num: 'CẤP ĐỘ 2' },
+  { value: 'Advanced', label: 'Nâng cao', sub: 'Chuyên sâu', num: 'CẤP ĐỘ 3' },
 ];
 
 const LEVEL_MAP = { Beginner: 'Mới bắt đầu', Intermediate: 'Trung cấp', Advanced: 'Nâng cao' };
@@ -63,9 +63,9 @@ function RecommendCard({ course, onClick }) {
 
 function LevelBadge({ level }) {
   const map = {
-    Beginner:     { label: 'Mới bắt đầu', cls: styles.lvBegin },
-    Intermediate: { label: 'Trình độ cơ bản',   cls: styles.lvInter },
-    Advanced:     { label: 'Nâng cao',    cls: styles.lvAdv   },
+    Beginner: { label: 'Mới bắt đầu', cls: styles.lvBegin },
+    Intermediate: { label: 'Trình độ cơ bản', cls: styles.lvInter },
+    Advanced: { label: 'Nâng cao', cls: styles.lvAdv },
   };
   const info = map[level] ?? { label: level, cls: '' };
   return <span className={`${styles.lvDot} ${info.cls}`} title={info.label} />;
@@ -120,19 +120,19 @@ export default function CourseList() {
   const [searchParams, setSearchParams] = useSearchParams();
   const { user } = useAuth();
 
-  const [courses,    setCourses]    = useState([]);
+  const [courses, setCourses] = useState([]);
   const [categories, setCategories] = useState([]);
-  const [tags,       setTags]       = useState([]);
-  const [loading,    setLoading]    = useState(true);
-  const [total,      setTotal]      = useState(0);
-  const [pageIndex,  setPageIndex]  = useState(0);
+  const [tags, setTags] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [total, setTotal] = useState(0);
+  const [pageIndex, setPageIndex] = useState(0);
   const PAGE_SIZE = 12;
 
   // Filters
-  const [keyword,      setKeyword]      = useState(searchParams.get('keyword') || '');
-  const [inputVal,     setInputVal]     = useState(searchParams.get('keyword') || '');
-  const [categoryId,   setCategoryId]   = useState(searchParams.get('categoryId') || '');
-  const [level,        setLevel]        = useState(searchParams.get('level') || 'all');
+  const [keyword, setKeyword] = useState(searchParams.get('keyword') || '');
+  const [inputVal, setInputVal] = useState(searchParams.get('keyword') || '');
+  const [categoryId, setCategoryId] = useState(searchParams.get('categoryId') || '');
+  const [level, setLevel] = useState(searchParams.get('level') || 'all');
   const [selectedTags, setSelectedTags] = useState([]); // array of tag ids
 
   // Recommendations
@@ -143,17 +143,17 @@ export default function CourseList() {
   useEffect(() => {
     api.get('/categories').then(res => {
       if (res.data.success) setCategories(res.data.data ?? []);
-    }).catch(() => {});
+    }).catch(() => { });
     api.get('/tags').then(res => {
       if (res.data.success) setTags(res.data.data ?? []);
-    }).catch(() => {});
+    }).catch(() => { });
   }, []);
 
   // Fetch recommendations for Learner
   useEffect(() => {
     if (user?.role === 'Learner') {
       setRecLoading(true);
-      api.get('/courses/recommendation?limit=6')
+      api.get('/courses/recommendation?limit=5')
         .then(r => {
           const list = r.data?.data ?? r.data ?? [];
           setRecCourses(Array.isArray(list) ? list : []);
@@ -170,7 +170,7 @@ export default function CourseList() {
     setLoading(true);
     try {
       const params = { pageIndex: page, pageSize: PAGE_SIZE };
-      if (keyword)    params.keyword    = keyword;
+      if (keyword) params.keyword = keyword;
       if (categoryId) params.categoryId = categoryId;
       if (level && level !== 'all') params.level = level;
 
@@ -220,8 +220,8 @@ export default function CourseList() {
   const visibleCourses = selectedTags.length === 0
     ? courses
     : courses.filter(c =>
-        c.tags?.some(t => selectedTags.includes(t.id))
-      );
+      c.tags?.some(t => selectedTags.includes(t.id))
+    );
 
   const hasMore = courses.length < total;
 
@@ -297,9 +297,6 @@ export default function CourseList() {
               <div className={styles.recHeader}>
                 <div className={styles.recTitleGroup}>
                   <h2 className={styles.recHeading}>Đề xuất dành cho bạn</h2>
-                  <span className={styles.aiBadge}>
-                    <i className="fas fa-sparkles" /> Gợi ý AI
-                  </span>
                 </div>
               </div>
               {recLoading ? (

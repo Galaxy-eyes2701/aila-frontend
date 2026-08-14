@@ -7,6 +7,7 @@ import {
   getQuestions,
   deleteQuestion,
   reorderQuestions,
+  resolveApiError,
 } from "@services/expertQuizApi";
 import QuestionFormModal from "./QuestionFormModal";
 import BulkCreateQuizModal from "./BulkCreateQuizModal";
@@ -56,9 +57,9 @@ export default function QuizDetailModal({
 
       await loadQuestions();
     } catch (err) {
-      setError(
-        err.response?.data?.errorMessage ?? "Không thể tải thông tin Quiz.",
-      );
+      const apiMsg =
+        err.response?.data?.errorMessage || resolveApiError(err).errorMessage;
+      setError(apiMsg || "Không thể tải thông tin Quiz.");
     } finally {
       setLoading(false);
     }
@@ -76,10 +77,9 @@ export default function QuizDetailModal({
         setQuestions([]);
         setQuizExists(false);
       } else {
-        setError(
-          err.response?.data?.errorMessage ??
-            "Không thể tải danh sách câu hỏi.",
-        );
+        const apiMsg =
+          err.response?.data?.errorMessage || resolveApiError(err).errorMessage;
+        setError(apiMsg || "Không thể tải danh sách câu hỏi.");
       }
     }
   }
@@ -102,11 +102,16 @@ export default function QuizDetailModal({
       setError("");
       setSettingsSaved(false);
 
-      await updateQuizDetail(material.id, {
+      const res = await updateQuizDetail(material.id, {
         timeLimitMinutes: Number(timeLimitMinutes),
         passingScore: Number(passingScore),
         showCorrectAnswersAfterSubmission: showCorrectAnswers,
       });
+
+      if (!res.success) {
+        setError(res.errorMessage || "Không thể lưu cài đặt Quiz.");
+        return;
+      }
 
       if (!quizExists) {
         await loadQuestions();
@@ -115,9 +120,9 @@ export default function QuizDetailModal({
       setSettingsSaved(true);
       setTimeout(() => setSettingsSaved(false), 2500);
     } catch (err) {
-      setError(
-        err.response?.data?.errorMessage ?? "Không thể lưu cài đặt Quiz.",
-      );
+      const apiMsg =
+        err.response?.data?.errorMessage || resolveApiError(err).errorMessage;
+      setError(apiMsg || "Không thể lưu cài đặt Quiz.");
     } finally {
       setSaving(false);
     }
@@ -132,7 +137,9 @@ export default function QuizDetailModal({
       await deleteQuestion(material.id, question.id);
       await loadQuestions();
     } catch (err) {
-      setError(err.response?.data?.errorMessage ?? "Không thể xóa câu hỏi.");
+      const apiMsg =
+        err.response?.data?.errorMessage || resolveApiError(err).errorMessage;
+      setError(apiMsg || "Không thể xóa câu hỏi.");
     } finally {
       setBusyQuestionId("");
     }
@@ -156,12 +163,17 @@ export default function QuizDetailModal({
         newOrderIndex: i + 1,
       }));
 
-      await reorderQuestions(material.id, items);
+      const res = await reorderQuestions(material.id, items);
+      if (!res.success) {
+        setError(res.errorMessage || "Không thể sắp xếp câu hỏi.");
+        await loadQuestions();
+        return;
+      }
       await loadQuestions();
     } catch (err) {
-      setError(
-        err.response?.data?.errorMessage ?? "Không thể sắp xếp câu hỏi.",
-      );
+      const apiMsg =
+        err.response?.data?.errorMessage || resolveApiError(err).errorMessage;
+      setError(apiMsg || "Không thể sắp xếp câu hỏi.");
       await loadQuestions();
     }
   }
