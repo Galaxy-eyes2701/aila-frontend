@@ -17,6 +17,7 @@ export default function QuestionCard({
   const isMulti = question.questionType === "MultipleChoice";
   const answered = selectedOptionIds.length > 0;
   const groupName = `q-${question.questionId}`;
+  const headingId = `${groupName}-label`;
 
   const handleSelect = (optionId) => {
     if (disabled) return;
@@ -32,8 +33,12 @@ export default function QuestionCard({
   };
 
   return (
-    <fieldset className={styles.questionCard}>
-      <legend className={styles.questionHead}>
+    <div
+      className={styles.questionCard}
+      role="group"
+      aria-labelledby={headingId}
+    >
+      <div className={styles.questionHead} id={headingId}>
         <span
           className={`${styles.questionNumber} ${
             answered ? styles.questionNumberDone : ""
@@ -49,7 +54,7 @@ export default function QuestionCard({
             {isMulti ? "Chọn một hoặc nhiều đáp án" : "Chọn một đáp án"}
           </span>
         </span>
-      </legend>
+      </div>
 
       <div className={styles.optionList}>
         {options.map((opt) => {
@@ -74,6 +79,6 @@ export default function QuestionCard({
           );
         })}
       </div>
-    </fieldset>
+    </div>
   );
 }
