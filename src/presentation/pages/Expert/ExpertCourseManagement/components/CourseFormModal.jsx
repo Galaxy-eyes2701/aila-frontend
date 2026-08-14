@@ -66,24 +66,36 @@ export default function CourseFormModal({ mode, initialData, categories, onClose
           if (!merged.find(p => p.id === t.id)) merged.push(t); 
         });
         
-        // If editing a course, also get course tags
+        // If editing a course, get course details to extract tags
         if (isEdit && initialData?.id) {
-          api.get(`/courses/${initialData.id}/tags`)
+          api.get(`/courses/${initialData.id}`)
             .then((courseRes) => {
-              const courseTagsData = courseRes.data.success ? (courseRes.data.data ?? []) : [];
-              
-              // Add course tags if not already in merged
-              courseTagsData.forEach(t => { 
-                if (!merged.find(p => p.id === t.id)) {
-                  merged.push({ ...t, isFromCourse: true }); 
-                }
-              });
+              if (courseRes.data.success && courseRes.data.data?.tags) {
+                const courseTagsData = courseRes.data.data.tags;
+                
+                // Add course tags if not already in merged
+                courseTagsData.forEach(t => { 
+                  if (!merged.find(p => p.id === t.id)) {
+                    // For tags from course details, use the properties directly from the response
+                    // System tags (createdById = null) are always published
+                    const isSystemTag = t.createdById === null;
+                    
+                    merged.push({ 
+                      ...t, 
+                      isFromCourse: true,
+                      // Use isPublished from the course detail response, or mark system tags as published
+                      isPublished: t.isPublished || isSystemTag,
+                      createdById: t.createdById
+                    }); 
+                  }
+                });
+              }
               
               setTags(merged);
               setTagsLoading(false);
             })
             .catch(() => {
-              // If course tags fail to load, still show other tags
+              // If course details fail to load, still show other tags
               setTags(merged);
               setTagsLoading(false);
             });
@@ -287,16 +299,7 @@ export default function CourseFormModal({ mode, initialData, categories, onClose
     } catch (err) { alert(err.response?.data?.errorMessage || 'Hủy yêu cầu thất bại.'); }
   };
 
-  const handleDeleteTag = async tagId => {
-    if (!window.confirm('Bạn có chắc muốn xóa tag này không? Hành động này không thể hoàn tác.')) return;
-    try {
-      const res = await api.delete(`/tags/${tagId}`);
-      if (res.data.success) {
-        setTags(prev => prev.filter(t => t.id !== tagId));
-        setForm(prev => ({ ...prev, tagIds: prev.tagIds.filter(id => id !== tagId) }));
-      }
-    } catch (err) { alert(err.response?.data?.errorMessage || 'Xóa tag thất bại.'); }
-  };
+
 
   const handleSubmit = async e => {
     e.preventDefault();
@@ -473,14 +476,13 @@ export default function CourseFormModal({ mode, initialData, categories, onClose
                     const isUnpubNone = !tag.isPublished && !status;
                     const isSelected  = form.tagIds.includes(tag.id);
                     const isDuplicate = duplicateTagCandidate?.id === tag.id;
-                    const isOwner     = !!tag.createdById;
                     let cls = styles.tagBtn;
                     if (isSelected)    cls += ` ${styles.tagBtnActive}`;
                     if (isDuplicate)   cls += ` ${styles.tagBtnDuplicate}`;
                     else if (isPending)   cls += ` ${styles.tagBtnPending}`;
                     else if (isRejected)  cls += ` ${styles.tagBtnRejected}`;
                     else if (isUnpubNone) cls += ` ${styles.tagBtnUnpub}`;
-                    else if (tag.isFromCourse && !tag.isPublished && !tag.createdById) cls += ` ${styles.tagBtnFromCourse}`;
+                    else if (tag.isFromCourse && !tag.isPublished) cls += ` ${styles.tagBtnFromCourse}`;
                     const titleText = isDuplicate ? 'Tag trùng code với ô nhập — nhấn "Dùng tag này" để thêm'
                       : isPending ? 'Đang chờ duyệt — không thể chọn'
                       : isRejected ? (isSelected ? 'Bị từ chối — nhấn để bỏ chọn hoặc gửi lại yêu cầu' : 'Bị từ chối — nhấn để gửi lại yêu cầu')
@@ -496,7 +498,7 @@ export default function CourseFormModal({ mode, initialData, categories, onClose
                           {!isDuplicate && isPending   && <span className={styles.tagStatusIcon}><i className="fas fa-clock" /></span>}
                           {!isDuplicate && isRejected  && <span className={styles.tagStatusIcon}><i className="fas fa-times-circle" /></span>}
                           {!isDuplicate && isUnpubNone && <span className={styles.tagStatusIcon}><i className="fas fa-exclamation-circle" /></span>}
-                          {!isDuplicate && tag.isFromCourse && !tag.isPublished && !tag.createdById && (
+                          {!isDuplicate && tag.isFromCourse && !tag.isPublished && (
                             <span className={styles.tagStatusIcon} title="Tag từ khóa học">
                               <i className="fas fa-graduation-cap" />
                             </span>
@@ -506,12 +508,6 @@ export default function CourseFormModal({ mode, initialData, categories, onClose
                           <button type="button" className={styles.tagActionBtn}
                             onClick={() => handleDeletePublishRequest(tag.id)} title="Hủy yêu cầu xét duyệt">
                             <i className="fas fa-times" />
-                          </button>
-                        )}
-                        {!isDuplicate && isOwner && (isUnpubNone || isRejected) && (
-                          <button type="button" className={`${styles.tagActionBtn} ${styles.tagActionBtnDanger}`}
-                            onClick={() => handleDeleteTag(tag.id)} title="Xóa tag này">
-                            <i className="fas fa-trash" />
                           </button>
                         )}
                       </div>
