@@ -5,6 +5,7 @@ import RichTextEditor from "../common/RichTextEditor";
 import {
   getDocumentDetail,
   updateDocumentDetail,
+  resolveApiError,
 } from "@services/documentApi";
 
 export default function DocumentDetailModal({
@@ -30,24 +31,25 @@ export default function DocumentDetailModal({
   async function loadDocument() {
     try {
       setLoading(true);
-
       setError("");
 
       const response = await getDocumentDetail(material.id);
 
       if (!response.success) {
-        setError(response.errorMessage ?? "Không tải được tài liệu.");
-
+        setError(response.errorMessage || "Không tải được tài liệu.");
         return;
       }
 
       setContent(response.data.content ?? "");
     } catch (err) {
-      setError(err.response?.data?.errorMessage ?? "Không thể tải tài liệu.");
+      const apiMsg =
+        err.response?.data?.errorMessage || resolveApiError(err).errorMessage;
+      setError(apiMsg || "Không thể tải tài liệu.");
     } finally {
       setLoading(false);
     }
   }
+
   function isContentEmpty(html) {
     if (!html) return true;
     return html.replace(/<[^>]*>/g, "").trim().length === 0;
@@ -63,26 +65,25 @@ export default function DocumentDetailModal({
 
     try {
       setSaving(true);
-
       setError("");
 
       const response = await updateDocumentDetail(
         material.id,
-
         {
           content,
         },
       );
 
       if (!response.success) {
-        setError(response.errorMessage);
-
+        setError(response.errorMessage || "Không thể cập nhật tài liệu.");
         return;
       }
 
       onSuccess(response.data);
     } catch (err) {
-      setError(err.response?.data?.errorMessage ?? "Không thể cập nhật.");
+      const apiMsg =
+        err.response?.data?.errorMessage || resolveApiError(err).errorMessage;
+      setError(apiMsg || "Không thể cập nhật tài liệu.");
     } finally {
       setSaving(false);
     }

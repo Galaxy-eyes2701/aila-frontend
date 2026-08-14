@@ -1,7 +1,6 @@
-// LearningView.jsx
 import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
-import api from "@services/api";
+import api, { resolveApiError } from "@services/api";
 import LearningHeader from "./LearningHeader";
 import LearningSidebar from "./LearningSidebar";
 import LearningContent from "./LearningContent";
@@ -72,10 +71,15 @@ export default function LearningView() {
             }
           }
         } else {
-          setError("Không thể tải nội dung lộ trình khóa học.");
+          setError(res.data.errorMessage || "Không thể tải nội dung lộ trình khóa học.");
         }
-      } catch {
-        setError("Lỗi kết nối máy chủ. Vui lòng kiểm tra và thử lại.");
+      } catch (err) {
+        const apiErrorMsg =
+          err.response?.data?.errorMessage ||
+          resolveApiError(err).errorMessage;
+        setError(
+          apiErrorMsg || "Lỗi kết nối máy chủ. Vui lòng kiểm tra và thử lại.",
+        );
       } finally {
         setLoading(false);
       }
@@ -108,10 +112,13 @@ export default function LearningView() {
 
         setCurrentMaterial({ ...detailData, isCompleted });
       } else {
-        alert("Không thể tải chi tiết nội dung học liệu.");
+        alert(res.data.errorMessage || "Không thể tải chi tiết nội dung học liệu.");
       }
-    } catch {
-      alert("Lỗi đường truyền mạng khi tải bài học.");
+    } catch (err) {
+      const apiErrorMsg =
+        err.response?.data?.errorMessage ||
+        resolveApiError(err).errorMessage;
+      alert(apiErrorMsg || "Lỗi đường truyền mạng khi tải bài học.");
     } finally {
       setContentLoading(false);
     }
@@ -212,12 +219,23 @@ export default function LearningView() {
   }
 
   if (error) {
+    const isNotice =
+      error.includes("bị ẩn") ||
+      error.includes("chưa tham gia") ||
+      error.includes("không tìm thấy");
+
     return (
       <div className={styles.empty}>
         <div className={styles.emptyIcon}>
-          <i className="fas fa-exclamation-triangle" />
+          <i
+            className={`fas ${
+              isNotice ? "fa-eye-slash" : "fa-exclamation-triangle"
+            }`}
+          />
         </div>
-        <p className={styles.emptyTitle}>Lỗi kết nối</p>
+        <p className={styles.emptyTitle}>
+          {isNotice ? "Thông báo khóa học" : "Lỗi kết nối"}
+        </p>
         <p className={styles.emptyDesc}>{error}</p>
         <Link to="/courses" className={styles.backBtn}>
           Quay lại danh sách khóa học

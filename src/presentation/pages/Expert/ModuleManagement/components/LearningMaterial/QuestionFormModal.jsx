@@ -9,6 +9,7 @@ import {
   updateAnswerOption,
   deleteAnswerOption,
   reorderAnswerOptions,
+  resolveApiError,
 } from "@services/expertQuizApi";
 
 const emptyOption = () => ({ id: null, content: "", isCorrect: false });
@@ -66,9 +67,9 @@ export default function QuestionFormModal({
       setOptions(loaded.length > 0 ? loaded : [emptyOption(), emptyOption()]);
       setOriginalOptions(loaded);
     } catch (err) {
-      setError(
-        err.response?.data?.errorMessage ?? "Không thể tải câu hỏi.",
-      );
+      const apiMsg =
+        err.response?.data?.errorMessage || resolveApiError(err).errorMessage;
+      setError(apiMsg || "Không thể tải câu hỏi.");
     } finally {
       setLoading(false);
     }
@@ -241,9 +242,9 @@ export default function QuestionFormModal({
 
       onSaved();
     } catch (err) {
-      setError(
-        err.response?.data?.errorMessage ?? "Không thể lưu câu hỏi.",
-      );
+      const apiMsg =
+        err.response?.data?.errorMessage || resolveApiError(err).errorMessage;
+      setError(apiMsg || "Không thể lưu câu hỏi.");
     } finally {
       setSaving(false);
     }

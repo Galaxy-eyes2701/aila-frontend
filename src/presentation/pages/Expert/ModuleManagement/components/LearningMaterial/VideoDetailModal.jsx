@@ -32,7 +32,7 @@ export default function VideoDetailModal({
       const response = await getVideoDetail(material.id);
 
       if (!response.success) {
-        setError(response.errorMessage ?? "Không tải được thông tin video.");
+        setError(response.errorMessage || "Không tải được thông tin video.");
         return;
       }
 
@@ -42,9 +42,9 @@ export default function VideoDetailModal({
       setDurationSeconds(data.durationSeconds ?? 0);
       setContent(data.content ?? "");
     } catch (err) {
-      setError(
-        resolveApiError(err).errorMessage ?? "Không thể tải Video Detail.",
-      );
+      const apiMsg =
+        err.response?.data?.errorMessage || resolveApiError(err).errorMessage;
+      setError(apiMsg || "Không thể tải thông tin Video.");
     } finally {
       setLoading(false);
     }
@@ -74,13 +74,15 @@ export default function VideoDetailModal({
       });
 
       if (!response.success) {
-        setError(response.errorMessage ?? "Không thể cập nhật Video.");
+        setError(response.errorMessage || "Không thể cập nhật Video.");
         return;
       }
 
       onSuccess(response.data);
     } catch (err) {
-      setError(resolveApiError(err).errorMessage ?? "Lỗi kết nối máy chủ.");
+      const apiMsg =
+        err.response?.data?.errorMessage || resolveApiError(err).errorMessage;
+      setError(apiMsg || "Lỗi kết nối máy chủ. Vui lòng thử lại.");
     } finally {
       setSaving(false);
     }
