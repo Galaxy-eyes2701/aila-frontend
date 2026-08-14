@@ -46,18 +46,56 @@ export default function CourseFormModal({ mode, initialData, categories, onClose
 
   useEffect(() => {
     setTagsLoading(true);
-    Promise.all([api.get('/tags'), api.get('/tags/me')])
+    
+    // Always get public and personal tags
+    const baseRequests = [
+      api.get('/tags'),       // Public tags
+      api.get('/tags/me')     // Personal tags
+    ];
+    
+    Promise.all(baseRequests)
       .then(([pubRes, myRes]) => {
         const pub = pubRes.data.success ? (pubRes.data.data ?? []) : [];
         const my  = myRes.data.success  ? (myRes.data.data  ?? []) : [];
+        
         const pubNorm = pub.map(t => ({ ...t, isPublished: true }));
         const merged  = [...pubNorm];
-        my.forEach(t => { if (!merged.find(p => p.id === t.id)) merged.push(t); });
-        setTags(merged);
+        
+        // Add personal tags if not already in merged
+        my.forEach(t => { 
+          if (!merged.find(p => p.id === t.id)) merged.push(t); 
+        });
+        
+        // If editing a course, also get course tags
+        if (isEdit && initialData?.id) {
+          api.get(`/courses/${initialData.id}/tags`)
+            .then((courseRes) => {
+              const courseTagsData = courseRes.data.success ? (courseRes.data.data ?? []) : [];
+              
+              // Add course tags if not already in merged
+              courseTagsData.forEach(t => { 
+                if (!merged.find(p => p.id === t.id)) {
+                  merged.push({ ...t, isFromCourse: true }); 
+                }
+              });
+              
+              setTags(merged);
+              setTagsLoading(false);
+            })
+            .catch(() => {
+              // If course tags fail to load, still show other tags
+              setTags(merged);
+              setTagsLoading(false);
+            });
+        } else {
+          setTags(merged);
+          setTagsLoading(false);
+        }
       })
-      .catch(() => {})
-      .finally(() => setTagsLoading(false));
-  }, []);
+      .catch(() => {
+        setTagsLoading(false);
+      });
+  }, [isEdit, initialData?.id]);
 
   const clearFieldError = field => setFieldErrors(prev => ({ ...prev, [field]: '' }));
 
@@ -135,14 +173,20 @@ export default function CourseFormModal({ mode, initialData, categories, onClose
     const generatedCode = autoCode(val);
     setNewTagName(val); setNewTagCode(generatedCode);
     setNewTagErrors({}); setNewTagError('');
-    scheduleCodeCheck(generatedCode);
+    // Remove real-time checking
+    setCodeDuplicate(false);
+    setDuplicateTagCandidate(null);
+    codeDuplicateRef.current = false;
   };
 
   const handleNewTagCodeChange = e => {
     const val = e.target.value;
     setNewTagCode(val);
     setNewTagErrors(p => ({ ...p, code: '' }));
-    scheduleCodeCheck(val);
+    // Remove real-time checking
+    setCodeDuplicate(false);
+    setDuplicateTagCandidate(null);
+    codeDuplicateRef.current = false;
   };
 
   const validateNewTag = () => {
@@ -162,13 +206,21 @@ export default function CourseFormModal({ mode, initialData, categories, onClose
   const handleCreateTag = async () => {
     const errs = validateNewTag();
     if (Object.keys(errs).length > 0) { setNewTagErrors(errs); return; }
-    if (codeDuplicateRef.current) {
-      if (!duplicateTagCandidate)
-        setNewTagError('Tag với code này đã tồn tại. Vui lòng chọn tag từ danh sách bên dưới hoặc dùng code khác.');
-      return;
-    }
+    
+    // Check for duplicate when creating tag
     setNewTagSaving(true); setNewTagError('');
     try {
+      // First check if tag already exists
+      const checkRes = await api.get('/tags/by-code', { params: { code: newTagCode.trim() } });
+      if (checkRes.data.success && checkRes.data.data) {
+        const existingTag = checkRes.data.data;
+        setDuplicateTagCandidate(existingTag);
+        setNewTagError('Tag với code này đã tồn tại. Nhấn "Dùng tag này" để thêm tag đó vào khóa học hoặc thay đổi code tag.');
+        setNewTagSaving(false);
+        return;
+      }
+
+      // If no duplicate, create the tag
       const res = await api.post('/tags/custom', { name: newTagName.trim(), code: newTagCode.trim() });
       if (res.data.success) {
         const created = res.data.data;
@@ -198,6 +250,15 @@ export default function CourseFormModal({ mode, initialData, categories, onClose
 
   const handleTagClick = tag => {
     if (tag.isPublished) { toggleTag(tag.id); return; }
+    
+    // Allow deselecting unpublished tags that are already selected
+    const isSelected = form.tagIds.includes(tag.id);
+    if (isSelected) { 
+      toggleTag(tag.id); 
+      return; 
+    }
+    
+    // For unselected unpublished tags, show verification modal
     if (duplicateTagCandidate?.id === tag.id) return;
     if (tag.publishRequest?.status === 'Pending') return;
     setVerifyTag(tag); setVerifyNote(''); setVerifyError('');
@@ -378,22 +439,24 @@ export default function CourseFormModal({ mode, initialData, categories, onClose
                     </div>
                     <div className={styles.formGroup}>
                       <label className={styles.formLabel}><i className="fas fa-code" /> Code tag *</label>
-                      <input className={`${styles.formInput} ${styles.codeInput} ${newTagErrors.code || codeDuplicate ? styles.inputError : ''}`}
+                      <input className={`${styles.formInput} ${styles.codeInput} ${newTagErrors.code ? styles.inputError : ''}`}
                         value={newTagCode} onChange={handleNewTagCodeChange} placeholder="machine-learning" maxLength={50} />
                       {newTagErrors.code
                         ? <span className={styles.fieldError}><i className="fas fa-exclamation-circle" /> {newTagErrors.code}</span>
-                        : codeDuplicate
-                          ? <span className={styles.fieldError}><i className="fas fa-exclamation-circle" /> Code này đã tồn tại — nhấn "Tạo &amp; chọn tag" để thêm tag đó vào khóa học.</span>
-                          : codeChecking
-                            ? <span className={styles.charCount}><span className={styles.spinner} style={{borderTopColor:'#6b7280'}} /> Đang kiểm tra...</span>
-                            : <span className={styles.charCount}>a-z, 0-9, - · {newTagCode.trim().length}/50</span>}
+                        : <span className={styles.charCount}>a-z, 0-9, - · {newTagCode.trim().length}/50</span>}
                     </div>
                   </div>
                   {newTagError && <div className={styles.formError}><i className="fas fa-exclamation-circle" /> {newTagError}</div>}
+                  {duplicateTagCandidate && (
+                    <div className={styles.duplicateTagActions}>
+                      <button type="button" className={styles.btnUseDuplicate} onClick={handleConfirmUseDuplicateTag}>
+                        <i className="fas fa-link" /> Dùng tag "{duplicateTagCandidate.name}"
+                      </button>
+                    </div>
+                  )}
                   <div className={styles.inlineTagNote}><i className="fas fa-info-circle" /> Tag mới sẽ ở trạng thái chưa duyệt và được chọn ngay vào khóa học.</div>
                   <button type="button" className={styles.btnInlineCreate} onClick={handleCreateTag} disabled={newTagSaving}>
                     {newTagSaving ? <><span className={styles.spinner} /> Đang tạo...</>
-                      : codeDuplicate ? <><i className="fas fa-link" /> Dùng tag này</>
                       : <><i className="fas fa-plus" /> Tạo &amp; chọn tag</>}
                   </button>
                 </div>
@@ -417,19 +480,27 @@ export default function CourseFormModal({ mode, initialData, categories, onClose
                     else if (isPending)   cls += ` ${styles.tagBtnPending}`;
                     else if (isRejected)  cls += ` ${styles.tagBtnRejected}`;
                     else if (isUnpubNone) cls += ` ${styles.tagBtnUnpub}`;
+                    else if (tag.isFromCourse && !tag.isPublished && !tag.createdById) cls += ` ${styles.tagBtnFromCourse}`;
                     const titleText = isDuplicate ? 'Tag trùng code với ô nhập — nhấn "Dùng tag này" để thêm'
                       : isPending ? 'Đang chờ duyệt — không thể chọn'
-                      : isRejected ? 'Bị từ chối — nhấn để gửi lại yêu cầu'
-                      : isUnpubNone ? 'Chưa duyệt — nhấn để gửi yêu cầu xét duyệt' : undefined;
+                      : isRejected ? (isSelected ? 'Bị từ chối — nhấn để bỏ chọn hoặc gửi lại yêu cầu' : 'Bị từ chối — nhấn để gửi lại yêu cầu')
+                      : isUnpubNone ? (isSelected ? 'Chưa duyệt — nhấn để bỏ chọn hoặc gửi yêu cầu xét duyệt' : 'Chưa duyệt — nhấn để gửi yêu cầu xét duyệt') 
+                      : tag.isFromCourse ? 'Tag từ khóa học (có thể chọn/bỏ chọn)'
+                      : undefined;
                     return (
                       <div key={tag.id} className={styles.tagBtnWrap}>
                         <button type="button" className={cls} onClick={() => handleTagClick(tag)}
-                          title={titleText} aria-disabled={isPending || isDuplicate}>
+                          title={titleText} aria-disabled={isPending || (isDuplicate && !isSelected)}>
                           {tag.name}
                           {isDuplicate  && <span className={styles.tagStatusIcon}><i className="fas fa-link" /></span>}
                           {!isDuplicate && isPending   && <span className={styles.tagStatusIcon}><i className="fas fa-clock" /></span>}
                           {!isDuplicate && isRejected  && <span className={styles.tagStatusIcon}><i className="fas fa-times-circle" /></span>}
                           {!isDuplicate && isUnpubNone && <span className={styles.tagStatusIcon}><i className="fas fa-exclamation-circle" /></span>}
+                          {!isDuplicate && tag.isFromCourse && !tag.isPublished && !tag.createdById && (
+                            <span className={styles.tagStatusIcon} title="Tag từ khóa học">
+                              <i className="fas fa-graduation-cap" />
+                            </span>
+                          )}
                         </button>
                         {!isDuplicate && isPending && (
                           <button type="button" className={styles.tagActionBtn}
