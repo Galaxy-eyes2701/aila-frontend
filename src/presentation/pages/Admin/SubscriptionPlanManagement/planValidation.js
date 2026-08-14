@@ -100,12 +100,14 @@ export const CREATE_FIELD_ORDER = [
 ];
 
 /**
- * UC-91 chỉ sửa được 6 trường; name/tierLevel/durationInDays bất biến (§5.1).
+ * UC-91: name/tierLevel bất biến sau khi tạo (§5.1) nên không có ô nhập ở mode edit.
+ * durationInDays sửa được — giá trị mới chỉ áp dụng cho lượt mua/gia hạn sau.
  * displayOrder vẫn nằm trong payload nhưng không hiện trong form — đổi bằng reorder ở bảng.
  */
 export const EDIT_FIELD_ORDER = [
   'description',
   'price',
+  'durationInDays',
   'aiTokenLimit',
   'aiPracticeScenarioLimit',
   'expertEvaluationLimit',
@@ -219,16 +221,13 @@ function validateDescription(raw) {
   return '';
 }
 
-/** Danh sách field cần validate theo từng mode (edit: BE bỏ qua name/tierLevel/durationInDays). */
+/** Danh sách field cần validate theo từng mode (edit: BE bỏ qua name/tierLevel). */
 function fieldsToValidate(mode) {
   const numberFields = Object.keys(NUMBER_FIELD_RULES);
 
   if (mode === 'create') return ['name', 'description', ...numberFields];
 
-  return [
-    'description',
-    ...numberFields.filter((field) => field !== 'tierLevel' && field !== 'durationInDays'),
-  ];
+  return ['description', ...numberFields.filter((field) => field !== 'tierLevel')];
 }
 
 /**
@@ -268,6 +267,7 @@ export function buildPlanPayload(form, mode = 'create', displayOrder = 0) {
   const shared = {
     description: description || null,
     price: Number(String(form.price).trim().replace(',', '.')),
+    durationInDays: Number(String(form.durationInDays).trim()),
     aiTokenLimit: Number(String(form.aiTokenLimit).trim()),
     aiPracticeScenarioLimit: Number(String(form.aiPracticeScenarioLimit).trim()),
     expertEvaluationLimit: Number(String(form.expertEvaluationLimit).trim()),
@@ -283,6 +283,5 @@ export function buildPlanPayload(form, mode = 'create', displayOrder = 0) {
       .replace(/\s+/g, ' '),
     ...shared,
     tierLevel: Number(String(form.tierLevel).trim()),
-    durationInDays: Number(String(form.durationInDays).trim()),
   };
 }
