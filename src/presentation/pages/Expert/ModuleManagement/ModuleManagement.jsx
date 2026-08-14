@@ -252,7 +252,9 @@ export default function ModuleManagement() {
     <div className={styles.page}>
       <div className="container">
         <div className={styles.breadcrumb}>
-          <Link to="/expert/profile">Chuyên gia</Link>
+          <Link to="/expert">Chuyên gia</Link>
+          <i className="fas fa-chevron-right" />
+          <Link to="/expert/courses">Quản lý khóa học</Link>
           <i className="fas fa-chevron-right" />
           <span>Quản lý học phần</span>
         </div>
@@ -266,10 +268,17 @@ export default function ModuleManagement() {
               tập cho khóa học.
             </p>
           </div>
-          <button className={styles.primaryButton} onClick={openCreateModal}>
-            <i className="fas fa-plus" />
-            Thêm học phần
-          </button>
+          <div style={{ display: "flex", gap: "12px", alignItems: "center", flexWrap: "wrap" }}>
+            <button
+              className={styles.secondaryButton}
+              onClick={() => navigate("/expert/courses")}
+            >
+              <i className="fas fa-arrow-left" /> Quay lại
+            </button>
+            <button className={styles.primaryButton} onClick={openCreateModal}>
+              <i className="fas fa-plus" /> Thêm học phần
+            </button>
+          </div>
         </section>
 
         <section className={styles.summaryGrid} aria-label="Thống kê học phần">
