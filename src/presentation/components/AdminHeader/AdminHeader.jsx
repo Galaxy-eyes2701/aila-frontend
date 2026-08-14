@@ -4,18 +4,39 @@ import useAuth from "@state/hooks/useAuth";
 import api from "@services/api";
 import styles from "./AdminHeader.module.css";
 
-const NAV_LINKS = [
-  { label: "Báo cáo", href: "/admin/reports" },
-  { label: "Người dùng", href: "/admin/users" },
-  { label: "Tags", href: "/admin/tags" },
-  { label: "Danh mục", href: "/admin/categories" },
-  { label: "Bài viết", href: "/admin/blogs" },
-  { label: "Gói đăng ký", href: "/admin/subscription-plans" },
-  { label: "Tài nguyên", href: "/admin/resource-limit-management" },
-  { label: "Tiêu thụ AI", href: "/admin/ai-reports" },
-  { label: "Vi phạm ", href: "/admin/policy-violations" },
-  { label: "Giá dịch vụ ", href: "/admin/ai-pricing" },
-  { label: "Nhật kí", href: "/admin/activity-logs" },
+const NAV_ITEMS = [
+  { label: "Báo cáo", href: "/admin/reports", icon: "fas fa-chart-pie" },
+  { label: "Người dùng", href: "/admin/users", icon: "fas fa-users" },
+  { label: "Gói đăng ký", href: "/admin/subscription-plans", icon: "fas fa-crown" },
+  {
+    key: "content",
+    label: "Nội dung",
+    icon: "fas fa-newspaper",
+    children: [
+      { label: "Bài viết", href: "/admin/blogs", icon: "fas fa-file-alt" },
+      { label: "Danh mục", href: "/admin/categories", icon: "fas fa-folder-open" },
+      { label: "Tags", href: "/admin/tags", icon: "fas fa-tags" },
+    ],
+  },
+  {
+    key: "ai",
+    label: "Hệ thống AI",
+    icon: "fas fa-brain",
+    children: [
+      { label: "Tiêu thụ AI", href: "/admin/ai-reports", icon: "fas fa-chart-bar" },
+      { label: "Giá dịch vụ AI", href: "/admin/ai-pricing", icon: "fas fa-coins" },
+      { label: "Quản lý tài nguyên", href: "/admin/resource-limit-management", icon: "fas fa-cubes" },
+    ],
+  },
+  {
+    key: "monitoring",
+    label: "Giám sát",
+    icon: "fas fa-shield-alt",
+    children: [
+      { label: "Vi phạm chính sách", href: "/admin/policy-violations", icon: "fas fa-exclamation-triangle" },
+      { label: "Nhật kí hoạt động", href: "/admin/activity-logs", icon: "fas fa-history" },
+    ],
+  },
 ];
 
 export default function AdminHeader() {
@@ -24,10 +45,12 @@ export default function AdminHeader() {
   const location = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [noticeOpen, setNoticeOpen] = useState(false);
+  const [openDropdown, setOpenDropdown] = useState(null);
   const [unreadCount, setUnreadCount] = useState(0);
   const [recentNotifications, setRecentNotifications] = useState([]);
 
   const noticeRef = useRef(null);
+  const navRef = useRef(null);
 
   const handleLogout = useCallback(() => {
     logout();
@@ -38,6 +61,9 @@ export default function AdminHeader() {
     function handleClickOutside(e) {
       if (noticeRef.current && !noticeRef.current.contains(e.target)) {
         setNoticeOpen(false);
+      }
+      if (navRef.current && !navRef.current.contains(e.target)) {
+        setOpenDropdown(null);
       }
     }
     document.addEventListener("mousedown", handleClickOutside);
@@ -102,34 +128,91 @@ export default function AdminHeader() {
   };
 
   const isLinkActive = (href) => {
+    if (!href) return false;
     return (
       location.pathname === href ||
       (href !== "/admin" && location.pathname.startsWith(href))
     );
   };
 
+  const isGroupActive = (item) => {
+    if (item.href) return isLinkActive(item.href);
+    if (item.children) {
+      return item.children.some((child) => isLinkActive(child.href));
+    }
+    return false;
+  };
+
   return (
     <header className={styles.navbar}>
-      <div className={`container ${styles.navContent}`}>
+      <div className={styles.navContent}>
         <Link to="/admin/reports" className={styles.logo}>
           Bình dân <span>Học AI</span>
+          <span className={styles.adminBadge}>ADMIN</span>
         </Link>
 
-        <ul
-          className={`${styles.navLinks} ${mobileOpen ? styles.navLinksOpen : ""}`}
+        <nav
+          ref={navRef}
+          className={`${styles.navLinksWrapper} ${mobileOpen ? styles.navLinksOpen : ""}`}
         >
-          {NAV_LINKS.map((link) => (
-            <li key={link.href}>
-              <Link
-                to={link.href}
-                className={isLinkActive(link.href) ? styles.active : ""}
-                onClick={() => setMobileOpen(false)}
-              >
-                {link.label}
-              </Link>
-            </li>
-          ))}
-        </ul>
+          <ul className={styles.navLinks}>
+            {NAV_ITEMS.map((item) => {
+              if (!item.children) {
+                return (
+                  <li key={item.href}>
+                    <Link
+                      to={item.href}
+                      className={isLinkActive(item.href) ? styles.active : ""}
+                      onClick={() => setMobileOpen(false)}
+                    >
+                      <i className={`${item.icon} ${styles.linkIcon}`} />
+                      <span>{item.label}</span>
+                    </Link>
+                  </li>
+                );
+              }
+
+              const groupActive = isGroupActive(item);
+              const isOpen = openDropdown === item.key;
+
+              return (
+                <li
+                  key={item.key}
+                  className={styles.dropdownLi}
+                  onMouseEnter={() => setOpenDropdown(item.key)}
+                  onMouseLeave={() => setOpenDropdown(null)}
+                >
+                  <button
+                    type="button"
+                    className={`${styles.dropdownToggle} ${groupActive ? styles.active : ""}`}
+                    onClick={() => setOpenDropdown((prev) => (prev === item.key ? null : item.key))}
+                  >
+                    <i className={`${item.icon} ${styles.linkIcon}`} />
+                    <span>{item.label}</span>
+                    <i className={`fas fa-chevron-down ${styles.caretIcon} ${isOpen ? styles.caretRotate : ""}`} />
+                  </button>
+
+                  <div className={`${styles.dropdownMenu} ${isOpen ? styles.dropdownMenuShow : ""}`}>
+                    {item.children.map((child) => (
+                      <Link
+                        key={child.href}
+                        to={child.href}
+                        className={`${styles.dropdownMenuItem} ${isLinkActive(child.href) ? styles.activeSubItem : ""}`}
+                        onClick={() => {
+                          setOpenDropdown(null);
+                          setMobileOpen(false);
+                        }}
+                      >
+                        <i className={`${child.icon} ${styles.childIcon}`} />
+                        <span>{child.label}</span>
+                      </Link>
+                    ))}
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
+        </nav>
 
         <div className={styles.navActions}>
           {/* Notification Bell */}
@@ -149,7 +232,7 @@ export default function AdminHeader() {
               className={`${styles.noticeDropdown} ${noticeOpen ? styles.dropdownOpen : ""}`}
             >
               <div className={styles.noticeDropdownHeader}>
-                🔔 Thông báo mới
+                <i className="fas fa-bell" /> Thông báo mới
               </div>
 
               {recentNotifications.length === 0 ? (
@@ -181,20 +264,23 @@ export default function AdminHeader() {
           </div>
 
           <button className={styles.logoutButton} onClick={handleLogout}>
-            <i className="fas fa-sign-out-alt" /> Đăng xuất
+            <i className="fas fa-sign-out-alt" />
+            <span>Đăng xuất</span>
+          </button>
+
+          <button
+            type="button"
+            className={styles.menuToggle}
+            onClick={() => setMobileOpen((o) => !o)}
+            aria-label="Mở menu"
+          >
+            <i className={`fas ${mobileOpen ? "fa-times" : "fa-bars"}`} />
           </button>
         </div>
-
-        <button
-          type="button"
-          className={styles.menuToggle}
-          onClick={() => setMobileOpen((o) => !o)}
-          aria-label="Mở menu"
-        >
-          <i className={`fas ${mobileOpen ? "fa-times" : "fa-bars"}`} />
-        </button>
       </div>
     </header>
   );
 }
+
+
 
