@@ -86,11 +86,11 @@ export default function Checkout() {
   const [error,    setError]    = useState("");
   const [creating, setCreating] = useState(false);
 
-  const pollRef    = useRef(null);
   const mountedRef = useRef(true);
   useEffect(() => () => { mountedRef.current = false; }, []);
 
   const remaining = useCountdown(payment?.expiredAt);
+  const [checking, setChecking] = useState(false);
 
   // ── 1. Load plan ──
   useEffect(() => {
@@ -113,28 +113,6 @@ export default function Checkout() {
       });
   }, [planId]);
 
-  // ── 3. Polling kiểm tra thanh toán ──
-  const stopPolling = useCallback(() => {
-    if (pollRef.current) {
-      clearInterval(pollRef.current);
-      pollRef.current = null;
-    }
-  }, []);
-
-  const startPolling = useCallback(() => {
-    stopPolling();
-    pollRef.current = setInterval(async () => {
-      try {
-        const res = await getCurrentSubscription();
-        if (!mountedRef.current) return;
-        if (res.success && res.data?.hasActiveSubscription) {
-          stopPolling();
-          setPhase("success");
-        }
-      } catch { /* ignore */ }
-    }, 5000);
-  }, [stopPolling]);
-
   // ── 2. Tạo payment khi user xác nhận ──
   const handleCreatePayment = useCallback(async () => {
     setCreating(true);
@@ -145,7 +123,6 @@ export default function Checkout() {
       if (res.success) {
         setPayment(res.data);
         setPhase("qr");
-        startPolling();
       } else {
         const code = res.errorCode;
         if (code === "LOWER_TIER_NOT_ALLOWED") {
@@ -163,13 +140,30 @@ export default function Checkout() {
     } finally {
       if (mountedRef.current) setCreating(false);
     }
-  }, [planId, startPolling]);
+  }, [planId]);
 
-  // Dừng polling khi unmount
-  useEffect(() => () => stopPolling(), [stopPolling]);
+  // ── 3. Manual check thanh toán (thay polling) ──
+  const handleCheckPayment = useCallback(async () => {
+    setChecking(true);
+    setError("");
+    try {
+      const res = await getCurrentSubscription();
+      if (!mountedRef.current) return;
+      if (res.success && res.data?.hasActiveSubscription) {
+        setPhase("success");
+      } else {
+        setError("Chưa phát hiện thanh toán. Vui lòng kiểm tra kết nối ngân hàng hoặc thử lại sau.");
+      }
+    } catch (err) {
+      if (!mountedRef.current) return;
+      const { errorMessage } = resolveApiError(err);
+      setError(errorMessage || "Lỗi kết nối. Vui lòng thử lại.");
+    } finally {
+      if (mountedRef.current) setChecking(false);
+    }
+  }, []);
 
-  // Phát hiện hết hạn QR.
-  // Dùng ref để track đã từng có remaining > 0 (tránh trigger ngay khi countdown = 0 lúc init)
+  // Phát hiện hết hạn QR
   const hadPositiveRemaining = useRef(false);
   useEffect(() => {
     if (remaining > 0) hadPositiveRemaining.current = true;
@@ -177,10 +171,9 @@ export default function Checkout() {
 
   useEffect(() => {
     if (phase === "qr" && remaining === 0 && hadPositiveRemaining.current) {
-      stopPolling();
       setPhase("expired");
     }
-  }, [remaining, phase, stopPolling]);
+  }, [remaining, phase]);
 
   /* ── Render phases ── */
 
@@ -431,13 +424,31 @@ export default function Checkout() {
             <i className="fas fa-circle-info" />
             <span>
               Nhập <strong>đúng nội dung chuyển khoản</strong> để hệ thống tự động xác nhận.
-              Sau khi chuyển khoản thành công, trang sẽ tự động cập nhật.
+              Sau khi chuyển khoản xong, bấm nút "Kiểm tra thanh toán" bên dưới.
             </span>
           </div>
 
-          <div className={styles.pollingNote}>
-            <i className="fas fa-spinner fa-spin" />
-            Đang chờ xác nhận thanh toán...
+          <div className={styles.btnRow} style={{ marginTop: 20 }}>
+            <button
+              className={styles.btnPrimary}
+              onClick={handleCheckPayment}
+              disabled={checking}
+            >
+              {checking
+                ? <><i className="fas fa-spinner fa-spin" /> Đang kiểm tra...</>
+                : <><i className="fas fa-check-circle" /> Kiểm tra thanh toán</>}
+            </button>
+            <button
+              className={styles.btnOutline}
+              onClick={() => {
+                setPayment(null);
+                hadPositiveRemaining.current = false;
+                setPhase("ready");
+              }}
+              disabled={checking}
+            >
+              <i className="fas fa-arrow-left" /> Tạo giao dịch mới
+            </button>
           </div>
         </div>
 
