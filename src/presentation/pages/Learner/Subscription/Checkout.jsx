@@ -3,7 +3,7 @@ import { Link, useParams } from "react-router-dom";
 import api from "@services/api";
 import { resolveApiError } from "@services/api";
 import { formatPrice, formatDuration } from "@services/subscriptionPlan";
-import { createPayment, getCurrentSubscription } from "@services/subscriptionApi";
+import { createPayment, checkPaymentStatus } from "@services/subscriptionApi";
 import styles from "./Checkout.module.css";
 
 /* ── Countdown hook ── */
@@ -115,12 +115,21 @@ export default function Checkout() {
 
   // ── Manual payment confirmation ──
   const handleConfirmPayment = useCallback(async () => {
+    // Try different possible field names for payment ID
+    const paymentId = payment?.paymentId || payment?.PaymentId || payment?.id;
+    
+    if (!paymentId) {
+      setError("Không tìm thấy thông tin giao dịch.");
+      return;
+    }
+
     setChecking(true);
     setError(""); // Clear any previous errors
     try {
-      const res = await getCurrentSubscription();
+      const result = await checkPaymentStatus(paymentId);
       if (!mountedRef.current) return;
-      if (res.success && res.data?.hasActiveSubscription) {
+      
+      if (result.success && result.isPaid) {
         setPhase("success");
       } else {
         setError("Chưa phát hiện thanh toán thành công. Vui lòng đảm bảo bạn đã chuyển khoản đúng số tiền và nội dung chuyển khoản.");
@@ -132,7 +141,7 @@ export default function Checkout() {
     } finally {
       if (mountedRef.current) setChecking(false);
     }
-  }, []);
+  }, [payment]);
 
   // ── Create payment when user confirms ──
   const handleCreatePayment = useCallback(async () => {

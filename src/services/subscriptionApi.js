@@ -26,3 +26,22 @@ export async function getPaymentDetail(paymentId) {
   const res = await api.get(`/learner/payments/${paymentId}`);
   return res.data;
 }
+
+/** Check if a specific payment has been completed (for checkout confirmation) */
+export async function checkPaymentStatus(paymentId) {
+  try {
+    const res = await getPaymentDetail(paymentId);
+    if (res.success && res.data) {
+      // Payment is successful if status is 'Success'
+      const isPaid = res.data.status === 'Success';
+      return {
+        success: true,
+        isPaid: isPaid,
+        paymentData: res.data
+      };
+    }
+    return { success: false, isPaid: false, paymentData: null };
+  } catch (error) {
+    return { success: false, isPaid: false, paymentData: null, error };
+  }
+}
