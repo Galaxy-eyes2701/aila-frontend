@@ -60,7 +60,7 @@ export default function CourseRow({ course, onEdit, onPublish, onUnpublish, onPr
         <h3 className={styles.rowTitle}>{course.name}</h3>
 
         {course.description && (
-          <p className={styles.rowDesc}>{course.description}</p>
+          <p className={styles.rowDesc}>{course.description.replace(/<[^>]*>?/gm, '').trim()}</p>
         )}
 
         <div className={styles.rowMeta}>

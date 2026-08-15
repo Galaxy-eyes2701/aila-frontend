@@ -1,4 +1,5 @@
 import { useState } from "react";
+import DOMPurify from "dompurify";
 import styles from "../ModuleManagement.module.css";
 import LearningMaterialList from "./LearningMaterial/LearningMaterialList";
 
@@ -55,13 +56,18 @@ export default function ModuleCard({
           <h3>{module.title}</h3>
         </div>
 
-        <p
-          className={
-            module.description ? styles.description : styles.mutedDescription
-          }
-        >
-          {module.description || "Chưa có mô tả cho học phần này."}
-        </p>
+        {module.description ? (
+          <div
+            className={styles.description}
+            dangerouslySetInnerHTML={{
+              __html: DOMPurify.sanitize(module.description),
+            }}
+          />
+        ) : (
+          <p className={styles.mutedDescription}>
+            Chưa có mô tả cho học phần này.
+          </p>
+        )}
 
         <div className={styles.metaRow}>
           <span>

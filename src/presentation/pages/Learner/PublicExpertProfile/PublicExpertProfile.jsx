@@ -34,7 +34,7 @@ function ExpertCourseCard({ course, onClick }) {
       <div className={styles.ccardBody}>
         <h3 className={styles.ccardTitle}>{course.name}</h3>
         {course.description && (
-          <p className={styles.ccardDesc}>{course.description}</p>
+          <p className={styles.ccardDesc}>{course.description.replace(/<[^>]*>?/gm, '').trim()}</p>
         )}
         <div className={styles.ccardFoot}>
           <span className={styles.lvBadge}>{LEVEL_LABELS[course.level] ?? course.level}</span>
