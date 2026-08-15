@@ -20,21 +20,28 @@ import styles from './SubscriptionPlans.module.css';
 const purchaseRoute = (planId) => `/subscription-plans/${planId}/checkout`;
 
 const BENEFITS = [
-  { key: 'aiTokenLimit',          icon: 'fa-bolt',       label: 'AI Token'                    },
-  { key: 'aiPracticeScenarioLimit', icon: 'fa-comments', label: 'Lượt AI Practice'             },
-  { key: 'expertEvaluationLimit', icon: 'fa-user-check', label: 'Lượt đánh giá chuyên gia'    },
+  { key: 'aiTokenLimit', icon: 'fa-bolt', label: 'AI Token' },
+  { key: 'aiPracticeScenarioLimit', icon: 'fa-comments', label: 'Lượt AI Practice' },
+  { key: 'expertEvaluationLimit', icon: 'fa-user-check', label: 'Lượt đánh giá chuyên gia' },
 ];
 
 /**
  * Trạng thái nút mua theo `purchaseAction` — BE so tier của gói với gói đang active rồi trả
  * sẵn kết quả, nên endpoint công khai không phải lộ tierLevel.
+ * RENEW = trùng tier với gói đang dùng → không mở lượt mua (không hỗ trợ gia hạn).
  * BLOCKED = gói tier thấp hơn gói đang dùng (BR-05).
  */
 const PURCHASE_ACTIONS = {
-  BUY:     { label: 'Mua ngay',       disabled: false, icon: 'fa-gem'                 },
-  UPGRADE: { label: 'Nâng cấp',       disabled: false, icon: 'fa-arrow-up-right-dots' },
-  RENEW:   { label: 'Gia hạn',        disabled: false, icon: 'fa-rotate-right'        },
-  BLOCKED: { label: 'Không khả dụng', disabled: true,  icon: 'fa-lock'                },
+  BUY: { label: 'Mua ngay', disabled: false, icon: 'fa-gem' },
+  UPGRADE: { label: 'Nâng cấp', disabled: false, icon: 'fa-arrow-up-right-dots' },
+  RENEW: {
+    label: 'Đang sử dụng', disabled: true, icon: 'fa-circle-check',
+    note: 'Gói đang hoạt động'
+  },
+  BLOCKED: {
+    label: 'Không khả dụng', disabled: true, icon: 'fa-lock',
+    note: 'Không thể mua gói có cấp thấp hơn gói đang hoạt động'
+  },
 };
 
 function resolveBuyLabel(purchaseAction) {
@@ -46,6 +53,7 @@ function PlanCard({ plan, checking, anyChecking, isCurrentPlan, onBuy }) {
     label: buyLabel,
     disabled: tierDisabled,
     icon: buyIcon,
+    note: disabledNote,
   } = resolveBuyLabel(plan.purchaseAction);
 
   const isDisabled = anyChecking || tierDisabled;
@@ -80,8 +88,8 @@ function PlanCard({ plan, checking, anyChecking, isCurrentPlan, onBuy }) {
 
       {tierDisabled ? (
         <div className={styles.disabledNote} role="note">
-          <i className="fas fa-lock" aria-hidden="true" />
-          Không thể mua gói có cấp thấp hơn gói đang hoạt động
+          <i className={`fas ${buyIcon}`} aria-hidden="true" />
+          {disabledNote}
         </div>
       ) : (
         <button
@@ -106,18 +114,18 @@ function PlanCard({ plan, checking, anyChecking, isCurrentPlan, onBuy }) {
 }
 
 export default function SubscriptionPlans() {
-  const navigate    = useNavigate();
+  const navigate = useNavigate();
   const { user, logout } = useAuth();
-  const { openLogin }   = useOutletContext() ?? {};
+  const { openLogin } = useOutletContext() ?? {};
 
-  const [plans,          setPlans]          = useState([]);
-  const [status,         setStatus]         = useState('loading');
-  const [loadError,      setLoadError]      = useState('');
+  const [plans, setPlans] = useState([]);
+  const [status, setStatus] = useState('loading');
+  const [loadError, setLoadError] = useState('');
   const [checkingPlanId, setCheckingPlanId] = useState('');
-  const [toast,          setToast]          = useState(null);
+  const [toast, setToast] = useState(null);
 
   // Gói đang active (chỉ fetch khi user đã login)
-  const [activeSub,      setActiveSub]      = useState(null); // null = chưa fetch / không có
+  const [activeSub, setActiveSub] = useState(null); // null = chưa fetch / không có
 
   const pendingPlanIdRef = useRef('');
 
@@ -156,7 +164,7 @@ export default function SubscriptionPlans() {
 
   // purchaseAction được BE tính theo caller nên phải fetch lại khi đăng nhập / đăng xuất,
   // nếu không nút mua sẽ giữ trạng thái của phiên trước.
-  useEffect(() => { fetchPlans();     }, [fetchPlans, user]);
+  useEffect(() => { fetchPlans(); }, [fetchPlans, user]);
   useEffect(() => { fetchActiveSub(); }, [fetchActiveSub]);
 
   // Re-fetch active sub khi user thay đổi (đăng nhập / đăng xuất)
