@@ -27,7 +27,7 @@ export default function RegisterModal({ onClose, onSwitchToLogin, onRegisterSucc
         fullName: form.fullName.trim(),
         email:    form.email.trim().toLowerCase(),
         password: form.password,
-      });
+      }, { skipAuth: true });
 
       if (!registerRes.data.success) {
         setError(registerRes.data.errorMessage || 'Đăng ký thất bại.');
@@ -37,7 +37,7 @@ export default function RegisterModal({ onClose, onSwitchToLogin, onRegisterSucc
       const loginRes = await api.post('/learner/login', {
         email: form.email.trim().toLowerCase(),
         password: form.password,
-      });
+      }, { skipAuth: true });
 
       if (loginRes.data.success) {
         const d = loginRes.data.data;

@@ -27,7 +27,7 @@ export default function AdminLogin() {
         email: normalizedEmail,
         username: normalizedEmail,
         password: form.password,
-      });
+      }, { skipAuth: true });
       if (res.data.success) {
         const data = res.data.data;
         localStorage.setItem('accessToken', data.accessToken);

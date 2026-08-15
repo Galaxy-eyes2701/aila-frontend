@@ -37,7 +37,7 @@ export default function LoginModal({ onClose, onSwitchToRegister, onLoginSuccess
       const res = await api.post('/learner/login', {  // ← đúng endpoint
         email:    form.email.trim().toLowerCase(),
         password: form.password,
-      });
+      }, { skipAuth: true });
       if (res.data.success) {
         const d = res.data.data;
         login(d.accessToken, { userId: d.userId, fullName: d.fullName, email: d.email, role: d.role });

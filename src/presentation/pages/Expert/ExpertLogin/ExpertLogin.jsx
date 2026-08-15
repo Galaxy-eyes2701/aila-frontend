@@ -57,7 +57,7 @@ export default function ExpertLogin() {
       const res = await api.post('/auth/expert/login', {
         email:    form.email.trim().toLowerCase(),
         password: form.password,
-      });
+      }, { skipAuth: true });
 
       if (res.data.success) {
         const data = res.data.data;

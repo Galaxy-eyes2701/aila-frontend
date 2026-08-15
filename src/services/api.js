@@ -125,10 +125,19 @@ api.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error?.config;
+    const requestUrl = originalRequest?.url || "";
+
+    // Không thực hiện refresh token cho các endpoint đăng nhập, đăng ký, refresh token hoặc có skipAuth
+    const isAuthEndpoint =
+      requestUrl.includes("/login") ||
+      requestUrl.includes("/refresh") ||
+      requestUrl.includes("/register") ||
+      Boolean(originalRequest?.skipAuth);
+
     const shouldTryRefresh =
       error?.response?.status === 401 &&
       !originalRequest?._retry &&
-      !originalRequest?.skipAuth;
+      !isAuthEndpoint;
 
     if (!shouldTryRefresh) {
       return Promise.reject(error);
@@ -140,7 +149,7 @@ api.interceptors.response.use(
       const refreshResponse = await api.post(
         "/auth/refresh",
         {},
-        { skipAuth: true },
+        { skipAuth: true }
       );
       const newAccessToken = refreshResponse?.data?.data?.accessToken;
 
@@ -156,7 +165,7 @@ api.interceptors.response.use(
       clearAuthSession();
       return Promise.reject(refreshError);
     }
-  },
+  }
 );
 
 export default api;
