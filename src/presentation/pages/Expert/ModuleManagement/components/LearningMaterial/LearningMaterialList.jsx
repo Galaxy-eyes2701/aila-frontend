@@ -5,6 +5,7 @@ import {
   getLearningMaterials,
   deleteLearningMaterial,
   reorderLearningMaterials,
+  resolveApiError,
 } from "@services/materialApi";
 import ConfirmModal from "../ConfirmModal";
 
@@ -63,9 +64,10 @@ export default function LearningMaterialList({
         onDeleted?.(false, "Không thể xóa học liệu.");
       }
     } catch (err) {
+      const apiErr = resolveApiError(err);
       onDeleted?.(
         false,
-        err.response?.data?.errorMessage ?? "Lỗi kết nối máy chủ.",
+        apiErr.errorMessage || "Lỗi kết nối máy chủ.",
       );
     } finally {
       setDeleting(false);
@@ -105,9 +107,10 @@ export default function LearningMaterialList({
         onDeleted?.(false, res.errorMessage ?? "Không thể lưu thứ tự học liệu.");
       }
     } catch (err) {
+      const apiErr = resolveApiError(err);
       onDeleted?.(
         false,
-        err.response?.data?.errorMessage ?? "Lỗi kết nối máy chủ.",
+        apiErr.errorMessage || "Lỗi kết nối máy chủ.",
       );
     } finally {
       setSavingOrder(false);
