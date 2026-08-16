@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import styles from "./TagManagement.module.css";
 import Toast from "../../Expert/ModuleManagement/components/Toast";
+import Pagination from "@presentation/components/Pagination/Pagination";
 import {
   createSystemTag,
   deleteSystemTag,
@@ -287,6 +288,24 @@ export default function TagManagement() {
   const [reviewingRequestId, setReviewingRequestId] = useState("");
   const [toast, setToast] = useState(null);
 
+  // Pagination states
+  const [tagsCurrentPage, setTagsCurrentPage] = useState(1);
+  const [tagsItemsPerPage, setTagsItemsPerPage] = useState(10);
+  const [pendingCurrentPage, setPendingCurrentPage] = useState(1);
+  const [pendingItemsPerPage, setPendingItemsPerPage] = useState(10);
+
+  // Computed paginated system tags
+  const tagsTotalPages = Math.max(1, Math.ceil(tags.length / tagsItemsPerPage));
+  const safeTagsPage = Math.min(tagsCurrentPage, tagsTotalPages);
+  const tagsStart = (safeTagsPage - 1) * tagsItemsPerPage;
+  const paginatedTags = tags.slice(tagsStart, tagsStart + tagsItemsPerPage);
+
+  // Computed paginated pending requests
+  const pendingTotalPages = Math.max(1, Math.ceil(pendingRequests.length / pendingItemsPerPage));
+  const safePendingPage = Math.min(pendingCurrentPage, pendingTotalPages);
+  const pendingStart = (safePendingPage - 1) * pendingItemsPerPage;
+  const paginatedPendingRequests = pendingRequests.slice(pendingStart, pendingStart + pendingItemsPerPage);
+
   const showToast = useCallback((message, type = "success") => {
     setToast({ message, type });
   }, []);
@@ -341,6 +360,8 @@ export default function TagManagement() {
   const handleSearchSubmit = (e) => {
     e.preventDefault();
     setSearchKeyword(searchInput);
+    setTagsCurrentPage(1);
+    setPendingCurrentPage(1);
   };
 
   const handleOpenCreate = () => {
@@ -511,7 +532,7 @@ export default function TagManagement() {
                   </tr>
                 )}
 
-                {!pendingLoading && !pendingError && pendingRequests.map((request) => (
+                {!pendingLoading && !pendingError && paginatedPendingRequests.map((request) => (
                   <tr key={request.id}>
                     <td>{request.name}</td>
                     <td>{request.code || "—"}</td>
@@ -536,6 +557,21 @@ export default function TagManagement() {
               </tbody>
             </table>
           </div>
+
+          {!pendingLoading && !pendingError && pendingRequests.length > 0 && (
+            <Pagination
+              currentPage={safePendingPage}
+              totalPages={pendingTotalPages}
+              itemsPerPage={pendingItemsPerPage}
+              totalItems={pendingRequests.length}
+              onPageChange={setPendingCurrentPage}
+              onItemsPerPageChange={(n) => {
+                setPendingItemsPerPage(n);
+                setPendingCurrentPage(1);
+              }}
+              unitLabel="yêu cầu"
+            />
+          )}
         </div>
 
         <div className={styles.sectionHeader}>
@@ -586,7 +622,7 @@ export default function TagManagement() {
               )}
 
               {!loading && !pageError &&
-                tags.map((tag) => (
+                paginatedTags.map((tag) => (
                   <tr key={tag.id}>
                     <td>{tag.name}</td>
                     <td>
@@ -618,6 +654,21 @@ export default function TagManagement() {
             </tbody>
           </table>
         </div>
+
+        {!loading && !pageError && tags.length > 0 && (
+          <Pagination
+            currentPage={safeTagsPage}
+            totalPages={tagsTotalPages}
+            itemsPerPage={tagsItemsPerPage}
+            totalItems={tags.length}
+            onPageChange={setTagsCurrentPage}
+            onItemsPerPageChange={(n) => {
+              setTagsItemsPerPage(n);
+              setTagsCurrentPage(1);
+            }}
+            unitLabel="tag"
+          />
+        )}
       </div>
 
       {(modalMode === "create" || modalMode === "edit") && (
