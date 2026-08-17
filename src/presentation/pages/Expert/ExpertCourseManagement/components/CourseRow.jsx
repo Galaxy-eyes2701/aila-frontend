@@ -10,26 +10,14 @@ const LEVEL_LABELS = {
   Advanced:     'Nâng cao',
 };
 
-export default function CourseRow({ course, onEdit, onPublish, onUnpublish, onPreview, onReReview, onLockedPublish, onSyncRag }) {
+export default function CourseRow({ course, onEdit, onPublish, onUnpublish, onPreview, onReReview, onLockedPublish, isPublishing }) {
   const isPublished = course.isPublished;
   const isLocked    = !!course.isPublicationLocked;
-  const [busy, setBusy] = useState(false);
-  const [syncingRag, setSyncingRag] = useState(false);
 
   const handlePublishToggle = async () => {
-    setBusy(true);
+    // Không cần setBusy vì isPublishing được quản lý từ parent component
     if (isPublished) await onUnpublish(course.id);
     else await onPublish(course.id);
-    setBusy(false);
-  };
-
-  const handleSyncRag = async () => {
-    setSyncingRag(true);
-    try {
-      await onSyncRag(course.id);
-    } finally {
-      setSyncingRag(false);
-    }
   };
 
   return (
@@ -98,28 +86,16 @@ export default function CourseRow({ course, onEdit, onPublish, onUnpublish, onPr
           <i className="fas fa-list-ul" /> Học phần
         </Link>
 
-        {/* Sync RAG Button - only show for published courses */}
-        {isPublished && (
-          <button
-            className={`${styles.actionBtn} ${styles.actionBtnSync}`}
-            onClick={handleSyncRag}
-            disabled={syncingRag}
-            title="Đồng bộ nội dung khóa học với hệ thống AI để hỗ trợ tư vấn tự động"
-          >
-            {syncingRag
-              ? <span className={styles.spinner} />
-              : <><i className="fas fa-sync-alt" /> Đồng bộ AI</>}
-          </button>
-        )}
+        {/* Sync RAG Button - đã được tích hợp vào nút Publish, không cần hiển thị riêng */}
 
         {isPublished ? (
           <button
             className={`${styles.actionBtn} ${styles.actionBtnWarning}`}
             onClick={handlePublishToggle}
-            disabled={busy}
+            disabled={isPublishing}
             title="Hủy xuất bản"
           >
-            {busy
+            {isPublishing
               ? <span className={styles.spinner} />
               : <><i className="fas fa-eye-slash" /> Ẩn</>}
           </button>
@@ -127,11 +103,11 @@ export default function CourseRow({ course, onEdit, onPublish, onUnpublish, onPr
           <button
             className={`${styles.actionBtn} ${isLocked ? styles.actionBtnWarning : styles.actionBtnSuccess}`}
             onClick={isLocked ? () => onLockedPublish?.() : handlePublishToggle}
-            disabled={busy}
+            disabled={isPublishing || isLocked}
             title={isLocked ? 'Khóa học đang bị khoá — nhấn để xem thông tin' : 'Xuất bản khóa học'}
           >
-            {busy
-              ? <span className={styles.spinner} />
+            {isPublishing
+              ? <><span className={styles.spinner} /> Đang xuất bản...</>
               : isLocked
                 ? <><i className="fas fa-lock" /> Bị khoá</>
                 : <><i className="fas fa-globe" /> Xuất bản</>}

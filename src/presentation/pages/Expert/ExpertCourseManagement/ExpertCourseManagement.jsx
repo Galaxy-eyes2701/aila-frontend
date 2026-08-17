@@ -16,6 +16,7 @@ export default function ExpertCourseManagement() {
   const [courses,    setCourses]    = useState([]);
   const [categories, setCategories] = useState([]);
   const [loading,    setLoading]    = useState(true);
+  const [publishing, setPublishing] = useState({}); // Track publishing state per course
   const [total,      setTotal]      = useState(0);
   const [pageIndex,  setPageIndex]  = useState(0);
   const PAGE_SIZE = 10;
@@ -90,13 +91,40 @@ export default function ExpertCourseManagement() {
   };
 
   const handlePublish = useCallback(async courseId => {
+    setPublishing(prev => ({ ...prev, [courseId]: true }));
     try {
+      // Bước 1: Publish course
       const res = await api.patch(`/experts/me/courses/${courseId}/publish`);
       if (res.data.success) {
         setCourses(prev => prev.map(c => c.id === courseId ? { ...c, isPublished: true } : c));
-        showToast('Khóa học đã được xuất bản thành công!');
-      } else { showToast(res.data.errorMessage || 'Xuất bản thất bại.', 'error'); }
-    } catch (err) { showToast(err.response?.data?.errorMessage || 'Xuất bản thất bại.', 'error'); }
+        showToast('Khóa học đã được xuất bản thành công!', 'success');
+        
+        // Bước 2: Tự động đồng bộ RAG sau khi publish thành công
+        try {
+          const syncRes = await api.post(`/rag/courses/${courseId}/sync-materials`);
+          if (syncRes.data && syncRes.data.status === 'Success') {
+            const { totalMaterialsIndexed, totalChunksGenerated } = syncRes.data;
+            showToast(
+              `Đồng bộ AI thành công! Đã xử lý ${totalMaterialsIndexed} tài liệu và tạo ${totalChunksGenerated} đoạn văn bản.`,
+              'success'
+            );
+          } else {
+            throw new Error(syncRes.data?.message || 'Đồng bộ AI thất bại');
+          }
+        } catch (syncErr) {
+          console.error('Auto-sync RAG failed:', syncErr);
+          showToast(
+            'Đồng bộ AI thất bại! Khóa học vẫn được xuất bản nhưng chức năng AI chat có thể không hoạt động đúng.',
+            'error'
+          );
+        }
+      } else { 
+        showToast(res.data.errorMessage || 'Xuất bản thất bại.', 'error'); 
+      }
+    } catch (err) { 
+      showToast(err.response?.data?.errorMessage || 'Xuất bản thất bại.', 'error'); 
+    }
+    setPublishing(prev => ({ ...prev, [courseId]: false }));
   }, []);
 
   const handleUnpublish = useCallback(courseId => {
@@ -114,28 +142,6 @@ export default function ExpertCourseManagement() {
       } else { showToast(res.data.errorMessage || 'Hủy xuất bản thất bại.', 'error'); }
     } catch (err) { showToast(err.response?.data?.errorMessage || 'Hủy xuất bản thất bại.', 'error'); }
   };
-
-  const handleSyncRag = useCallback(async courseId => {
-    try {
-      const res = await api.post(`/rag/courses/${courseId}/sync-materials`);
-      if (res.data) {
-        const data = res.data;
-        const { totalMaterialsIndexed, totalChunksGenerated, status } = data;
-        if (status === 'Success') {
-          showToast(
-            `Đồng bộ thành công! Đã xử lý ${totalMaterialsIndexed} tài liệu và tạo ${totalChunksGenerated} đoạn văn bản.`
-          );
-        } else {
-          showToast(data.message || 'Đồng bộ hoàn tất nhưng có lỗi.', 'error');
-        }
-      } else {
-        showToast('Đồng bộ thành công!');
-      }
-    } catch (err) {
-      console.error('Sync RAG error:', err);
-      showToast(err.response?.data?.errorMessage || 'Đồng bộ thất bại. Vui lòng thử lại.', 'error');
-    }
-  }, []);
 
   const loadMore = () => { const next = pageIndex + 1; setPageIndex(next); fetchCourses(next); };
 
@@ -211,7 +217,8 @@ export default function ExpertCourseManagement() {
               <CourseRow key={course.id} course={course}
                 onEdit={handleEdit} onPublish={handlePublish}
                 onUnpublish={handleUnpublish} onPreview={setPreviewCourseId}
-                onReReview={setReReviewCourse} onSyncRag={handleSyncRag}
+                onReReview={setReReviewCourse}
+                isPublishing={publishing[course.id] || false}
                 onLockedPublish={() => showToast(
                   'Khóa học đang bị khoá do vi phạm nội quy. Vui lòng nhấn "Yêu cầu mở lại" để gửi yêu cầu xem xét.',
                   'error'
