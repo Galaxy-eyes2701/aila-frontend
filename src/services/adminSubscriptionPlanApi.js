@@ -14,8 +14,10 @@ export async function createSubscriptionPlan(payload) {
 
 /**
  * PUT /api/admin/subscription-plans/{planId} (UC-91).
- * CHỈ 6 trường: description, price, aiTokenLimit, aiPracticeScenarioLimit,
- * expertEvaluationLimit, displayOrder. name/tierLevel/durationInDays bị BE bỏ qua.
+ * CHỈ 7 trường: description, price, durationInDays, aiTokenLimit,
+ * aiPracticeScenarioLimit, expertEvaluationLimit, displayOrder.
+ * name/tierLevel bất biến (INV-01, BR-01) nên BE bỏ qua; durationInDays thì KHÔNG —
+ * BE bắt buộc > 0, thiếu trường này request sẽ fail.
  */
 export async function updateSubscriptionPlan(planId, payload) {
   const res = await api.put(`/admin/subscription-plans/${planId}`, payload);

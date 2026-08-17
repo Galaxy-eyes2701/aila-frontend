@@ -44,11 +44,13 @@ export function buildReorderUpdates(currentPlans, nextPlans) {
     .filter(({ plan, displayOrder }) => toOrder(plan.displayOrder) !== displayOrder);
 }
 
-/** PUT /admin/subscription-plans/{id} luôn cần đủ 6 trường — giữ nguyên 5 trường còn lại. */
+/** PUT /admin/subscription-plans/{id} luôn cần đủ 7 trường — giữ nguyên 6 trường còn lại. */
 export function buildOrderUpdatePayload(plan, displayOrder) {
   return {
     description: plan.description ?? null,
     price: Number(plan.price),
+    // BE validate durationInDays > 0; thiếu trường này JSON bind về 0 → INVALID_PLAN_DURATION.
+    durationInDays: Number(plan.durationInDays),
     aiTokenLimit: Number(plan.aiTokenLimit),
     aiPracticeScenarioLimit: Number(plan.aiPracticeScenarioLimit),
     expertEvaluationLimit: Number(plan.expertEvaluationLimit),
