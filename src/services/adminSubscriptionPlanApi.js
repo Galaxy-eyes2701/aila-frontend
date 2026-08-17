@@ -29,3 +29,14 @@ export async function changeSubscriptionPlanStatus(planId, isActive) {
   const res = await api.patch(`/admin/subscription-plans/${planId}/status`, { isActive });
   return res.data;
 }
+
+/** GET /api/admin/subscription-plans/statistics — Thống kê người mua & doanh thu cho admin. */
+export async function getAdminSubscriptionStatistics({ fromDate, toDate } = {}) {
+  const params = {};
+  if (fromDate) params.fromDate = fromDate;
+  if (toDate) params.toDate = toDate;
+
+  const res = await api.get('/admin/subscription-plans/statistics', { params });
+  return res.data;
+}
+

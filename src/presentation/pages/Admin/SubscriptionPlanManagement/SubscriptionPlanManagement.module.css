@@ -1,6 +1,6 @@
 .page {
   padding: 32px 0 60px;
-  background: #e0f2fe;
+  background-color: #e0f2fe;
   min-height: 100vh;
 }
 
@@ -16,6 +16,11 @@
 .breadcrumb a {
   color: #2563eb;
   text-decoration: none;
+  font-weight: 500;
+}
+
+.breadcrumb a:hover {
+  text-decoration: underline;
 }
 
 .headerBand {
@@ -25,18 +30,25 @@
   gap: 20px;
   flex-wrap: wrap;
   margin-bottom: 20px;
+  padding: 24px 28px;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
 }
 
 .headerBand h1 {
   font-size: 24px;
   font-weight: 800;
-  margin: 4px 0;
+  color: #1f2937;
+  margin: 0 0 6px 0;
 }
 
 .headerText {
   color: #6b7280;
   font-size: 14px;
-  max-width: 640px;
+  max-width: 680px;
+  margin: 0;
+  line-height: 1.5;
 }
 
 .headerActions {
@@ -56,8 +68,10 @@
   background: #2563eb;
   color: #fff;
   font-weight: 600;
+  font-size: 14px;
   cursor: pointer;
   white-space: nowrap;
+  transition: all 0.2s ease;
 }
 
 .primaryButton:hover:not(:disabled) {
@@ -79,8 +93,10 @@
   background: #fff;
   color: #374151;
   font-weight: 600;
+  font-size: 14px;
   cursor: pointer;
   white-space: nowrap;
+  transition: all 0.2s ease;
 }
 
 .secondaryButton:hover:not(:disabled) {
@@ -95,6 +111,10 @@
 .dangerButton {
   color: #dc2626;
   border-color: #fecaca;
+}
+
+.dangerButton:hover:not(:disabled) {
+  background: #fef2f2;
 }
 
 .dangerSolidButton {
@@ -120,19 +140,57 @@
   cursor: not-allowed;
 }
 
-/* ── STATS ────────────────────────────────────────────────────────────── */
+/* ── TAB BAR ──────────────────────────────────────────────────────────── */
+.tabBar {
+  display: flex;
+  gap: 6px;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  padding: 6px;
+  margin-bottom: 20px;
+  width: fit-content;
+}
+
+.tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 22px;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  background: transparent;
+  color: #6b7280;
+  transition: all 0.2s ease;
+}
+
+.tab:hover {
+  background: #f3f4f6;
+  color: #1f2937;
+}
+
+.tabActive {
+  background: #2563eb !important;
+  color: #ffffff !important;
+  box-shadow: 0 2px 4px rgba(37, 99, 235, 0.2);
+}
+
+/* ── STATS ROW (Tab Plans) ────────────────────────────────────────────── */
 .statRow {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-  gap: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 14px;
   margin-bottom: 20px;
 }
 
 .statCard {
-  padding: 14px 16px;
-  background: #fff;
-  border: 1px solid #e5e7eb;
+  padding: 16px 20px;
+  background: #ffffff;
   border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
 }
 
 .statLabel {
@@ -141,11 +199,12 @@
   text-transform: uppercase;
   letter-spacing: 0.04em;
   color: #6b7280;
+  font-weight: 600;
   margin-bottom: 6px;
 }
 
 .statValue {
-  font-size: 22px;
+  font-size: 24px;
   font-weight: 800;
   color: #111827;
 }
@@ -158,28 +217,191 @@
   color: #6b7280;
 }
 
+/* ── FILTER BAR (Tab Statistics) ──────────────────────────────────────── */
+.filterBar {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 16px;
+  margin-bottom: 20px;
+  padding: 16px 20px;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  flex-wrap: wrap;
+}
+
+.dateRangeGroup {
+  display: flex;
+  gap: 14px;
+  align-items: flex-end;
+  flex-wrap: wrap;
+  flex: 1;
+  min-width: 300px;
+}
+
+.dateInput {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.dateInput label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #374151;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.dateInput input {
+  padding: 8px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 14px;
+  background: #ffffff;
+  color: #1f2937;
+  outline: none;
+}
+
+.dateInput input:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+
+.filterActions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+/* ── SUMMARY CARDS (Tab Statistics) ───────────────────────────────────── */
+.summaryCards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.summaryCard {
+  display: flex;
+  gap: 14px;
+  padding: 20px;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  align-items: center;
+}
+
+.cardIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  font-size: 20px;
+  flex-shrink: 0;
+}
+
+.iconRevenue {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.iconTransactions {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
+.iconUsers {
+  background: #f3e8ff;
+  color: #7e22ce;
+}
+
+.iconActiveSub {
+  background: #fef3c7;
+  color: #b45309;
+}
+
+.cardContent {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  flex: 1;
+}
+
+.cardLabel {
+  font-size: 12px;
+  font-weight: 600;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 4px;
+}
+
+.cardValue {
+  font-size: 20px;
+  font-weight: 800;
+  color: #111827;
+}
+
+/* ── SECTIONS ─────────────────────────────────────────────────────────── */
+.section {
+  margin-bottom: 24px;
+  padding: 24px;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.section h2 {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 18px 0;
+  font-size: 18px;
+  font-weight: 700;
+  color: #1f2937;
+}
+
+.highlightValue {
+  color: #15803d;
+  font-weight: 700;
+}
+
+.badgeActiveCount {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: #dcfce7;
+  color: #15803d;
+  font-weight: 600;
+  font-size: 13px;
+}
+
 /* ── TABLE ────────────────────────────────────────────────────────────── */
 .tableWrapper {
-  background: #fff;
-  border: 1px solid #e5e7eb;
+  background: #ffffff;
   border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
   overflow-x: auto;
 }
 
 .table {
   width: 100%;
-  min-width: 1080px;
   border-collapse: collapse;
 }
 
 .table th {
   text-align: left;
   font-size: 12px;
+  font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.03em;
-  color: #6b7280;
+  color: #4b5563;
   background: #f9fafb;
-  padding: 12px 16px;
+  padding: 14px 16px;
   border-bottom: 1px solid #e5e7eb;
   white-space: nowrap;
 }
@@ -194,6 +416,10 @@
 
 .table tr:last-child td {
   border-bottom: none;
+}
+
+.table tbody tr:hover {
+  background-color: #fafafa;
 }
 
 .numeric {
@@ -292,6 +518,26 @@
   cursor: not-allowed;
 }
 
+/* ── SKELETONS & EMPTY STATES ─────────────────────────────────────────── */
+.cardSkeleton {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 20px;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.tableSkeleton {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 16px;
+  background: #ffffff;
+  border-radius: 12px;
+}
+
 .skeletonRow {
   height: 22px;
   border-radius: 6px;
@@ -300,21 +546,35 @@
   animation: shimmer 1.4s infinite;
 }
 
+.skeletonLine {
+  height: 16px;
+  border-radius: 6px;
+  background: linear-gradient(90deg, #eceff3 25%, #f6f8fa 50%, #eceff3 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s infinite;
+}
+
 @keyframes shimmer {
-  0% { background-position: 200% 0; }
-  100% { background-position: -200% 0; }
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
 }
 
 .emptyState,
 .errorState {
   text-align: center;
-  padding: 56px 20px;
+  padding: 48px 20px;
   color: #6b7280;
+  background: #ffffff;
+  border-radius: 12px;
 }
 
 .emptyState i,
 .errorState i {
-  font-size: 32px;
+  font-size: 36px;
   margin-bottom: 12px;
   color: #9ca3af;
 }
@@ -330,7 +590,7 @@
   gap: 8px;
   margin-top: 18px;
   font-size: 13px;
-  color: #6b7280;
+  color: #4b5563;
 }
 
 /* ── MODAL ────────────────────────────────────────────────────────────── */
