@@ -20,14 +20,14 @@ import {
 
 const STATUS_OPTIONS = [
   { value: "", label: "Tất cả trạng thái" },
-  { value: "Pending", label: "Pending" },
-  { value: "Resolved", label: "Resolved" },
+  { value: "Pending", label: "Đang chờ duyệt" },
+  { value: "Resolved", label: "Đã giải quyết" },
 ];
 
 const TYPE_OPTIONS = [
   { value: "", label: "Tất cả loại" },
-  { value: "course", label: "Course report" },
-  { value: "content", label: "Content report" },
+  { value: "course", label: "Khóa học" },
+  { value: "content", label: "Học liệu" },
 ];
 
 const REASON_LABELS = {
@@ -69,10 +69,17 @@ function getStatusClass(status) {
   }
 }
 
+const STATUS_LABELS = {
+  Pending: "Đang chờ",
+  Resolved: "Đã giải quyết",
+  Reviewing: "Đang xem xét",
+  Rejected: "Đã từ chối",
+};
+
 // BE trả contentType = "Course" hoặc "Learning Material" (ReportDto/ReportDetailDto),
 // không có field "reportType".
 function getTypeLabel(contentType) {
-  return contentType === "Course" ? "Course report" : "Content report";
+  return contentType === "Course" ? "Báo cáo khóa học" : "Báo cáo học liệu";
 }
 
 /* ── Re-Review Request Status helpers ─────────────────────── */
@@ -218,7 +225,7 @@ function ReReviewRequestsPanel({ onPreview, showToast }) {
           <thead>
             <tr>
               <th>Khóa học</th>
-              <th>Expert</th>
+              <th>Chuyên gia</th>
               <th>Lý do yêu cầu</th>
               <th>Trạng thái</th>
               <th>Ngày gửi</th>
@@ -543,11 +550,11 @@ function ReportDetailModal({ report, onClose, onResolve, onLock, onUnlock, onPre
         <div className={styles.metaGrid}>
           <div className={styles.metaItem}>
             <span className={styles.metaLabel}>Loại nội dung</span>
-            <div className={styles.metaValue}>{report.contentType || "—"}</div>
+            <div className={styles.metaValue}>{getTypeLabel(report.contentType)}</div>
           </div>
           <div className={styles.metaItem}>
             <span className={styles.metaLabel}>Trạng thái</span>
-            <div className={styles.metaValue}>{report.status || "—"}</div>
+            <div className={styles.metaValue}>{STATUS_LABELS[report.status] || report.status || "—"}</div>
           </div>
           <div className={styles.metaItem}>
             <span className={styles.metaLabel}>Người báo cáo</span>
@@ -999,7 +1006,7 @@ export default function ReportManagement() {
                     <td>{report.learnerName || "—"}</td>
                     <td>
                       <span className={`${styles.badge} ${getStatusClass(report.status)}`}>
-                        {report.status || "Pending"}
+                        {STATUS_LABELS[report.status] || report.status || "Đang chờ"}
                       </span>
                     </td>
                     <td>{formatDate(report.createdAt)}</td>

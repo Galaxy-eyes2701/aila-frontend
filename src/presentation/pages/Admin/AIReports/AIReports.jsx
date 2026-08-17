@@ -28,11 +28,11 @@ const emptyForm = {
 };
 
 function PricingFormModal({ mode, initialData, onClose, onSaved }) {
-  const [form, setForm]   = useState(initialData ?? emptyForm);
+  const [form, setForm] = useState(initialData ?? emptyForm);
   const [error, setError] = useState('');
   const [saving, setSaving] = useState(false);
 
-  useEffect(() => { 
+  useEffect(() => {
     if (initialData && mode === 'edit') {
       // Convert from per-token to per-1M-tokens for display
       setForm({
@@ -50,15 +50,15 @@ function PricingFormModal({ mode, initialData, onClose, onSaved }) {
     const name = form.serviceName?.trim() || '';
     if (!name) return 'Tên dịch vụ không được để trống.';
     if (name.length < 2) return 'Tên dịch vụ phải có ít nhất 2 ký tự.';
-    
+
     const inputCost = Number(form.costPerInputToken || 0);
     const outputCost = Number(form.costPerOutputToken || 0);
-    
+
     if (inputCost < 0) return 'Chi phí Input Token không được âm.';
     if (outputCost < 0) return 'Chi phí Output Token không được âm.';
     if (inputCost > 1000) return 'Chi phí Input Token không hợp lý (>$1000/1M tokens).';
     if (outputCost > 1000) return 'Chi phí Output Token không hợp lý (>$1000/1M tokens).';
-    
+
     return '';
   };
 
@@ -71,14 +71,14 @@ function PricingFormModal({ mode, initialData, onClose, onSaved }) {
       // Convert from per-1M-tokens to per-token for backend storage
       const inputTokenCost = Number(form.costPerInputToken || 0);
       const outputTokenCost = Number(form.costPerOutputToken || 0);
-      
+
       const payload = {
-        modelId:            form.modelId?.trim() || '',
-        serviceName:        form.serviceName.trim(),
-        costPerInputToken:  inputTokenCost / 1000000,  // Convert per-1M to per-token
+        modelId: form.modelId?.trim() || '',
+        serviceName: form.serviceName.trim(),
+        costPerInputToken: inputTokenCost / 1000000,  // Convert per-1M to per-token
         costPerOutputToken: outputTokenCost / 1000000, // Convert per-1M to per-token
-        currency:           'USD', // Luôn là USD
-        isActive:           form.isActive ?? true,
+        currency: 'USD', // Luôn là USD
+        isActive: form.isActive ?? true,
       };
       const res = mode === 'edit'
         ? await updateAIPricingConfig(initialData.id, payload)
@@ -109,7 +109,7 @@ function PricingFormModal({ mode, initialData, onClose, onSaved }) {
           </div>
           <div className={styles.formRow}>
             <div className={styles.formGroup}>
-              <label>Chi phí / 1M Input Tokens (USD) *</label>
+              <label>Chi phí / 1 triệu Tokens (USD) *</label>
               <input
                 type="text"
                 value={form.costPerInputToken ?? ''}
@@ -124,11 +124,11 @@ function PricingFormModal({ mode, initialData, onClose, onSaved }) {
                 title="Nhập chi phí cho 1 triệu input tokens. Hỗ trợ scientific notation (ví dụ: 5.9e-7)"
                 required />
               <small className={styles.fieldHint}>
-                Ví dụ: 0.59 = $0.59/1M tokens, 5.9e-7 = $0.00000059/token
+                Ví dụ: 0.59 = $0.59/1 triệu tokens, 5.9e-7 = $0.00000059/token
               </small>
             </div>
             <div className={styles.formGroup}>
-              <label>Chi phí / 1M Output Tokens (USD) *</label>
+              <label>Chi phí / 1 triệu Tokens (USD) *</label>
               <input
                 type="text"
                 value={form.costPerOutputToken ?? ''}
@@ -143,7 +143,7 @@ function PricingFormModal({ mode, initialData, onClose, onSaved }) {
                 title="Nhập chi phí cho 1 triệu output tokens. Hỗ trợ scientific notation (ví dụ: 7.9e-7)"
                 required />
               <small className={styles.fieldHint}>
-                Ví dụ: 0.79 = $0.79/1M tokens, 7.9e-7 = $0.00000079/token
+                Ví dụ: 0.79 = $0.79/1 triệu tokens, 7.9e-7 = $0.00000079/token
               </small>
             </div>
           </div>
@@ -183,21 +183,21 @@ export default function AIReports() {
 
   /* ── Reports state ── */
   const [resourceConsumption, setResourceConsumption] = useState(null);
-  const [consumptionTrend,    setConsumptionTrend]    = useState(null);
-  const [serviceBreakdown,    setServiceBreakdown]    = useState(null);
-  const [topConsumers,        setTopConsumers]        = useState(null);
-  const [reportsLoading,  setReportsLoading]  = useState(true);
-  const [reportsError,    setReportsError]    = useState('');
-  const [startDate,  setStartDate]  = useState('');
-  const [endDate,    setEndDate]    = useState('');
+  const [consumptionTrend, setConsumptionTrend] = useState(null);
+  const [serviceBreakdown, setServiceBreakdown] = useState(null);
+  const [topConsumers, setTopConsumers] = useState(null);
+  const [reportsLoading, setReportsLoading] = useState(true);
+  const [reportsError, setReportsError] = useState('');
+  const [startDate, setStartDate] = useState('');
+  const [endDate, setEndDate] = useState('');
 
   /* ── Pricing state ── */
   const [pricingConfigs, setPricingConfigs] = useState([]);
   const [pricingLoading, setPricingLoading] = useState(true);
-  const [pricingError,   setPricingError]   = useState('');
-  const [modalMode,      setModalMode]      = useState(null);
-  const [editingConfig,  setEditingConfig]  = useState(null);
-  const [busyId,         setBusyId]         = useState('');
+  const [pricingError, setPricingError] = useState('');
+  const [modalMode, setModalMode] = useState(null);
+  const [editingConfig, setEditingConfig] = useState(null);
+  const [busyId, setBusyId] = useState('');
 
   const [toast, setToast] = useState(null);
   const showToast = useCallback((message, type = 'success') => setToast({ message, type }), []);
@@ -207,21 +207,21 @@ export default function AIReports() {
     : new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND', minimumFractionDigits: 0 }).format(v);
   const formatNum = (v) => v == null ? '—'
     : new Intl.NumberFormat('vi-VN').format(Math.round(v));
-  
+
   // Helper để format giá token một cách thông minh (bỏ số 0 thừa)
   const formatTokenPrice = (price) => {
     if (price == null || price === 0) return '$0';
-    
+
     // Nếu giá >= 0.01, hiển thị với 2-4 chữ số thập phân
     if (price >= 0.01) {
       return `$${price.toFixed(2).replace(/\.?0+$/, '')}`;
     }
-    
+
     // Nếu giá < 0.01, sử dụng scientific notation hoặc nhiều chữ số thập phân
     if (price < 0.001) {
       return `$${price.toExponential(2)}`;
     }
-    
+
     // Với giá từ 0.001 đến 0.01, hiển thị với số chữ số thập phân phù hợp
     return `$${price.toFixed(6).replace(/\.?0+$/, '')}`;
   };
@@ -238,9 +238,9 @@ export default function AIReports() {
       ]);
       if (consumption.success) setResourceConsumption(consumption.data);
       else { setReportsError(consumption.errorMessage || 'Không thể tải báo cáo.'); return; }
-      if (trend.success)     setConsumptionTrend(trend.data);
+      if (trend.success) setConsumptionTrend(trend.data);
       if (breakdown.success) setServiceBreakdown(breakdown.data);
-      if (topUsers.success)  setTopConsumers(topUsers.data);
+      if (topUsers.success) setTopConsumers(topUsers.data);
     } catch (err) {
       setReportsError(err.message || 'Lỗi kết nối máy chủ.');
     } finally { setReportsLoading(false); }
@@ -342,12 +342,12 @@ export default function AIReports() {
                 </button>
               </div>
               <div className={styles.filterActions}>
-                <button 
-                  className={styles.secondaryButton} 
+                <button
+                  className={styles.secondaryButton}
                   onClick={fetchReports}
                   disabled={reportsLoading}
                 >
-                  <i className={reportsLoading ? "fas fa-spinner fa-spin" : "fas fa-sync-alt"} /> 
+                  <i className={reportsLoading ? "fas fa-spinner fa-spin" : "fas fa-sync-alt"} />
                   {reportsLoading ? "Đang tải..." : "Tải lại"}
                 </button>
                 <button className={styles.secondaryButton} onClick={() => { setStartDate(''); setEndDate(''); }}>
@@ -415,18 +415,18 @@ export default function AIReports() {
                           <th>Ngày</th><th>Tổng Tokens</th><th>Prompt</th><th>Completion</th>
                           <th>Requests</th><th>Chi phí USD</th><th>Chi phí VND</th>
                         </tr></thead><tbody>
-                          {consumptionTrend.dataPoints.map((item, i) => (
-                            <tr key={i}>
-                              <td>{item.date || '—'}</td>
-                              <td>{formatNum(item.totalTokens)}</td>
-                              <td>{formatNum(item.promptTokens)}</td>
-                              <td>{formatNum(item.completionTokens)}</td>
-                              <td>{formatNum(item.totalRequests)}</td>
-                              <td>${(item.estimatedCostUsd || 0).toFixed(4)}</td>
-                              <td>{formatVND(item.estimatedCostVnd)}</td>
-                            </tr>
-                          ))}
-                        </tbody></table>
+                            {consumptionTrend.dataPoints.map((item, i) => (
+                              <tr key={i}>
+                                <td>{item.date || '—'}</td>
+                                <td>{formatNum(item.totalTokens)}</td>
+                                <td>{formatNum(item.promptTokens)}</td>
+                                <td>{formatNum(item.completionTokens)}</td>
+                                <td>{formatNum(item.totalRequests)}</td>
+                                <td>${(item.estimatedCostUsd || 0).toFixed(4)}</td>
+                                <td>{formatVND(item.estimatedCostVnd)}</td>
+                              </tr>
+                            ))}
+                          </tbody></table>
                       </div>
                     ) : <div className={styles.emptyState}><i className="fas fa-chart-line" /><p>Không có dữ liệu xu hướng.</p></div>}
                 </section>
@@ -441,17 +441,17 @@ export default function AIReports() {
                           <th>Dịch vụ</th><th>Tổng Tokens</th><th>Requests</th>
                           <th>Chi phí USD</th><th>Chi phí VND</th><th>Tỷ lệ %</th>
                         </tr></thead><tbody>
-                          {serviceBreakdown.services.map((item, i) => (
-                            <tr key={i}>
-                              <td>{item.displayName || item.serviceType || '—'}</td>
-                              <td>{formatNum(item.totalTokens)}</td>
-                              <td>{formatNum(item.requestCount)}</td>
-                              <td>${(item.estimatedCostUsd || 0).toFixed(4)}</td>
-                              <td>{formatVND(item.estimatedCostVnd)}</td>
-                              <td>{(item.percentage || 0).toFixed(1)}%</td>
-                            </tr>
-                          ))}
-                        </tbody></table>
+                            {serviceBreakdown.services.map((item, i) => (
+                              <tr key={i}>
+                                <td>{item.displayName || item.serviceType || '—'}</td>
+                                <td>{formatNum(item.totalTokens)}</td>
+                                <td>{formatNum(item.requestCount)}</td>
+                                <td>${(item.estimatedCostUsd || 0).toFixed(4)}</td>
+                                <td>{formatVND(item.estimatedCostVnd)}</td>
+                                <td>{(item.percentage || 0).toFixed(1)}%</td>
+                              </tr>
+                            ))}
+                          </tbody></table>
                       </div>
                     ) : <div className={styles.emptyState}><i className="fas fa-chart-pie" /><p>Không có dữ liệu phân tích dịch vụ.</p></div>}
                 </section>
@@ -471,21 +471,21 @@ export default function AIReports() {
                         <th>#</th><th>Tên / Email</th><th>Vai trò</th>
                         <th>Tổng Tokens</th><th>Requests</th><th>Chi phí USD</th><th>Chi phí VND</th>
                       </tr></thead><tbody>
-                        {topConsumers.topUsers.map((item, i) => (
-                          <tr key={i}>
-                            <td className={styles.rankCell}><span className={styles.rank}>#{i + 1}</span></td>
-                            <td>
-                              <div>{item.fullName || '—'}</div>
-                              <div style={{ fontSize: '12px', color: 'var(--text-muted,#6b7280)' }}>{item.email}</div>
-                            </td>
-                            <td>{item.role || '—'}</td>
-                            <td>{formatNum(item.totalTokens)}</td>
-                            <td>{formatNum(item.requestCount)}</td>
-                            <td>${(item.estimatedCostUsd || 0).toFixed(4)}</td>
-                            <td>{formatVND(item.estimatedCostVnd)}</td>
-                          </tr>
-                        ))}
-                      </tbody></table>
+                          {topConsumers.topUsers.map((item, i) => (
+                            <tr key={i}>
+                              <td className={styles.rankCell}><span className={styles.rank}>#{i + 1}</span></td>
+                              <td>
+                                <div>{item.fullName || '—'}</div>
+                                <div style={{ fontSize: '12px', color: 'var(--text-muted,#6b7280)' }}>{item.email}</div>
+                              </td>
+                              <td>{item.role || '—'}</td>
+                              <td>{formatNum(item.totalTokens)}</td>
+                              <td>{formatNum(item.requestCount)}</td>
+                              <td>${(item.estimatedCostUsd || 0).toFixed(4)}</td>
+                              <td>{formatVND(item.estimatedCostVnd)}</td>
+                            </tr>
+                          ))}
+                        </tbody></table>
                     </div>
                   ) : <div className={styles.emptyState}><i className="fas fa-users" /><p>Không có dữ liệu người tiêu thụ.</p></div>}
                 </section>
@@ -508,7 +508,7 @@ export default function AIReports() {
                   Đơn giá mặc định được sử dụng cho báo cáo AI khi không có cấu hình cụ thể nào được kích hoạt.
                 </p>
               </div>
-              
+
               <div className={styles.defaultConfigGrid}>
                 <div className={styles.defaultConfigCard}>
                   <label>Model AI mặc định</label>
@@ -518,13 +518,13 @@ export default function AIReports() {
                     disabled
                     className={styles.disabledInput}
                   />
-                  <small>Model được sử dụng khi không có config nào active</small>
+                  <small>Model được sử dụng khi không có cấu hình nào hoạt động</small>
                 </div>
-                
-                
-                
+
+
+
                 <div className={styles.defaultConfigCard}>
-                  <label>Chi phí Input Token mặc định (per 1M tokens)</label>
+                  <label>Chi phí Input Token mặc định (mỗi 1 triệu tokens)</label>
                   <div className={styles.defaultPriceGroup}>
                     <input
                       type="text"
@@ -534,14 +534,14 @@ export default function AIReports() {
                     />
                     <div className={styles.priceConversion}>
                       <span>≈ $0.00000059 / token</span>
-                      <span>≈ 14,986 VND / 1M tokens</span>
+                      <span>≈ 14,986 VND / 1 triệu tokens</span>
                     </div>
                   </div>
-                  <small>Groq Llama 70B Input Token pricing</small>
+                  <small>Đơn giá Input Token Groq Llama 70B</small>
                 </div>
-                
+
                 <div className={styles.defaultConfigCard}>
-                  <label>Chi phí Output Token mặc định (per 1M tokens)</label>
+                  <label>Chi phí Output Token mặc định (mỗi 1 triệu tokens)</label>
                   <div className={styles.defaultPriceGroup}>
                     <input
                       type="text"
@@ -551,17 +551,17 @@ export default function AIReports() {
                     />
                     <div className={styles.priceConversion}>
                       <span>≈ $0.00000079 / token</span>
-                      <span>≈ 20,066 VND / 1M tokens</span>
+                      <span>≈ 20,066 VND / 1 triệu tokens</span>
                     </div>
                   </div>
-                  <small>Groq Llama 70B Output Token pricing</small>
+                  <small>Đơn giá Output Token Groq Llama 70B</small>
                 </div>
               </div>
-              
-             
+
+
             </section>
 
-            
+
 
             {pricingError ? (
               <div className={styles.errorState}>
@@ -576,8 +576,8 @@ export default function AIReports() {
                     <tr>
                       <th>Model ID</th>
                       <th>Tên dịch vụ</th>
-                      <th>Input / 1M (USD)</th>
-                      <th>Output / 1M (USD)</th>
+                      <th>Input / 1 triệu (USD)</th>
+                      <th>Output / 1 triệu (USD)</th>
                       <th>Tiền tệ</th>
                       <th>Trạng thái</th>
                       <th>Hành động</th>

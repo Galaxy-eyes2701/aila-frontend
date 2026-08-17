@@ -5,6 +5,14 @@ import Toast from '../../Expert/ModuleManagement/components/Toast';
 import Pagination from '@presentation/components/Pagination/Pagination';
 import { getAIPolicyViolations } from '@services/aiReportsApi';
 
+const VIOLATION_TYPE_LABELS = {
+  ContentViolation: "Vi phạm nội dung",
+  RateLimitViolation: "Vượt quá giới hạn tỷ lệ",
+  UnauthorizedAccess: "Truy cập trái phép",
+  MaliciousIntent: "Ý định xấu",
+  Other: "Khác",
+};
+
 function ViolationDetailModal({ violation, onClose }) {
   if (!violation) return null;
 
@@ -33,7 +41,7 @@ function ViolationDetailModal({ violation, onClose }) {
             <label>Loại vi phạm</label>
             <p>
               <span className={styles.violationType}>
-                {violation.violationType || '—'}
+                {VIOLATION_TYPE_LABELS[violation.violationType] || violation.violationType || '—'}
               </span>
             </p>
           </div>
@@ -233,7 +241,7 @@ export default function PolicyViolations() {
                       </td>
                       <td>
                         <span className={styles.violationType}>
-                          {violation.violationType || '—'}
+                          {VIOLATION_TYPE_LABELS[violation.violationType] || violation.violationType || '—'}
                         </span>
                       </td>
                       <td className={styles.descriptionCell}>

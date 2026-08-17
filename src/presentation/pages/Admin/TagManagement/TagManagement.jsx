@@ -459,7 +459,7 @@ export default function TagManagement() {
           <div>
             <h1>Quản lý tags</h1>
             <p className={styles.headerText}>
-              Duyệt, tạo, chỉnh sửa và xóa system tags trong hệ thống.
+              Duyệt, tạo, chỉnh sửa và xóa các thẻ tag hệ thống.
             </p>
           </div>
 
@@ -575,7 +575,7 @@ export default function TagManagement() {
         </div>
 
         <div className={styles.sectionHeader}>
-          <h2>Tags hệ thống</h2>
+          <h2>Thẻ (Tag) hệ thống</h2>
         </div>
 
         <div className={styles.tableWrapper}>

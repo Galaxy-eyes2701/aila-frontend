@@ -563,7 +563,7 @@ export default function SubscriptionPlanManagement() {
                             <th scope="col">Giá hiện tại</th>
                             <th scope="col">Tổng lượt mua</th>
                             <th scope="col">Tổng doanh thu</th>
-                            <th scope="col">Số gói đang Active</th>
+                            <th scope="col">Số gói đang hoạt động</th>
                           </tr>
                         </thead>
                         <tbody>
