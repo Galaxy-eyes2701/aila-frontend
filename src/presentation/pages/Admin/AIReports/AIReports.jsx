@@ -56,8 +56,8 @@ function PricingFormModal({ mode, initialData, onClose, onSaved }) {
 
     if (inputCost < 0) return 'Chi phí Input Token không được âm.';
     if (outputCost < 0) return 'Chi phí Output Token không được âm.';
-    if (inputCost > 1000) return 'Chi phí Input Token không hợp lý (>$1000/1M tokens).';
-    if (outputCost > 1000) return 'Chi phí Output Token không hợp lý (>$1000/1M tokens).';
+    if (inputCost > 1000) return 'Chi phí Input Token không hợp lý (>$1000/1 triệu tokens).';
+    if (outputCost > 1000) return 'Chi phí Output Token không hợp lý (>$1000/1 triệu tokens).';
 
     return '';
   };
@@ -397,7 +397,7 @@ export default function AIReports() {
                       <div className={styles.summaryCard}>
                         <div className={styles.cardIcon}><i className="fas fa-paper-plane" /></div>
                         <div className={styles.cardContent}>
-                          <p className={styles.cardLabel}>Tổng requests</p>
+                          <p className={styles.cardLabel}>Tổng lượt yêu cầu</p>
                           <p className={styles.cardValue}>{formatNum(resourceConsumption?.totalRequests)}</p>
                         </div>
                       </div>
@@ -412,8 +412,8 @@ export default function AIReports() {
                     : consumptionTrend?.dataPoints?.length > 0 ? (
                       <div className={styles.tableScroll}>
                         <table><thead><tr>
-                          <th>Ngày</th><th>Tổng Tokens</th><th>Prompt</th><th>Completion</th>
-                          <th>Requests</th><th>Chi phí USD</th><th>Chi phí VND</th>
+                          <th>Ngày</th><th>Tổng Tokens</th><th>Input Tokens</th><th>Output Tokens</th>
+                          <th>Lượt yêu cầu</th><th>Chi phí USD</th><th>Chi phí VND</th>
                         </tr></thead><tbody>
                             {consumptionTrend.dataPoints.map((item, i) => (
                               <tr key={i}>
@@ -438,7 +438,7 @@ export default function AIReports() {
                     : serviceBreakdown?.services?.length > 0 ? (
                       <div className={styles.tableScroll}>
                         <table><thead><tr>
-                          <th>Dịch vụ</th><th>Tổng Tokens</th><th>Requests</th>
+                          <th>Dịch vụ</th><th>Tổng Tokens</th><th>Lượt yêu cầu</th>
                           <th>Chi phí USD</th><th>Chi phí VND</th><th>Tỷ lệ %</th>
                         </tr></thead><tbody>
                             {serviceBreakdown.services.map((item, i) => (
@@ -469,22 +469,25 @@ export default function AIReports() {
                     <div className={styles.tableScroll}>
                       <table><thead><tr>
                         <th>#</th><th>Tên / Email</th><th>Vai trò</th>
-                        <th>Tổng Tokens</th><th>Requests</th><th>Chi phí USD</th><th>Chi phí VND</th>
+                        <th>Tổng Tokens</th><th>Lượt yêu cầu</th><th>Chi phí USD</th><th>Chi phí VND</th>
                       </tr></thead><tbody>
-                          {topConsumers.topUsers.map((item, i) => (
-                            <tr key={i}>
-                              <td className={styles.rankCell}><span className={styles.rank}>#{i + 1}</span></td>
-                              <td>
-                                <div>{item.fullName || '—'}</div>
-                                <div style={{ fontSize: '12px', color: 'var(--text-muted,#6b7280)' }}>{item.email}</div>
-                              </td>
-                              <td>{item.role || '—'}</td>
-                              <td>{formatNum(item.totalTokens)}</td>
-                              <td>{formatNum(item.requestCount)}</td>
-                              <td>${(item.estimatedCostUsd || 0).toFixed(4)}</td>
-                              <td>{formatVND(item.estimatedCostVnd)}</td>
-                            </tr>
-                          ))}
+                          {topConsumers.topUsers.map((item, i) => {
+                            const roleMap = { Admin: "Quản trị viên", Expert: "Chuyên gia", Learner: "Học viên" };
+                            return (
+                              <tr key={i}>
+                                <td className={styles.rankCell}><span className={styles.rank}>#{i + 1}</span></td>
+                                <td>
+                                  <div>{item.fullName || '—'}</div>
+                                  <div style={{ fontSize: '12px', color: 'var(--text-muted,#6b7280)' }}>{item.email}</div>
+                                </td>
+                                <td>{roleMap[item.role] || item.role || '—'}</td>
+                                <td>{formatNum(item.totalTokens)}</td>
+                                <td>{formatNum(item.requestCount)}</td>
+                                <td>${(item.estimatedCostUsd || 0).toFixed(4)}</td>
+                                <td>{formatVND(item.estimatedCostVnd)}</td>
+                               </tr>
+                            );
+                          })}
                         </tbody></table>
                     </div>
                   ) : <div className={styles.emptyState}><i className="fas fa-users" /><p>Không có dữ liệu người tiêu thụ.</p></div>}

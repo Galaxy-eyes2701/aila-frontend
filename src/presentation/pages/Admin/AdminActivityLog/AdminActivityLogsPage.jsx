@@ -1,7 +1,8 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import ActivityLogFilter from "./ActivityLogFilter";
 import ActivityLogTable from "./ActivityLogTable";
+import Pagination from "@presentation/components/Pagination/Pagination";
 import { getAdminActivityLogs } from "@services/adminActivityLogApi";
 import styles from "./AdminActivityLogs.module.css";
 
@@ -10,11 +11,19 @@ function AdminActivityLogsPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
+
   const [filters, setFilters] = useState({
     startDate: "",
     endDate: "",
     action: "",
   });
+
+  const paginatedLogs = useMemo(() => {
+    const start = (currentPage - 1) * itemsPerPage;
+    return logs.slice(start, start + itemsPerPage);
+  }, [logs, currentPage, itemsPerPage]);
 
   const fetchLogs = async (currentFilters) => {
     try {
@@ -45,6 +54,7 @@ function AdminActivityLogsPage() {
 
   const handleSearch = (newFilters) => {
     setFilters(newFilters);
+    setCurrentPage(1);
     fetchLogs(newFilters);
   };
 
@@ -118,7 +128,22 @@ function AdminActivityLogsPage() {
             )}
           </div>
 
-          <ActivityLogTable logs={logs} loading={loading} />
+          <ActivityLogTable logs={paginatedLogs} loading={loading} />
+
+          {!loading && !error && logs.length > 0 && (
+            <Pagination
+              currentPage={currentPage}
+              totalPages={Math.max(1, Math.ceil(logs.length / itemsPerPage))}
+              itemsPerPage={itemsPerPage}
+              totalItems={logs.length}
+              onPageChange={setCurrentPage}
+              onItemsPerPageChange={(n) => {
+                setItemsPerPage(n);
+                setCurrentPage(1);
+              }}
+              unitLabel="hoạt động"
+            />
+          )}
         </div>
       </div>
     </div>
