@@ -99,6 +99,9 @@ export default function ExpertCourseManagement() {
         setCourses(prev => prev.map(c => c.id === courseId ? { ...c, isPublished: true } : c));
         showToast('Khóa học đã được xuất bản thành công!', 'success');
         
+        // Delay 1 giây trước khi bắt đầu sync AI
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        
         // Bước 2: Tự động đồng bộ RAG sau khi publish thành công
         try {
           const syncRes = await api.post(`/rag/courses/${courseId}/sync-materials`);
