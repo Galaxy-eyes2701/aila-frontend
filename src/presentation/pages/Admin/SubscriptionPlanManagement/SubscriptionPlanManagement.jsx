@@ -81,6 +81,11 @@ export default function SubscriptionPlanManagement() {
 
   /* ── Fetch Statistics ── */
   const fetchStatistics = useCallback(async () => {
+    if (startDate && endDate && new Date(startDate) > new Date(endDate)) {
+      setStatsError('Ngày kết thúc không được nhỏ hơn ngày bắt đầu.');
+      return;
+    }
+
     setStatsLoading(true);
     setStatsError('');
 
