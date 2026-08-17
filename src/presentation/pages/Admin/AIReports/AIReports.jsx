@@ -32,14 +32,33 @@ function PricingFormModal({ mode, initialData, onClose, onSaved }) {
   const [error, setError] = useState('');
   const [saving, setSaving] = useState(false);
 
-  useEffect(() => { setForm(initialData ?? emptyForm); setError(''); }, [initialData]);
+  useEffect(() => { 
+    if (initialData && mode === 'edit') {
+      // Convert from per-token to per-1M-tokens for display
+      setForm({
+        ...initialData,
+        costPerInputToken: initialData.costPerInputToken ? (initialData.costPerInputToken * 1000000).toString() : '',
+        costPerOutputToken: initialData.costPerOutputToken ? (initialData.costPerOutputToken * 1000000).toString() : ''
+      });
+    } else {
+      setForm(emptyForm);
+    }
+    setError('');
+  }, [initialData, mode]);
 
   const validate = () => {
     const name = form.serviceName?.trim() || '';
     if (!name) return 'Tên dịch vụ không được để trống.';
     if (name.length < 2) return 'Tên dịch vụ phải có ít nhất 2 ký tự.';
-    if (Number(form.costPerInputToken) < 0)  return 'Chi phí Input Token không được âm.';
-    if (Number(form.costPerOutputToken) < 0) return 'Chi phí Output Token không được âm.';
+    
+    const inputCost = Number(form.costPerInputToken || 0);
+    const outputCost = Number(form.costPerOutputToken || 0);
+    
+    if (inputCost < 0) return 'Chi phí Input Token không được âm.';
+    if (outputCost < 0) return 'Chi phí Output Token không được âm.';
+    if (inputCost > 1000) return 'Chi phí Input Token không hợp lý (>$1000/1M tokens).';
+    if (outputCost > 1000) return 'Chi phí Output Token không hợp lý (>$1000/1M tokens).';
+    
     return '';
   };
 
@@ -49,12 +68,16 @@ function PricingFormModal({ mode, initialData, onClose, onSaved }) {
     if (err) { setError(err); return; }
     setSaving(true); setError('');
     try {
+      // Convert from per-1M-tokens to per-token for backend storage
+      const inputTokenCost = Number(form.costPerInputToken || 0);
+      const outputTokenCost = Number(form.costPerOutputToken || 0);
+      
       const payload = {
         modelId:            form.modelId?.trim() || '',
         serviceName:        form.serviceName.trim(),
-        costPerInputToken:  Number(form.costPerInputToken  || 0),
-        costPerOutputToken: Number(form.costPerOutputToken || 0),
-        currency:           form.currency || 'USD',
+        costPerInputToken:  inputTokenCost / 1000000,  // Convert per-1M to per-token
+        costPerOutputToken: outputTokenCost / 1000000, // Convert per-1M to per-token
+        currency:           'USD', // Luôn là USD
         isActive:           form.isActive ?? true,
       };
       const res = mode === 'edit'
@@ -86,40 +109,48 @@ function PricingFormModal({ mode, initialData, onClose, onSaved }) {
           </div>
           <div className={styles.formRow}>
             <div className={styles.formGroup}>
-              <label>Chi phí / Input Token (USD) *</label>
+              <label>Chi phí / 1M Input Tokens (USD) *</label>
               <input
                 type="text"
                 value={form.costPerInputToken ?? ''}
                 onChange={(e) => {
                   const value = e.target.value;
+                  // Allow empty, numbers, decimals, and scientific notation (e.g., 5.9e-7)
                   if (value === '' || /^[0-9]*\.?[0-9]*([eE][+-]?[0-9]*)?$/.test(value)) {
                     setForm({ ...form, costPerInputToken: value });
                   }
                 }}
-                placeholder="5.9e-7 hoặc 0.00000059"
+                placeholder="0.59 hoặc 5.9e-7"
+                title="Nhập chi phí cho 1 triệu input tokens. Hỗ trợ scientific notation (ví dụ: 5.9e-7)"
                 required />
+              <small className={styles.fieldHint}>
+                Ví dụ: 0.59 = $0.59/1M tokens, 5.9e-7 = $0.00000059/token
+              </small>
             </div>
             <div className={styles.formGroup}>
-              <label>Chi phí / Output Token (USD) *</label>
+              <label>Chi phí / 1M Output Tokens (USD) *</label>
               <input
                 type="text"
                 value={form.costPerOutputToken ?? ''}
                 onChange={(e) => {
                   const value = e.target.value;
+                  // Allow empty, numbers, decimals, and scientific notation (e.g., 7.9e-7)
                   if (value === '' || /^[0-9]*\.?[0-9]*([eE][+-]?[0-9]*)?$/.test(value)) {
                     setForm({ ...form, costPerOutputToken: value });
                   }
                 }}
-                placeholder="7.9e-7 hoặc 0.00000079"
+                placeholder="0.79 hoặc 7.9e-7"
+                title="Nhập chi phí cho 1 triệu output tokens. Hỗ trợ scientific notation (ví dụ: 7.9e-7)"
                 required />
+              <small className={styles.fieldHint}>
+                Ví dụ: 0.79 = $0.79/1M tokens, 7.9e-7 = $0.00000079/token
+              </small>
             </div>
           </div>
           <div className={styles.formGroup}>
             <label>Tiền tệ</label>
-            <select value={form.currency || 'USD'} onChange={(e) => setForm({ ...form, currency: e.target.value })}>
+            <select value="USD" disabled className={styles.disabledInput}>
               <option value="USD">USD</option>
-              <option value="VND">VND</option>
-              <option value="EUR">EUR</option>
             </select>
           </div>
           <div className={styles.formCheckbox}>
@@ -176,6 +207,24 @@ export default function AIReports() {
     : new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND', minimumFractionDigits: 0 }).format(v);
   const formatNum = (v) => v == null ? '—'
     : new Intl.NumberFormat('vi-VN').format(Math.round(v));
+  
+  // Helper để format giá token một cách thông minh (bỏ số 0 thừa)
+  const formatTokenPrice = (price) => {
+    if (price == null || price === 0) return '$0';
+    
+    // Nếu giá >= 0.01, hiển thị với 2-4 chữ số thập phân
+    if (price >= 0.01) {
+      return `$${price.toFixed(2).replace(/\.?0+$/, '')}`;
+    }
+    
+    // Nếu giá < 0.01, sử dụng scientific notation hoặc nhiều chữ số thập phân
+    if (price < 0.001) {
+      return `$${price.toExponential(2)}`;
+    }
+    
+    // Với giá từ 0.001 đến 0.01, hiển thị với số chữ số thập phân phù hợp
+    return `$${price.toFixed(6).replace(/\.?0+$/, '')}`;
+  };
 
   /* ── Fetch reports ── */
   const fetchReports = useCallback(async () => {
@@ -475,16 +524,16 @@ export default function AIReports() {
                 
                 
                 <div className={styles.defaultConfigCard}>
-                  <label>Chi phí Input Token mặc định</label>
+                  <label>Chi phí Input Token mặc định (per 1M tokens)</label>
                   <div className={styles.defaultPriceGroup}>
                     <input
                       type="text"
-                      value="0.00000059"
+                      value="$0.59"
                       disabled
                       className={styles.disabledInput}
                     />
                     <div className={styles.priceConversion}>
-                      <span>≈ $0.59 / 1M tokens</span>
+                      <span>≈ $0.00000059 / token</span>
                       <span>≈ 14,986 VND / 1M tokens</span>
                     </div>
                   </div>
@@ -492,16 +541,16 @@ export default function AIReports() {
                 </div>
                 
                 <div className={styles.defaultConfigCard}>
-                  <label>Chi phí Output Token mặc định</label>
+                  <label>Chi phí Output Token mặc định (per 1M tokens)</label>
                   <div className={styles.defaultPriceGroup}>
                     <input
                       type="text"
-                      value="0.00000079"
+                      value="$0.79"
                       disabled
                       className={styles.disabledInput}
                     />
                     <div className={styles.priceConversion}>
-                      <span>≈ $0.79 / 1M tokens</span>
+                      <span>≈ $0.00000079 / token</span>
                       <span>≈ 20,066 VND / 1M tokens</span>
                     </div>
                   </div>
@@ -549,8 +598,8 @@ export default function AIReports() {
                       <tr key={cfg.id}>
                         <td><span style={{ fontFamily: 'monospace', fontSize: '12px' }}>{cfg.modelId || '—'}</span></td>
                         <td><strong>{cfg.serviceName}</strong></td>
-                        <td>${(cfg.costPer1MInputTokens  || 0).toFixed(4)}</td>
-                        <td>${(cfg.costPer1MOutputTokens || 0).toFixed(4)}</td>
+                        <td>{formatTokenPrice(cfg.costPer1MInputTokens)}</td>
+                        <td>{formatTokenPrice(cfg.costPer1MOutputTokens)}</td>
                         <td>{cfg.currency || 'USD'}</td>
                         <td>
                           <span className={`${styles.badge} ${cfg.isActive ? styles.statusActive : styles.statusInactive}`}>
