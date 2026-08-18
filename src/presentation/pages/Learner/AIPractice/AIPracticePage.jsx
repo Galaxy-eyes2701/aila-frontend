@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
+import { resolveApiError } from "@services/api";
 import {
   abandonAttempt,
   completeAttempt,
@@ -73,9 +74,9 @@ export default function AIPracticePage() {
         setPhase("starting");
       })
       .catch((err) => {
+        const { errorMessage } = resolveApiError(err);
         setMaterialError(
-          err?.response?.data?.errorMessage ||
-          "Không thể tải thông tin tình huống. Vui lòng thử lại."
+          errorMessage || "Không thể tải thông tin tình huống. Vui lòng thử lại."
         );
         setPhase("error");
       })
@@ -97,11 +98,8 @@ export default function AIPracticePage() {
       setPhase("chat");
       setTimeout(() => inputRef.current?.focus(), 80);
     } catch (err) {
-      const msg =
-        err?.response?.data?.errorMessage ||
-        err?.message ||
-        "Không thể bắt đầu phiên luyện tập.";
-      setStartError(msg);
+      const { errorMessage } = resolveApiError(err);
+      setStartError(errorMessage || "Không thể bắt đầu phiên luyện tập.");
     } finally {
       setStarting(false);
     }
@@ -203,10 +201,13 @@ export default function AIPracticePage() {
       }
     } catch (err) {
       // AF-06 — AI lỗi, không trừ token
-      const msg = err?.response?.data?.errorMessage || "AI tạm thời không phản hồi. Vui lòng thử lại.";
+      const { errorMessage } = resolveApiError(err);
       setMessages((prev) => prev.filter((m) => m.id !== userMsgId));
       setPrompt(text);
-      setBanner({ type: "error", text: msg });
+      setBanner({
+        type: "error",
+        text: errorMessage || "AI tạm thời không phản hồi. Vui lòng thử lại.",
+      });
     } finally {
       setSending(false);
     }
@@ -231,8 +232,11 @@ export default function AIPracticePage() {
       setResult(data);
       setPhase("done");
     } catch (err) {
-      const msg = err?.response?.data?.errorMessage || "Không thể hoàn thành phiên luyện tập. Vui lòng thử lại.";
-      setBanner({ type: "error", text: msg });
+      const { errorMessage } = resolveApiError(err);
+      setBanner({
+        type: "error",
+        text: errorMessage || "Không thể hoàn thành phiên luyện tập. Vui lòng thử lại.",
+      });
       setPhase("chat");
     }
   }, [attemptId]);
