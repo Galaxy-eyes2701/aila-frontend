@@ -1,7 +1,7 @@
 .page {
   padding: 40px 0 72px;
   min-height: calc(100vh - 68px);
-  background: var(--bg);
+  background: #f7f3eb;
 }
 
 /* ── BREADCRUMB ────────────────────────────────────────────── */
@@ -162,7 +162,7 @@
   cursor: pointer;
   transition: background var(--transition), color var(--transition);
 }
-.filterTab:hover { background: var(--bg); color: var(--text); }
+.filterTab:hover { background: #efe8dc; color: var(--text); }
 .filterTabActive { background: var(--primary) !important; color: #fff !important; }
 
 /* ── LOADING SKELETON ROWS ─────────────────────────────────── */
@@ -303,7 +303,7 @@
   text-decoration: none;
   transition: background var(--transition), border-color var(--transition), color var(--transition);
 }
-.actionBtn:hover { background: var(--bg); border-color: #9ca3af; }
+.actionBtn:hover { background: #efe8dc; border-color: #9ca3af; }
 
 .actionBtnSuccess {
   background: #dcfce7;
@@ -368,7 +368,7 @@
   cursor: pointer;
   transition: background var(--transition), border-color var(--transition);
 }
-.btnLoadMore:hover { background: var(--bg); border-color: #9ca3af; }
+.btnLoadMore:hover { background: #efe8dc; border-color: #9ca3af; }
 
 /* ── SPINNER ───────────────────────────────────────────────── */
 .spinner {
@@ -703,7 +703,7 @@
   padding: 5px 14px;
   border-radius: 999px;
   border: 1.5px solid var(--border);
-  background: var(--bg);
+  background: #f7f3eb;
   color: var(--text-muted);
   font-size: 13px;
   font-weight: 500;
@@ -878,7 +878,7 @@
   align-items: center;
   gap: 10px;
   padding: 12px 14px;
-  background: var(--bg);
+  background: #efe8dc;
   border: 1.5px solid var(--border);
   border-radius: var(--radius-sm);
   flex-wrap: wrap;
@@ -941,7 +941,7 @@
   cursor: pointer;
   transition: background var(--transition);
 }
-.btnCancel:hover { background: var(--bg); border-color: #9ca3af; }
+.btnCancel:hover { background: #efe8dc; border-color: #9ca3af; }
 
 .btnSave {
   padding: 10px 24px;
