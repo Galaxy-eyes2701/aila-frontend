@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { resolveApiError } from '@services/api';
 import styles from './AIReports.module.css';
 import Toast from '../../Expert/ModuleManagement/components/Toast';
 import {
@@ -85,8 +86,10 @@ function PricingFormModal({ mode, initialData, onClose, onSaved }) {
         : await createAIPricingConfig(payload);
       if (res.success) onSaved(res.data);
       else setError(res.errorMessage || 'Không thể lưu cấu hình giá.');
-    } catch { setError('Lỗi kết nối máy chủ.'); }
-    finally { setSaving(false); }
+    } catch (err) {
+      const { errorMessage } = resolveApiError(err);
+      setError(errorMessage || 'Lỗi kết nối máy chủ.');
+    } finally { setSaving(false); }
   };
 
   return (
@@ -242,7 +245,8 @@ export default function AIReports() {
       if (breakdown.success) setServiceBreakdown(breakdown.data);
       if (topUsers.success) setTopConsumers(topUsers.data);
     } catch (err) {
-      setReportsError(err.message || 'Lỗi kết nối máy chủ.');
+      const { errorMessage } = resolveApiError(err);
+      setReportsError(errorMessage || 'Lỗi kết nối máy chủ.');
     } finally { setReportsLoading(false); }
   }, [startDate, endDate]);
 
@@ -255,8 +259,10 @@ export default function AIReports() {
       const res = await getAIPricingConfigs();
       if (res.success) setPricingConfigs(res.data?.items ?? []);
       else setPricingError(res.errorMessage || 'Không thể tải cấu hình giá.');
-    } catch { setPricingError('Lỗi kết nối máy chủ.'); }
-    finally { setPricingLoading(false); }
+    } catch (err) {
+      const { errorMessage } = resolveApiError(err);
+      setPricingError(errorMessage || 'Lỗi kết nối máy chủ.');
+    } finally { setPricingLoading(false); }
   }, []);
 
   useEffect(() => { fetchPricing(); }, [fetchPricing]);
@@ -276,8 +282,10 @@ export default function AIReports() {
       const res = await deleteAIPricingConfig(config.id);
       if (res.success) { setPricingConfigs(prev => prev.filter(c => c.id !== config.id)); showToast('Đã xóa cấu hình giá.'); }
       else showToast(res.errorMessage || 'Không thể xóa.', 'error');
-    } catch { showToast('Lỗi kết nối máy chủ.', 'error'); }
-    finally { setBusyId(''); }
+    } catch (err) {
+      const { errorMessage } = resolveApiError(err);
+      showToast(errorMessage || 'Lỗi kết nối máy chủ.', 'error');
+    } finally { setBusyId(''); }
   };
 
   /* ────────────────────────────── RENDER ────────────────────────────── */

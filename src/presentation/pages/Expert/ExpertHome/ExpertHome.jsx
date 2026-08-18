@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import api from '@services/api';
+import api, { resolveApiError } from '@services/api';
 import { getExpertDashboard } from "@services/expertDashboardApi";
 import styles from './ExpertHome.module.css';
 
@@ -118,8 +118,9 @@ export default function ExpertHome() {
       if (profileRes.data.success) setProfile(profileRes.data.data);
       if (coursesRes.data.success) setCourses(coursesRes.data.data?.items ?? []);
     } catch (err) {
-      if (err.response?.status === 401) navigate('/expert/login');
-      else setError('Không tải được thông tin cá nhân. Vui lòng thử lại.');
+      const { errorMessage, status: httpStatus } = resolveApiError(err);
+      if (httpStatus === 401) navigate('/expert/login');
+      else setError(errorMessage || 'Không tải được thông tin cá nhân. Vui lòng thử lại.');
     }
   }, [navigate]);
 
@@ -154,7 +155,8 @@ export default function ExpertHome() {
         setScopeError(res.errorMessage || 'Phạm vi báo cáo không hợp lệ.');
       }
     } catch (err) {
-      setScopeError('Không thể tải dữ liệu phân tích bảng điều khiển.');
+      const { errorMessage } = resolveApiError(err);
+      setScopeError(errorMessage || 'Không thể tải dữ liệu phân tích bảng điều khiển.');
     } finally {
       setDashLoading(false);
     }

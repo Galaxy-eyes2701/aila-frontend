@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { resolveApiError } from "@services/api";
 import styles from "./LearningMaterial.module.css";
 import {
   createAIPracticeMaterial,
@@ -343,8 +344,9 @@ export default function AIPracticeMaterialModal({
         );
       }
     } catch (err) {
+      const { errorMessage } = resolveApiError(err);
       setError(
-        err.response?.data?.errorMessage || "Lỗi kết nối máy chủ.",
+        errorMessage || "Lỗi kết nối máy chủ.",
       );
     } finally {
       setSaving(false);

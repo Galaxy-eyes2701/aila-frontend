@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { resolveApiError } from "@services/api";
 import { askQuestion, getChatMessages, getOrCreateChatSession } from "@services/ragApi";
 import styles from "./AIChatWidget.module.css";
 
@@ -50,8 +51,8 @@ export default function AIChatWidget({ courseId }) {
         }
       })
       .catch((err) => {
-        const msg = err?.response?.data?.errorMessage || "Không thể khởi tạo trợ lý AI.";
-        setBanner({ type: "error", text: msg });
+        const { errorMessage } = resolveApiError(err);
+        setBanner({ type: "error", text: errorMessage || "Không thể khởi tạo trợ lý AI." });
       })
       .finally(() => setInitLoading(false));
   }, [open, courseId, sessionId]);
@@ -113,10 +114,10 @@ export default function AIChatWidget({ courseId }) {
       }
     } catch (err) {
       // AF-03 — AI service lỗi
-      const msg = err?.response?.data?.errorMessage || "AI tạm thời không phản hồi. Vui lòng thử lại.";
+      const { errorMessage } = resolveApiError(err);
       setMessages((prev) => prev.filter((m) => m.id !== userMsgId));
       setQuestion(text);
-      setBanner({ type: "error", text: msg });
+      setBanner({ type: "error", text: errorMessage || "AI tạm thời không phản hồi. Vui lòng thử lại." });
     } finally {
       setSending(false);
     }

@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useLocation, useParams } from "react-router-dom";
+import { resolveApiError } from "@services/api";
 import { getAttemptDetail } from "@services/practiceApi";
 import PracticeResult from "./components/PracticeResult";
 import styles from "./AIPractice.module.css";
@@ -33,9 +34,9 @@ export default function AIPracticeFeedbackPage() {
         setAttempt(data);
       })
       .catch((err) => {
+        const { errorMessage } = resolveApiError(err);
         setError(
-          err?.response?.data?.errorMessage ||
-          "Không thể tải kết quả phiên luyện tập. Vui lòng thử lại."
+          errorMessage || "Không thể tải kết quả phiên luyện tập. Vui lòng thử lại."
         );
       })
       .finally(() => setLoading(false));

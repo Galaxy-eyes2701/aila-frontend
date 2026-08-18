@@ -53,8 +53,8 @@ export default function QuestionImportModal({ open, quizMaterialId, onClose, onI
       link.remove();
       window.URL.revokeObjectURL(url);
     } catch (err) {
-      const apiMsg = err.response?.data?.errorMessage || resolveApiError(err).errorMessage;
-      setError(apiMsg ?? "Không thể tải template.");
+      const { errorMessage } = resolveApiError(err);
+      setError(errorMessage || "Không thể tải template.");
     } finally {
       setDownloading(false);
     }
@@ -89,8 +89,8 @@ export default function QuestionImportModal({ open, quizMaterialId, onClose, onI
       setPreviewData(res.data);
       setStep(STEP.REVIEW);
     } catch (err) {
-      const apiMsg = err.response?.data?.errorMessage || resolveApiError(err).errorMessage;
-      setError(apiMsg ?? "Lỗi kết nối. Vui lòng thử lại.");
+      const { errorMessage } = resolveApiError(err);
+      setError(errorMessage || "Lỗi kết nối. Vui lòng thử lại.");
     } finally {
       setPreviewing(false);
     }
@@ -111,9 +111,8 @@ export default function QuestionImportModal({ open, quizMaterialId, onClose, onI
       setStep(STEP.DONE);
       onImported?.();
     } catch (err) {
-      const apiMsg =
-        err.response?.data?.errorMessage || resolveApiError(err).errorMessage;
-      setError(apiMsg || "Lỗi kết nối. Vui lòng thử lại.");
+      const { errorMessage } = resolveApiError(err);
+      setError(errorMessage || "Lỗi kết nối. Vui lòng thử lại.");
     } finally {
       setConfirming(false);
     }

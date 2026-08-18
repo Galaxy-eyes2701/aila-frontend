@@ -42,9 +42,8 @@ export default function DocumentDetailModal({
 
       setContent(response.data.content ?? "");
     } catch (err) {
-      const apiMsg =
-        err.response?.data?.errorMessage || resolveApiError(err).errorMessage;
-      setError(apiMsg || "Không thể tải tài liệu.");
+      const { errorMessage } = resolveApiError(err);
+      setError(errorMessage || "Không thể tải tài liệu.");
     } finally {
       setLoading(false);
     }
@@ -81,9 +80,8 @@ export default function DocumentDetailModal({
 
       onSuccess(response.data);
     } catch (err) {
-      const apiMsg =
-        err.response?.data?.errorMessage || resolveApiError(err).errorMessage;
-      setError(apiMsg || "Không thể cập nhật tài liệu.");
+      const { errorMessage } = resolveApiError(err);
+      setError(errorMessage || "Không thể cập nhật tài liệu.");
     } finally {
       setSaving(false);
     }

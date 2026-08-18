@@ -42,9 +42,8 @@ export default function VideoDetailModal({
       setDurationSeconds(data.durationSeconds ?? 0);
       setContent(data.content ?? "");
     } catch (err) {
-      const apiMsg =
-        err.response?.data?.errorMessage || resolveApiError(err).errorMessage;
-      setError(apiMsg || "Không thể tải thông tin Video.");
+      const { errorMessage } = resolveApiError(err);
+      setError(errorMessage || "Không thể tải thông tin Video.");
     } finally {
       setLoading(false);
     }
@@ -80,9 +79,8 @@ export default function VideoDetailModal({
 
       onSuccess(response.data);
     } catch (err) {
-      const apiMsg =
-        err.response?.data?.errorMessage || resolveApiError(err).errorMessage;
-      setError(apiMsg || "Lỗi kết nối máy chủ. Vui lòng thử lại.");
+      const { errorMessage } = resolveApiError(err);
+      setError(errorMessage || "Lỗi kết nối máy chủ. Vui lòng thử lại.");
     } finally {
       setSaving(false);
     }

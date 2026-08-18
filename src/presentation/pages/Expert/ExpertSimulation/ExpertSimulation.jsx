@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import useAuth from "@state/hooks/useAuth";
+import { resolveApiError } from "@services/api";
 import {
   finishSimulation,
   getSimulationDetail,
@@ -96,11 +97,8 @@ export default function ExpertSimulation() {
       setPhase("chat");
       setTimeout(() => inputRef.current?.focus(), 100);
     } catch (err) {
-      const msg =
-        err?.response?.data?.errorMessage ||
-        err?.message ||
-        "Không thể khởi tạo phiên thử nghiệm.";
-      setStartError(msg);
+      const { errorMessage } = resolveApiError(err);
+      setStartError(errorMessage || "Không thể khởi tạo phiên thử nghiệm.");
     } finally {
       setStarting(false);
     }
@@ -183,12 +181,10 @@ export default function ExpertSimulation() {
       }
     } catch (err) {
       // AF-05/06 — AI service lỗi
-      const msg =
-        err?.response?.data?.errorMessage ||
-        "AI tạm thời không phản hồi. Vui lòng thử lại.";
+      const { errorMessage } = resolveApiError(err);
       setMessages((prev) => prev.filter((m) => m.id !== userMsgId));
       setPrompt(text);
-      setBanner({ type: "error", text: msg });
+      setBanner({ type: "error", text: errorMessage || "AI tạm thời không phản hồi. Vui lòng thử lại." });
     } finally {
       setSending(false);
     }
@@ -214,10 +210,8 @@ export default function ExpertSimulation() {
       setResult(data);
       setPhase("done");
     } catch (err) {
-      const msg =
-        err?.response?.data?.errorMessage ||
-        "Không thể hoàn thành phiên thử nghiệm. Vui lòng thử lại.";
-      setBanner({ type: "error", text: msg });
+      const { errorMessage } = resolveApiError(err);
+      setBanner({ type: "error", text: errorMessage || "Không thể hoàn thành phiên thử nghiệm. Vui lòng thử lại." });
       setPhase("chat");
     }
   }, [sessionId]);

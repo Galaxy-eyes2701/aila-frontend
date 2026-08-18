@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import api from "@services/api";
+import api, { resolveApiError } from "@services/api";
 import styles from "./ModuleManagement.module.css";
 import Toast from "./components/Toast";
 import ModuleSkeleton from "./components/ModuleSkeleton";
@@ -164,9 +164,9 @@ export default function ModuleManagement() {
         mode === "create" ? "Đã tạo học phần mới." : "Đã cập nhật học phần.",
       );
     } catch (error) {
+      const { errorMessage } = resolveApiError(error);
       setFormError(
-        error.response?.data?.errorMessage ||
-          "Lỗi kết nối máy chủ. Vui lòng thử lại.",
+        errorMessage || "Lỗi kết nối máy chủ. Vui lòng thử lại.",
       );
     } finally {
       setSaving(false);
@@ -197,8 +197,9 @@ export default function ModuleManagement() {
       showToast("Đã xóa học phần.");
       setDeleteTargetModule(null);
     } catch (error) {
+      const { errorMessage } = resolveApiError(error);
       showToast(
-        error.response?.data?.errorMessage || "Không thể xóa học phần.",
+        errorMessage || "Không thể xóa học phần.",
         "error",
       );
     } finally {
@@ -244,8 +245,9 @@ export default function ModuleManagement() {
         );
       }
     } catch (error) {
+      const { errorMessage } = resolveApiError(error);
       showToast(
-        error.response?.data?.errorMessage || "Lỗi kết nối máy chủ.",
+        errorMessage || "Lỗi kết nối máy chủ.",
         "error",
       );
     } finally {

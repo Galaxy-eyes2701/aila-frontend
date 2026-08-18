@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import api from '@services/api';
+import api, { resolveApiError } from '@services/api';
 import styles from '../ExpertCourseManagement.module.css';
 import RichTextEditor from '../../ModuleManagement/components/common/RichTextEditor';
 
@@ -313,10 +313,9 @@ export default function CourseFormModal({ mode, initialData, categories, onClose
 
   const handleSubmit = async e => {
     e.preventDefault();
-    const errs = validate();
-    if (Object.keys(errs).length > 0) {
-      setFieldErrors(errs);
-      setFormError('Vui lòng kiểm tra lại các trường bên dưới.');
+    if (!validateForm()) return;
+    if (codeDuplicateRef.current) {
+      setFieldErrors(prev => ({ ...prev, newTagCode: 'Code tag đã tồn tại. Hãy đổi code khác hoặc bấm "Dùng tag này".' }));
       return;
     }
     setSaving(true); setFormError('');
@@ -334,7 +333,8 @@ export default function CourseFormModal({ mode, initialData, categories, onClose
       if (res.data.success) onSaved(res.data.data, isEdit ? 'edit' : 'create');
       else setFormError(res.data.errorMessage || 'Lưu thất bại. Vui lòng thử lại.');
     } catch (err) {
-      setFormError(err.response?.data?.errorMessage || 'Lỗi kết nối. Vui lòng thử lại.');
+      const { errorMessage } = resolveApiError(err);
+      setFormError(errorMessage || 'Lỗi kết nối. Vui lòng thử lại.');
     } finally { setSaving(false); }
   };
 

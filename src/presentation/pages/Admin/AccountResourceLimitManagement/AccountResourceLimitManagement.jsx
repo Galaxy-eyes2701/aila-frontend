@@ -1,5 +1,6 @@
 import { useEffect, useState, useMemo } from "react";
 import { Link } from "react-router-dom";
+import { resolveApiError } from "@services/api";
 import styles from "./AccountResourceLimitManagement.module.css";
 
 import {
@@ -59,8 +60,9 @@ export default function AccountResourceLimitManagement() {
       }
       setPolicies(response.data ?? []);
     } catch (error) {
+      const { errorMessage } = resolveApiError(error);
       setErrorMessage(
-        error.response?.data?.errorMessage ?? "Có lỗi xảy ra khi tải chính sách",
+        errorMessage || "Có lỗi xảy ra khi tải chính sách",
       );
     } finally {
       setLoading(false);
@@ -92,8 +94,9 @@ export default function AccountResourceLimitManagement() {
 
       setSuccessMessage("Cập nhật chính sách mặc định thành công!");
     } catch (error) {
+      const { errorMessage } = resolveApiError(error);
       setErrorMessage(
-        error.response?.data?.errorMessage ?? "Có lỗi xảy ra khi cập nhật chính sách",
+        errorMessage || "Có lỗi xảy ra khi cập nhật chính sách",
       );
     } finally {
       setSavingPolicies(false);
@@ -120,8 +123,9 @@ export default function AccountResourceLimitManagement() {
 
       setAccountPage(response.data);
     } catch (error) {
+      const { errorMessage } = resolveApiError(error);
       setErrorMessage(
-        error.response?.data?.errorMessage ?? "Có lỗi xảy ra khi tải danh sách tài khoản",
+        errorMessage || "Có lỗi xảy ra khi tải danh sách tài khoản",
       );
     } finally {
       setLoading(false);

@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { resolveApiError } from "@services/api";
 import styles from "./TagManagement.module.css";
 import Toast from "../../Expert/ModuleManagement/components/Toast";
 import Pagination from "@presentation/components/Pagination/Pagination";
@@ -57,7 +58,8 @@ function TagFormModal({ mode, initialData, onClose, onSaved }) {
         setError(res.errorMessage || "Không thể lưu tag.");
       }
     } catch (err) {
-      setError(err.response?.data?.errorMessage || "Lỗi kết nối máy chủ.");
+      const { errorMessage } = resolveApiError(err);
+      setError(errorMessage || "Lỗi kết nối máy chủ.");
     } finally {
       setSaving(false);
     }
@@ -325,7 +327,8 @@ export default function TagManagement() {
         setPageError(res.errorMessage || "Không thể tải danh sách tags.");
       }
     } catch (err) {
-      setPageError(err.response?.data?.errorMessage || "Lỗi kết nối máy chủ.");
+      const { errorMessage } = resolveApiError(err);
+      setPageError(errorMessage || "Lỗi kết nối máy chủ.");
     } finally {
       setLoading(false);
     }
@@ -346,7 +349,8 @@ export default function TagManagement() {
         setPendingError(res.errorMessage || "Không thể tải danh sách yêu cầu xác minh.");
       }
     } catch (err) {
-      setPendingError(err.response?.data?.errorMessage || "Lỗi kết nối máy chủ.");
+      const { errorMessage } = resolveApiError(err);
+      setPendingError(errorMessage || "Lỗi kết nối máy chủ.");
     } finally {
       setPendingLoading(false);
     }
@@ -397,7 +401,8 @@ export default function TagManagement() {
         alert(res.errorMessage || "Không thể xóa tag.");
       }
     } catch (err) {
-      alert(err.response?.data?.errorMessage || "Lỗi kết nối máy chủ.");
+      const { errorMessage } = resolveApiError(err);
+      alert(errorMessage || "Lỗi kết nối máy chủ.");
     } finally {
       setBusyTagId("");
     }
@@ -416,7 +421,8 @@ export default function TagManagement() {
         showToast(res.errorMessage || "Không thể tải chi tiết yêu cầu.", "error");
       }
     } catch (err) {
-      showToast(err.response?.data?.errorMessage || "Lỗi kết nối máy chủ.", "error");
+      const { errorMessage } = resolveApiError(err);
+      showToast(errorMessage || "Lỗi kết nối máy chủ.", "error");
     } finally {
       setDetailLoading(false);
     }
@@ -440,7 +446,8 @@ export default function TagManagement() {
         showToast(res.errorMessage || "Không thể xử lý yêu cầu này.", "error");
       }
     } catch (err) {
-      showToast(err.response?.data?.errorMessage || "Lỗi kết nối máy chủ.", "error");
+      const { errorMessage } = resolveApiError(err);
+      showToast(errorMessage || "Lỗi kết nối máy chủ.", "error");
     } finally {
       setReviewingRequestId("");
     }

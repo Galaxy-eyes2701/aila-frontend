@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import api from '@services/api';
+import api, { resolveApiError } from '@services/api';
 import { DEFAULT_AVATAR } from '@infrastructure/constants/defaultAvatar';
 import styles from './ExpertProfile.module.css';
 
@@ -100,7 +100,7 @@ function PasswordModal({ onClose, onSaved }) {
         );
       }
     } catch (err) {
-      const errorCode = err.response?.data?.errorCode;
+      const { errorMessage, errorCode } = resolveApiError(err);
       setModalError(
         errorCode === 'WRONG_PASSWORD'
           ? 'Mật khẩu hiện tại không đúng.'
@@ -108,7 +108,7 @@ function PasswordModal({ onClose, onSaved }) {
             ? 'Mật khẩu mới không hợp lệ.'
             : errorCode === 'ACCOUNT_INACTIVE'
               ? 'Tài khoản đã bị vô hiệu hóa.'
-              : err.response?.data?.errorMessage || 'Lỗi kết nối. Vui lòng thử lại.'
+              : errorMessage || 'Lỗi kết nối. Vui lòng thử lại.'
       );
     } finally {
       setSaving(false);
@@ -243,8 +243,9 @@ function EditModal({ profile, onClose, onSaved }) {
         setModalError(res.data.errorMessage || 'Cập nhật thất bại.');
       }
     } catch (err) {
+      const { errorMessage } = resolveApiError(err);
       setModalError(
-        err.response?.data?.errorMessage || 'Lỗi kết nối. Vui lòng thử lại.'
+        errorMessage || 'Lỗi kết nối. Vui lòng thử lại.'
       );
     } finally {
       setSaving(false);
@@ -392,10 +393,11 @@ export default function ExpertProfile() {
         setError(res.data.errorMessage || 'Không thể tải thông tin profile.');
       }
     } catch (err) {
-      if (err.response?.status === 401) navigate('/expert/login');
-      else if (err.response?.status === 404)
+      const { errorMessage, status: httpStatus } = resolveApiError(err);
+      if (httpStatus === 401) navigate('/expert/login');
+      else if (httpStatus === 404)
         setError('Không tìm thấy thông tin Expert.');
-      else setError('Lỗi kết nối máy chủ. Vui lòng thử lại sau.');
+      else setError(errorMessage || 'Lỗi kết nối máy chủ. Vui lòng thử lại sau.');
     } finally {
       setLoading(false);
     }

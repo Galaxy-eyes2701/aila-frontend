@@ -140,9 +140,8 @@ export default function LearnerProfile() {
       })
       .catch((err) => {
         if (cancelled) return;
-        if (err.response?.status === 401)
-          setLoadError("Phiên đăng nhập hết hạn. Vui lòng đăng nhập lại.");
-        else setLoadError("Lỗi kết nối máy chủ. Vui lòng thử lại sau.");
+        const { errorMessage } = resolveApiError(err);
+        setLoadError(errorMessage || "Lỗi kết nối máy chủ. Vui lòng thử lại sau.");
       })
       .finally(() => {
         if (!cancelled) setLoading(false);
@@ -207,9 +206,9 @@ export default function LearnerProfile() {
         );
       }
     } catch (err) {
+      const { errorMessage } = resolveApiError(err);
       setAvatarError(
-        err.response?.data?.errorMessage ||
-          "Lỗi kết nối máy chủ. Vui lòng thử lại.",
+        errorMessage || "Lỗi kết nối máy chủ. Vui lòng thử lại.",
       );
     } finally {
       setAvatarUploading(false);
@@ -267,13 +266,15 @@ export default function LearnerProfile() {
         );
       }
     } catch (err) {
+      const { errorMessage } = resolveApiError(err);
       const c = err.response?.data?.errorCode;
       setSaveError(
-        c === "UNPUBLISHED_TAG"
-          ? "Một số tag chưa được duyệt, vui lòng chọn lại."
-          : c === "ACCOUNT_INACTIVE"
-            ? "Tài khoản bị vô hiệu hóa."
-            : "Lỗi kết nối máy chủ. Vui lòng thử lại.",
+        errorMessage ||
+          (c === "UNPUBLISHED_TAG"
+            ? "Một số tag chưa được duyệt, vui lòng chọn lại."
+            : c === "ACCOUNT_INACTIVE"
+              ? "Tài khoản bị vô hiệu hóa."
+              : "Lỗi kết nối máy chủ. Vui lòng thử lại."),
       );
     } finally {
       setSaving(false);

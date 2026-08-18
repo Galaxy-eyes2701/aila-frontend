@@ -1,32 +1,36 @@
 import { useState } from "react";
+import { resolveApiError } from "@services/api";
+import styles from "./AccountResourceLimitManagement.module.css";
 import { createAccountResourceLimitOverride } from "@services/resourceLimitApi";
-import styles from "./OverrideModal.module.css";
 
 export default function CreateOverrideModal({ account, onClose, onSuccess }) {
+  const [form, setForm] = useState({
+    maxDailyTokens: account.dailyTokenLimit ?? 100000,
+    maxDailyAttempts: account.dailyAttemptLimit ?? 50,
+    maxDailySimulations: account.dailySimulationLimit ?? 20,
+    reason: "",
+  });
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
-
-  const [form, setForm] = useState({
-    accountId: account.accountId,
-    aiTokenLimit: 0,
-    aiPracticeScenarioLimit: 0,
-    expertEvaluationRequestLimit: 0,
-  });
 
   function handleChange(field, value) {
     setForm((prev) => ({
       ...prev,
-      [field]: Math.max(0, Number(value) || 0),
+      [field]: field === "reason" ? value : Math.max(0, Number(value) || 0),
     }));
   }
 
   async function handleSubmit(e) {
-    e?.preventDefault();
+    e.preventDefault();
+
     try {
       setLoading(true);
       setErrorMessage("");
 
-      const response = await createAccountResourceLimitOverride(form);
+      const response = await createAccountResourceLimitOverride(
+        account.accountId,
+        form,
+      );
 
       if (!response.success) {
         setErrorMessage(
@@ -37,8 +41,9 @@ export default function CreateOverrideModal({ account, onClose, onSuccess }) {
 
       onSuccess();
     } catch (error) {
+      const { errorMessage } = resolveApiError(error);
       setErrorMessage(
-        error.response?.data?.errorMessage ?? "Có lỗi xảy ra khi tạo cấu hình",
+        errorMessage || "Có lỗi xảy ra khi tạo cấu hình",
       );
     } finally {
       setLoading(false);

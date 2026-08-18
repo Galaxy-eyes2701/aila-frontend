@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { resolveApiError } from "@services/api";
 import styles from "./UserManagement.module.css";
 import { createExpertAccount } from "@services/userApi";
 
@@ -18,24 +19,19 @@ export default function CreateExpertModal({ open, onClose, onCreated }) {
   }
 
   function validate() {
-    if (!form.fullName.trim()) return "Họ tên không được để trống.";
-
-    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailPattern.test(form.email.trim()))
-      return "Email không hợp lệ.";
-
+    if (!form.email.trim()) return "Email không được để trống.";
+    if (!form.fullName.trim()) return "Họ và tên không được để trống.";
     if (form.password.length < 8)
       return "Mật khẩu phải có ít nhất 8 ký tự.";
-
-    return "";
+    return null;
   }
 
   async function handleSubmit(e) {
     e.preventDefault();
 
-    const validationError = validate();
-    if (validationError) {
-      setError(validationError);
+    const valMsg = validate();
+    if (valMsg) {
+      setError(valMsg);
       return;
     }
 
@@ -57,9 +53,8 @@ export default function CreateExpertModal({ open, onClose, onCreated }) {
       setForm(emptyForm);
       onCreated(res.data);
     } catch (err) {
-      setError(
-        err.response?.data?.errorMessage ?? "Lỗi kết nối máy chủ.",
-      );
+      const { errorMessage } = resolveApiError(err);
+      setError(errorMessage || "Lỗi kết nối máy chủ.");
     } finally {
       setSaving(false);
     }

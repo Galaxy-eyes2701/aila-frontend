@@ -1,10 +1,10 @@
 import { useState } from "react";
+import { resolveApiError } from "@services/api";
+import styles from "./AccountResourceLimitManagement.module.css";
 import { updateAccountResourceLimitOverride } from "@services/resourceLimitApi";
-import styles from "./OverrideModal.module.css";
 
 export default function EditOverrideModal({
   account,
-  data,
   onClose,
   onSuccess,
 }) {
@@ -12,15 +12,16 @@ export default function EditOverrideModal({
   const [errorMessage, setErrorMessage] = useState("");
 
   const [form, setForm] = useState({
-    aiTokenLimit: data.aiTokenLimit ?? 0,
-    aiPracticeScenarioLimit: data.aiPracticeScenarioLimit ?? 0,
-    expertEvaluationRequestLimit: data.expertEvaluationRequestLimit ?? 0,
+    maxDailyTokens: account.dailyTokenLimit ?? 100000,
+    maxDailyAttempts: account.dailyAttemptLimit ?? 50,
+    maxDailySimulations: account.dailySimulationLimit ?? 20,
+    reason: account.overrideReason ?? "",
   });
 
   function handleChange(field, value) {
     setForm((prev) => ({
       ...prev,
-      [field]: Math.max(0, Number(value) || 0),
+      [field]: field === "reason" ? value : Math.max(0, Number(value) || 0),
     }));
   }
 
@@ -42,9 +43,9 @@ export default function EditOverrideModal({
 
       onSuccess();
     } catch (error) {
+      const { errorMessage } = resolveApiError(error);
       setErrorMessage(
-        error.response?.data?.errorMessage ??
-          "Có lỗi xảy ra khi cập nhật cấu hình",
+        errorMessage || "Có lỗi xảy ra khi cập nhật cấu hình",
       );
     } finally {
       setLoading(false);

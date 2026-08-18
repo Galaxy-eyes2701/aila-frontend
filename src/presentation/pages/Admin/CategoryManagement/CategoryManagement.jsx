@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
+import { resolveApiError } from "@services/api";
 import styles from "./CategoryManagement.module.css";
 import Toast from "../../Expert/ModuleManagement/components/Toast";
 import Pagination from "@presentation/components/Pagination/Pagination";
@@ -71,7 +72,8 @@ function CategoryFormModal({ mode, initialData, onClose, onSaved }) {
         setError(res.errorMessage || "Không thể lưu danh mục.");
       }
     } catch (err) {
-      setError(err.response?.data?.errorMessage || "Lỗi kết nối máy chủ.");
+      const { errorMessage } = resolveApiError(err);
+      setError(errorMessage || "Lỗi kết nối máy chủ.");
     } finally {
       setSaving(false);
     }
@@ -197,7 +199,8 @@ export default function CategoryManagement() {
         setPageError(res.errorMessage || "Không thể tải danh sách danh mục.");
       }
     } catch (err) {
-      setPageError(err.response?.data?.errorMessage || "Lỗi kết nối máy chủ.");
+      const { errorMessage } = resolveApiError(err);
+      setPageError(errorMessage || "Lỗi kết nối máy chủ.");
     } finally {
       setLoading(false);
     }
@@ -295,8 +298,9 @@ export default function CategoryManagement() {
         showToast(res.errorMessage || "Không thể cập nhật trạng thái.", "error");
       }
     } catch (err) {
+      const { errorMessage } = resolveApiError(err);
       showToast(
-        err.response?.data?.errorMessage || "Lỗi kết nối máy chủ.",
+        errorMessage || "Lỗi kết nối máy chủ.",
         "error",
       );
     } finally {
@@ -331,8 +335,9 @@ export default function CategoryManagement() {
         showToast(res.errorMessage || "Không thể sắp xếp lại danh mục.", "error");
       }
     } catch (err) {
+      const { errorMessage } = resolveApiError(err);
       showToast(
-        err.response?.data?.errorMessage || "Lỗi kết nối máy chủ.",
+        errorMessage || "Lỗi kết nối máy chủ.",
         "error",
       );
     } finally {

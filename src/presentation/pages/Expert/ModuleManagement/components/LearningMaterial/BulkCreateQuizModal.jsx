@@ -185,9 +185,8 @@ export default function BulkCreateQuizModal({
 
       onSuccess();
     } catch (err) {
-      const apiMsg =
-        err.response?.data?.errorMessage || resolveApiError(err).errorMessage;
-      setError(apiMsg || "Không thể tạo nhanh Quiz.");
+      const { errorMessage } = resolveApiError(err);
+      setError(errorMessage || "Không thể tạo nhanh Quiz.");
     } finally {
       setSaving(false);
     }

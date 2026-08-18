@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { resolveApiError } from "@services/api";
 import styles from "./BlogManagement.module.css";
 import Toast from "../../Expert/ModuleManagement/components/Toast";
 import BlogFormModal from "./BlogFormModal";
@@ -65,7 +66,8 @@ export default function BlogManagement() {
         setPageError(res.errorMessage || "Không thể tải danh sách blog.");
       }
     } catch (err) {
-      setPageError(err.response?.data?.errorMessage ?? "Lỗi kết nối máy chủ.");
+      const { errorMessage } = resolveApiError(err);
+      setPageError(errorMessage || "Lỗi kết nối máy chủ.");
     } finally {
       setLoading(false);
     }
@@ -95,8 +97,9 @@ export default function BlogManagement() {
         showToast(res.errorMessage || "Không thể tải chi tiết blog.", "error");
       }
     } catch (err) {
+      const { errorMessage } = resolveApiError(err);
       showToast(
-        err.response?.data?.errorMessage ?? "Lỗi kết nối máy chủ.",
+        errorMessage || "Lỗi kết nối máy chủ.",
         "error",
       );
     } finally {
@@ -130,8 +133,9 @@ export default function BlogManagement() {
         showToast(res.errorMessage || "Không thể đổi trạng thái.", "error");
       }
     } catch (err) {
+      const { errorMessage } = resolveApiError(err);
       showToast(
-        err.response?.data?.errorMessage ?? "Lỗi kết nối máy chủ.",
+        errorMessage || "Lỗi kết nối máy chủ.",
         "error",
       );
     } finally {
@@ -161,8 +165,9 @@ export default function BlogManagement() {
         showToast(res.errorMessage || "Không thể xóa bài viết.", "error");
       }
     } catch (err) {
+      const { errorMessage } = resolveApiError(err);
       showToast(
-        err.response?.data?.errorMessage ?? "Lỗi kết nối máy chủ.",
+        errorMessage || "Lỗi kết nối máy chủ.",
         "error",
       );
     } finally {

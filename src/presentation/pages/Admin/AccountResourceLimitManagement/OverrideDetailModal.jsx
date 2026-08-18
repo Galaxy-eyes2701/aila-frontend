@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
+import { resolveApiError } from "@services/api";
 import {
   getAccountResourceLimitOverride,
   deleteAccountResourceLimitOverride,
 } from "@services/resourceLimitApi";
-import styles from "./OverrideModal.module.css";
+import styles from "./AccountResourceLimitManagement.module.css";
 
 export default function OverrideDetailModal({
   account,
@@ -11,9 +12,9 @@ export default function OverrideDetailModal({
   onEdit,
   onSuccess,
 }) {
-  const [loading, setLoading] = useState(false);
-  const [errorMessage, setErrorMessage] = useState("");
   const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [errorMessage, setErrorMessage] = useState("");
 
   async function loadDetail() {
     try {
@@ -31,8 +32,9 @@ export default function OverrideDetailModal({
 
       setData(response.data);
     } catch (error) {
+      const { errorMessage } = resolveApiError(error);
       setErrorMessage(
-        error.response?.data?.errorMessage ?? "Có lỗi xảy ra khi tải dữ liệu",
+        errorMessage || "Có lỗi xảy ra khi tải dữ liệu",
       );
     } finally {
       setLoading(false);
@@ -63,8 +65,9 @@ export default function OverrideDetailModal({
 
       onSuccess();
     } catch (error) {
+      const { errorMessage } = resolveApiError(error);
       setErrorMessage(
-        error.response?.data?.errorMessage ?? "Có lỗi xảy ra khi xóa cấu hình",
+        errorMessage || "Có lỗi xảy ra khi xóa cấu hình",
       );
     } finally {
       setLoading(false);

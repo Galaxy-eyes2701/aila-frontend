@@ -110,7 +110,8 @@ export default function PolicyViolations() {
         setViolations(null);
       }
     } catch (err) {
-      setPageError(err.message || 'Lỗi kết nối máy chủ.');
+      const { errorMessage } = resolveApiError(err);
+      setPageError(errorMessage || 'Lỗi kết nối máy chủ.');
     } finally {
       setLoading(false);
     }

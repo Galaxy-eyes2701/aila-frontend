@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useSearchParams, Link } from 'react-router-dom';
-import api from '@services/api';
+import api, { resolveApiError } from '@services/api';
 import styles from './ExpertCourseManagement.module.css';
 import CoursePreviewModal from '@presentation/components/CoursePreviewModal/CoursePreviewModal';
 import Toast             from './components/Toast';
@@ -125,7 +125,8 @@ export default function ExpertCourseManagement() {
         showToast(res.data.errorMessage || 'Xuất bản thất bại.', 'error'); 
       }
     } catch (err) { 
-      showToast(err.response?.data?.errorMessage || 'Xuất bản thất bại.', 'error'); 
+      const { errorMessage } = resolveApiError(err);
+      showToast(errorMessage || 'Xuất bản thất bại.', 'error'); 
     }
     setPublishing(prev => ({ ...prev, [courseId]: false }));
   }, []);
@@ -143,7 +144,10 @@ export default function ExpertCourseManagement() {
         setCourses(prev => prev.map(c => c.id === courseId ? { ...c, isPublished: false } : c));
         showToast('Khóa học đã được chuyển về bản nháp.');
       } else { showToast(res.data.errorMessage || 'Hủy xuất bản thất bại.', 'error'); }
-    } catch (err) { showToast(err.response?.data?.errorMessage || 'Hủy xuất bản thất bại.', 'error'); }
+    } catch (err) {
+      const { errorMessage } = resolveApiError(err);
+      showToast(errorMessage || 'Hủy xuất bản thất bại.', 'error');
+    }
   };
 
   const loadMore = () => { const next = pageIndex + 1; setPageIndex(next); fetchCourses(next); };

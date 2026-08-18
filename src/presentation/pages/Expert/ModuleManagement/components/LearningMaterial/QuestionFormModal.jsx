@@ -242,9 +242,8 @@ export default function QuestionFormModal({
 
       onSaved();
     } catch (err) {
-      const apiMsg =
-        err.response?.data?.errorMessage || resolveApiError(err).errorMessage;
-      setError(apiMsg || "Không thể lưu câu hỏi.");
+      const { errorMessage } = resolveApiError(err);
+      setError(errorMessage || "Không thể lưu câu hỏi.");
     } finally {
       setSaving(false);
     }

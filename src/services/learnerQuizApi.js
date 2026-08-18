@@ -25,7 +25,16 @@ async function request(promise) {
     const resp = err?.response;
     if (resp) {
       const body = resp.data || {};
-      throw new ApiError(body.errorCode, body.errorMessage, resp.status);
+      const code = body.errorCode || body.ErrorCode || "UNKNOWN";
+      const msg =
+        body.errorMessage ||
+        body.ErrorMessage ||
+        body.message ||
+        body.Message ||
+        body.detail ||
+        body.title ||
+        `Đã xảy ra lỗi máy chủ (${resp.status}).`;
+      throw new ApiError(code, msg, resp.status);
     }
     throw new ApiError(
       "NETWORK_ERROR",
@@ -35,8 +44,15 @@ async function request(promise) {
   }
 
   const body = res.data;
-  if (body && body.success) return body.data;
-  throw new ApiError(body?.errorCode, body?.errorMessage, res.status);
+  if (body && (body.success || body.Success)) return body.data ?? body.Data;
+  const code = body?.errorCode || body?.ErrorCode || "UNKNOWN";
+  const msg =
+    body?.errorMessage ||
+    body?.ErrorMessage ||
+    body?.message ||
+    body?.Message ||
+    "Đã xảy ra lỗi khi thực hiện bài kiểm tra.";
+  throw new ApiError(code, msg, res.status);
 }
 
 const base = (courseId, materialId) =>

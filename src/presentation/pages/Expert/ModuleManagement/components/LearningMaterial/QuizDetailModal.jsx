@@ -59,9 +59,8 @@ export default function QuizDetailModal({
 
       await loadQuestions();
     } catch (err) {
-      const apiMsg =
-        err.response?.data?.errorMessage || resolveApiError(err).errorMessage;
-      setError(apiMsg || "Không thể tải thông tin Quiz.");
+      const { errorMessage } = resolveApiError(err);
+      setError(errorMessage || "Không thể tải thông tin Quiz.");
     } finally {
       setLoading(false);
     }
@@ -79,9 +78,8 @@ export default function QuizDetailModal({
         setQuestions([]);
         setQuizExists(false);
       } else {
-        const apiMsg =
-          err.response?.data?.errorMessage || resolveApiError(err).errorMessage;
-        setError(apiMsg || "Không thể tải danh sách câu hỏi.");
+        const { errorMessage } = resolveApiError(err);
+        setError(errorMessage || "Không thể tải danh sách câu hỏi.");
       }
     }
   }
@@ -122,9 +120,8 @@ export default function QuizDetailModal({
       setSettingsSaved(true);
       setTimeout(() => setSettingsSaved(false), 2500);
     } catch (err) {
-      const apiMsg =
-        err.response?.data?.errorMessage || resolveApiError(err).errorMessage;
-      setError(apiMsg || "Không thể lưu cài đặt Quiz.");
+      const { errorMessage } = resolveApiError(err);
+      setError(errorMessage || "Không thể lưu cài đặt Quiz.");
     } finally {
       setSaving(false);
     }
@@ -145,9 +142,8 @@ export default function QuizDetailModal({
       setDeleteTargetQuestion(null);
       await loadQuestions();
     } catch (err) {
-      const apiMsg =
-        err.response?.data?.errorMessage || resolveApiError(err).errorMessage;
-      setError(apiMsg || "Không thể xóa câu hỏi.");
+      const { errorMessage } = resolveApiError(err);
+      setError(errorMessage || "Không thể xóa câu hỏi.");
     } finally {
       setBusyQuestionId("");
     }
@@ -179,9 +175,8 @@ export default function QuizDetailModal({
       }
       await loadQuestions();
     } catch (err) {
-      const apiMsg =
-        err.response?.data?.errorMessage || resolveApiError(err).errorMessage;
-      setError(apiMsg || "Không thể sắp xếp câu hỏi.");
+      const { errorMessage } = resolveApiError(err);
+      setError(errorMessage || "Không thể sắp xếp câu hỏi.");
       await loadQuestions();
     }
   }

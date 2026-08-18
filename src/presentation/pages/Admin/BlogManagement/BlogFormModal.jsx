@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { resolveApiError } from "@services/api";
 import RichTextEditor from "../../Expert/ModuleManagement/components/common/RichTextEditor";
 import styles from "./BlogManagement.module.css";
 import { createBlog, updateBlog } from "@services/blogApi";
@@ -92,7 +93,8 @@ export default function BlogFormModal({ mode, blog, onClose, onSaved }) {
 
       onSaved(mode === "create" ? "Đã tạo bài viết mới." : "Đã cập nhật bài viết.");
     } catch (err) {
-      setError(err.response?.data?.errorMessage ?? "Lỗi kết nối máy chủ.");
+      const { errorMessage } = resolveApiError(err);
+      setError(errorMessage || "Lỗi kết nối máy chủ.");
     } finally {
       setSaving(false);
     }

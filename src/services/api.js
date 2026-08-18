@@ -12,13 +12,44 @@ const FIELD_LABELS = {
   Description: "Mô tả",
   VideoUrl: "Đường dẫn Video",
   Content: "Nội dung",
-  DurationSeconds: "Thời lượng",
-  TimeLimitMinutes: "Thời gian làm bài",
-  PassingScore: "Điểm đạt",
-  Scenario: "Bối cảnh",
+  DurationSeconds: "Thời lượng (giây)",
+  TimeLimitMinutes: "Thời gian làm bài (phút)",
+  PassingScore: "Điểm đạt (%)",
+  Scenario: "Bối cảnh tình huống",
   AiTask: "Nhiệm vụ của AI",
   LearnerTask: "Nhiệm vụ của học viên",
   MaxPromptAttempts: "Số lần thử tối đa",
+  OrderIndex: "Thứ tự sắp xếp",
+  MaterialType: "Loại học liệu",
+  ModuleId: "Học phần",
+  CourseId: "Khóa học",
+  QuestionType: "Loại câu hỏi",
+  Answers: "Danh sách đáp án",
+  Questions: "Danh sách câu hỏi",
+  Weight: "Trọng số",
+  PromptTemplates: "Mẫu prompt gợi ý",
+  StepGuidances: "Hướng dẫn các bước",
+  ScoringCriteria: "Tiêu chí đánh giá",
+  FullName: "Họ và tên",
+  Email: "Địa chỉ Email",
+  Password: "Mật khẩu",
+  Name: "Tên",
+  Code: "Mã",
+};
+
+const DIRECT_ERROR_MAP = {
+  "Unauthorized": "Phiên đăng nhập đã hết hạn hoặc không có quyền truy cập.",
+  "Forbidden": "Bạn không có quyền thực hiện thao tác này.",
+  "Not Found": "Không tìm thấy dữ liệu yêu cầu.",
+  "Internal Server Error": "Máy chủ xảy ra sự cố. Vui lòng thử lại sau.",
+  "Bad Request": "Yêu cầu không hợp lệ.",
+  "One or more validation errors occurred.": "Dữ liệu không hợp lệ. Vui lòng kiểm tra lại.",
+  "An error occurred while processing your request.": "Đã xảy ra lỗi trong quá trình xử lý.",
+  "Invalid credentials": "Tên tài khoản hoặc mật khẩu không chính xác.",
+  "User not found": "Không tìm thấy thông tin người dùng.",
+  "Course not found": "Không tìm thấy khóa học.",
+  "Module not found": "Không tìm thấy học phần.",
+  "Material not found": "Không tìm thấy học liệu.",
 };
 
 function translateField(field) {
@@ -57,15 +88,33 @@ const ERROR_MESSAGE_RULES = [
     translate: (m) =>
       `${translateField(m[1])} phải lớn hơn ${translateField(m[2])}.`,
   },
+  {
+    regex: /^'(.+?)' must be greater than or equal to (\d+)\. You entered (\d+)\.$/,
+    translate: (m) =>
+      `${translateField(m[1])} phải lớn hơn hoặc bằng ${m[2]}. Bạn đã nhập ${m[3]}.`,
+  },
+  {
+    regex: /^'(.+?)' is invalid\.$/,
+    translate: (m) => `${translateField(m[1])} không hợp lệ.`,
+  },
+  {
+    regex: /^Entity "(.+?)" \((.+?)\) was not found\.$/,
+    translate: (m) =>
+      `Không tìm thấy dữ liệu ${translateField(m[1])} (${m[2]}).`,
+  },
 ];
 
 function translateErrorMessage(message) {
   if (!message || typeof message !== "string") return message;
+  const trimmed = message.trim();
+  if (DIRECT_ERROR_MAP[trimmed]) {
+    return DIRECT_ERROR_MAP[trimmed];
+  }
   for (const rule of ERROR_MESSAGE_RULES) {
-    const match = message.match(rule.regex);
+    const match = trimmed.match(rule.regex);
     if (match) return rule.translate(match);
   }
-  return message; // không khớp mẫu nào -> giữ nguyên, không mất thông tin
+  return trimmed;
 }
 export function resolveApiError(err) {
   if (!err) return { status: 0, errorCode: null, errorMessage: null };

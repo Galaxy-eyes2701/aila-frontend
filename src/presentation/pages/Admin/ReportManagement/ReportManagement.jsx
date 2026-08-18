@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { resolveApiError } from "@services/api";
 import styles from "./ReportManagement.module.css";
 import Toast from "../../Expert/ModuleManagement/components/Toast";
 import CoursePreviewModal from "@presentation/components/CoursePreviewModal/CoursePreviewModal";
@@ -153,7 +154,8 @@ function ReReviewRequestsPanel({ onPreview, showToast }) {
       if (res.success) setRequests(res.data ?? []);
       else setError(res.errorMessage || "Không thể tải danh sách.");
     } catch (err) {
-      setError(err.response?.data?.errorMessage || "Lỗi kết nối máy chủ.");
+      const { errorMessage } = resolveApiError(err);
+      setError(errorMessage || "Lỗi kết nối máy chủ.");
     } finally {
       setLoading(false);
     }
@@ -194,7 +196,8 @@ function ReReviewRequestsPanel({ onPreview, showToast }) {
         showToast(res.errorMessage || "Thao tác thất bại.", "error");
       }
     } catch (err) {
-      showToast(err.response?.data?.errorMessage || "Lỗi kết nối.", "error");
+      const { errorMessage } = resolveApiError(err);
+      showToast(errorMessage || "Lỗi kết nối.", "error");
     } finally {
       setProcessing(false);
     }
@@ -726,7 +729,8 @@ export default function ReportManagement() {
         setPageError(res.errorMessage || "Không thể tải danh sách báo cáo.");
       }
     } catch (err) {
-      setPageError(err.response?.data?.errorMessage || "Lỗi kết nối máy chủ.");
+      const { errorMessage } = resolveApiError(err);
+      setPageError(errorMessage || "Lỗi kết nối máy chủ.");
     } finally {
       setLoading(false);
     }
@@ -748,7 +752,8 @@ export default function ReportManagement() {
         showToast(res.errorMessage || "Không thể tải chi tiết báo cáo.", "error");
       }
     } catch (err) {
-      showToast(err.response?.data?.errorMessage || "Lỗi kết nối máy chủ.", "error");
+      const { errorMessage } = resolveApiError(err);
+      showToast(errorMessage || "Lỗi kết nối máy chủ.", "error");
     } finally {
       setDetailLoading(false);
     }
@@ -771,7 +776,8 @@ export default function ReportManagement() {
         showToast(res.errorMessage || "Không thể cập nhật báo cáo.", "error");
       }
     } catch (err) {
-      showToast(err.response?.data?.errorMessage || "Lỗi kết nối máy chủ.", "error");
+      const { errorMessage } = resolveApiError(err);
+      showToast(errorMessage || "Lỗi kết nối máy chủ.", "error");
     } finally {
       setResolvingId("");
     }
@@ -804,7 +810,8 @@ export default function ReportManagement() {
         showToast(res.errorMessage || "Không thể khoá khóa học.", "error");
       }
     } catch (err) {
-      showToast(err.response?.data?.errorMessage || "Lỗi kết nối máy chủ.", "error");
+      const { errorMessage } = resolveApiError(err);
+      showToast(errorMessage || "Lỗi kết nối máy chủ.", "error");
     } finally {
       setLockingId("");
     }
@@ -837,7 +844,8 @@ export default function ReportManagement() {
         showToast(res.errorMessage || "Không thể gỡ khoá.", "error");
       }
     } catch (err) {
-      showToast(err.response?.data?.errorMessage || "Lỗi kết nối máy chủ.", "error");
+      const { errorMessage } = resolveApiError(err);
+      showToast(errorMessage || "Lỗi kết nối máy chủ.", "error");
     } finally {
       setLockingId("");
     }
@@ -865,7 +873,8 @@ export default function ReportManagement() {
         showToast(res.errorMessage || "Không thể từ chối báo cáo.", "error");
       }
     } catch (err) {
-      showToast(err.response?.data?.errorMessage || "Lỗi kết nối máy chủ.", "error");
+      const { errorMessage } = resolveApiError(err);
+      showToast(errorMessage || "Lỗi kết nối máy chủ.", "error");
     } finally {
       setResolvingId("");
     }
