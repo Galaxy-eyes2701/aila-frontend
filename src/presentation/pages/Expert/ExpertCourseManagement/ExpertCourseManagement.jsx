@@ -4,7 +4,7 @@ import api, { resolveApiError } from '@services/api';
 import styles from './ExpertCourseManagement.module.css';
 import CoursePreviewModal from '@presentation/components/CoursePreviewModal/CoursePreviewModal';
 import Toast             from './components/Toast';
-import ConfirmDialog     from './components/ConfirmDialog';
+import ConfirmModal      from '@presentation/components/ConfirmModal/ConfirmModal';
 import CourseRow         from './components/CourseRow';
 import CourseFormModal   from './components/CourseFormModal';
 import CourseReReviewModal from './components/CourseReReviewModal';
@@ -249,11 +249,16 @@ export default function ExpertCourseManagement() {
       )}
 
       {confirm?.type === 'unpublish' && (
-        <ConfirmDialog
+        <ConfirmModal
+          open={!!confirm}
           title="Hủy xuất bản khóa học?"
-          message={`Khóa học "${confirm.courseName}" sẽ bị ẩn khỏi danh sách công khai và học viên mới không thể đăng ký. Học viên đã đăng ký vẫn có thể truy cập.`}
-          confirmLabel="Hủy xuất bản" danger
-          onConfirm={confirmUnpublish} onCancel={() => setConfirm(null)} />
+          description={`Khóa học "${confirm.courseName}" sẽ bị ẩn khỏi danh sách công khai và học viên mới không thể đăng ký. Học viên đã đăng ký vẫn có thể truy cập.`}
+          tone="danger"
+          confirmLabel="Hủy xuất bản"
+          icon="fa-eye-slash"
+          onConfirm={confirmUnpublish}
+          onClose={() => setConfirm(null)}
+        />
       )}
 
       {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}

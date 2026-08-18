@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import api, { resolveApiError } from '@services/api';
 import styles from '../ExpertCourseManagement.module.css';
 import RichTextEditor from '../../ModuleManagement/components/common/RichTextEditor';
+import ConfirmModal from '@presentation/components/ConfirmModal/ConfirmModal';
 
 const FALLBACK_THUMB = 'https://images.unsplash.com/photo-1677442135703-1787eea5ce01?w=480&q=75';
 const LEVELS = [
@@ -301,12 +302,28 @@ export default function CourseFormModal({ mode, initialData, categories, onClose
     } finally { setVerifySaving(false); }
   };
 
-  const handleDeletePublishRequest = async tagId => {
-    if (!window.confirm('Bạn có chắc muốn hủy yêu cầu xét duyệt này không?\nTag sẽ quay về trạng thái chưa gửi duyệt.')) return;
+  const [cancelPublishRequestTagId, setCancelPublishRequestTagId] = useState(null);
+
+  const handleDeletePublishRequest = (tagId) => {
+    setCancelPublishRequestTagId(tagId);
+  };
+
+  const executeCancelPublishRequest = async () => {
+    if (!cancelPublishRequestTagId) return;
+    const tagId = cancelPublishRequestTagId;
     try {
       const res = await api.delete(`/tags/${tagId}/publish-request`);
-      if (res.data.success) setTags(prev => prev.map(t => t.id === tagId ? res.data.data : t));
-    } catch (err) { alert(err.response?.data?.errorMessage || 'Hủy yêu cầu thất bại.'); }
+      if (res.data.success) {
+        setTags(prev => prev.map(t => t.id === tagId ? res.data.data : t));
+      } else {
+        setVerifyError(res.data.errorMessage || 'Hủy yêu cầu thất bại.');
+      }
+    } catch (err) {
+      const { errorMessage } = resolveApiError(err);
+      setVerifyError(errorMessage || 'Hủy yêu cầu thất bại.');
+    } finally {
+      setCancelPublishRequestTagId(null);
+    }
   };
 
 
@@ -657,6 +674,19 @@ export default function CourseFormModal({ mode, initialData, categories, onClose
             </div>
           </div>
         </div>
+      )}
+
+      {cancelPublishRequestTagId && (
+        <ConfirmModal
+          open={!!cancelPublishRequestTagId}
+          title="Hủy yêu cầu xét duyệt tag?"
+          description="Bạn có chắc muốn hủy yêu cầu xét duyệt này không? Tag sẽ quay về trạng thái chưa gửi duyệt."
+          tone="warning"
+          confirmLabel="Hủy yêu cầu"
+          icon="fa-rotate-left"
+          onConfirm={executeCancelPublishRequest}
+          onClose={() => setCancelPublishRequestTagId(null)}
+        />
       )}
     </div>
   );

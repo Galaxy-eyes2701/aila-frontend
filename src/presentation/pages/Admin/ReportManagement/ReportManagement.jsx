@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { resolveApiError } from "@services/api";
 import styles from "./ReportManagement.module.css";
 import Toast from "../../Expert/ModuleManagement/components/Toast";
+import ConfirmModal from "@presentation/components/ConfirmModal/ConfirmModal";
 import CoursePreviewModal from "@presentation/components/CoursePreviewModal/CoursePreviewModal";
 import {
   getAdminReports,
@@ -759,95 +760,108 @@ export default function ReportManagement() {
     }
   };
 
-  const handleResolve = async (reportId) => {
-    if (!window.confirm("Bạn có chắc muốn đánh dấu báo cáo này là đã xử lý?")) return;
+  const [reportConfirmState, setReportConfirmState] = useState(null);
 
-    setResolvingId(reportId);
+  const handleResolve = (reportId) => {
+    setReportConfirmState({
+      type: "resolve",
+      id: reportId,
+      title: "Đánh dấu đã xử lý?",
+      description: "Bạn có chắc muốn đánh dấu báo cáo này là đã xử lý?",
+      tone: "primary",
+      confirmLabel: "Xác nhận đã xử lý",
+      icon: "fa-circle-check",
+    });
+  };
+
+  const handleLock = (reportId) => {
+    setReportConfirmState({
+      type: "lock",
+      id: reportId,
+      title: "Khóa khóa học?",
+      description: "Khoá khóa học này và đánh dấu báo cáo đã xử lý? Chuyên gia sẽ không thể công khai lại khóa học cho đến khi được gỡ khoá.",
+      tone: "danger",
+      confirmLabel: "Khóa khóa học",
+      icon: "fa-lock",
+    });
+  };
+
+  const handleUnlock = (courseId) => {
+    setReportConfirmState({
+      type: "unlock",
+      id: courseId,
+      title: "Gỡ khóa khóa học?",
+      description: "Bạn có chắc muốn gỡ khoá khóa học này? Chuyên gia sẽ có thể công khai lại khóa học.",
+      tone: "primary",
+      confirmLabel: "Gỡ khóa",
+      icon: "fa-lock-open",
+    });
+  };
+
+  const executeReportConfirmAction = async () => {
+    if (!reportConfirmState) return;
+    const { type, id } = reportConfirmState;
 
     try {
-      const res = await resolveAdminReport(reportId);
-
-      if (res.success) {
-        const nextStatus = res.data?.status || "Resolved";
-        setReports((prev) => prev.map((item) => (item.id === reportId ? { ...item, status: nextStatus } : item)));
-        setSelectedReport((prev) => (prev && prev.id === reportId ? { ...prev, status: nextStatus, resolvedAt: res.data?.resolvedAt } : prev));
-        showToast(res.data?.message || "Đã đánh dấu báo cáo là đã xử lý.");
-      } else {
-        showToast(res.errorMessage || "Không thể cập nhật báo cáo.", "error");
+      if (type === "resolve") {
+        setResolvingId(id);
+        const res = await resolveAdminReport(id);
+        if (res.success) {
+          const nextStatus = res.data?.status || "Resolved";
+          setReports((prev) => prev.map((item) => (item.id === id ? { ...item, status: nextStatus } : item)));
+          setSelectedReport((prev) => (prev && prev.id === id ? { ...prev, status: nextStatus, resolvedAt: res.data?.resolvedAt } : prev));
+          showToast(res.data?.message || "Đã đánh dấu báo cáo là đã xử lý.");
+        } else {
+          showToast(res.errorMessage || "Không thể cập nhật báo cáo.", "error");
+        }
+      } else if (type === "lock") {
+        setLockingId(id);
+        const res = await lockCourseFromReport(id);
+        if (res.success) {
+          setReports((prev) =>
+            prev.map((item) =>
+              item.id === id
+                ? { ...item, status: "Resolved", isCourseLocked: true }
+                : item
+            )
+          );
+          setSelectedReport((prev) =>
+            prev && prev.id === id
+              ? { ...prev, status: "Resolved", isCourseLocked: true, resolvedAt: new Date().toISOString() }
+              : prev
+          );
+          showToast(res.data?.message || "Đã khoá khóa học và xử lý báo cáo.");
+        } else {
+          showToast(res.errorMessage || "Không thể khoá khóa học.", "error");
+        }
+      } else if (type === "unlock") {
+        setLockingId(id);
+        const res = await unlockCourse(id);
+        if (res.success) {
+          setReports((prev) =>
+            prev.map((item) =>
+              item.courseId === id
+                ? { ...item, isCourseLocked: false }
+                : item
+            )
+          );
+          setSelectedReport((prev) =>
+            prev && prev.courseId === id
+              ? { ...prev, isCourseLocked: false }
+              : prev
+          );
+          showToast(res.data?.message || "Đã gỡ khoá khóa học.");
+        } else {
+          showToast(res.errorMessage || "Không thể gỡ khoá khóa học.", "error");
+        }
       }
     } catch (err) {
       const { errorMessage } = resolveApiError(err);
       showToast(errorMessage || "Lỗi kết nối máy chủ.", "error");
     } finally {
       setResolvingId("");
-    }
-  };
-
-  const handleLock = async (reportId) => {
-    if (!window.confirm("Khoá khóa học này và đánh dấu báo cáo đã xử lý?\nExpert sẽ không thể publish lại cho đến khi được gỡ khoá.")) return;
-
-    setLockingId(reportId);
-
-    try {
-      const res = await lockCourseFromReport(reportId);
-
-      if (res.success) {
-        // Cập nhật list: report chuyển Resolved, course isCourseLocked = true
-        setReports((prev) =>
-          prev.map((item) =>
-            item.id === reportId
-              ? { ...item, status: "Resolved", isCourseLocked: true }
-              : item
-          )
-        );
-        setSelectedReport((prev) =>
-          prev && prev.id === reportId
-            ? { ...prev, status: "Resolved", isCourseLocked: true, resolvedAt: new Date().toISOString() }
-            : prev
-        );
-        showToast(res.data?.message || "Đã khoá khóa học và xử lý báo cáo.");
-      } else {
-        showToast(res.errorMessage || "Không thể khoá khóa học.", "error");
-      }
-    } catch (err) {
-      const { errorMessage } = resolveApiError(err);
-      showToast(errorMessage || "Lỗi kết nối máy chủ.", "error");
-    } finally {
       setLockingId("");
-    }
-  };
-
-  const handleUnlock = async (courseId) => {
-    if (!window.confirm("Gỡ khoá khóa học này?\nExpert sẽ có thể publish lại khóa học.")) return;
-
-    setLockingId(courseId);
-
-    try {
-      const res = await unlockCourse(courseId);
-
-      if (res.success) {
-        // Cập nhật list và detail: isCourseLocked = false
-        setReports((prev) =>
-          prev.map((item) =>
-            item.courseId === courseId
-              ? { ...item, isCourseLocked: false }
-              : item
-          )
-        );
-        setSelectedReport((prev) =>
-          prev && prev.courseId === courseId
-            ? { ...prev, isCourseLocked: false }
-            : prev
-        );
-        showToast(res.data?.message || "Đã gỡ khoá khóa học.");
-      } else {
-        showToast(res.errorMessage || "Không thể gỡ khoá.", "error");
-      }
-    } catch (err) {
-      const { errorMessage } = resolveApiError(err);
-      showToast(errorMessage || "Lỗi kết nối máy chủ.", "error");
-    } finally {
-      setLockingId("");
+      setReportConfirmState(null);
     }
   };
 
@@ -1132,6 +1146,20 @@ export default function ReportManagement() {
           report={dismissModal}
           onClose={() => setDismissModal(null)}
           onConfirm={handleDismissConfirm}
+        />
+      )}
+
+      {reportConfirmState && (
+        <ConfirmModal
+          open={!!reportConfirmState}
+          title={reportConfirmState.title}
+          description={reportConfirmState.description}
+          tone={reportConfirmState.tone}
+          icon={reportConfirmState.icon}
+          confirmLabel={reportConfirmState.confirmLabel}
+          busy={!!resolvingId || !!lockingId}
+          onConfirm={executeReportConfirmAction}
+          onClose={() => setReportConfirmState(null)}
         />
       )}
 

@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { resolveApiError } from "@services/api";
 import styles from "./CategoryManagement.module.css";
 import Toast from "../../Expert/ModuleManagement/components/Toast";
+import ConfirmModal from "@presentation/components/ConfirmModal/ConfirmModal";
 import Pagination from "@presentation/components/Pagination/Pagination";
 import {
   changeCategoryStatus,
@@ -266,16 +267,15 @@ export default function CategoryManagement() {
     await fetchCategories();
   };
 
-  const handleToggleStatus = async (category) => {
-    if (
-      !window.confirm(
-        `Bạn có chắc muốn ${
-          category.isActive ? "vô hiệu hóa" : "kích hoạt"
-        } danh mục "${category.name}" không?`,
-      )
-    ) {
-      return;
-    }
+  const [statusConfirmCategory, setStatusConfirmCategory] = useState(null);
+
+  const handleToggleStatus = (category) => {
+    setStatusConfirmCategory(category);
+  };
+
+  const confirmToggleStatusExecute = async () => {
+    if (!statusConfirmCategory) return;
+    const category = statusConfirmCategory;
 
     setBusyCategoryId(category.id);
     try {
@@ -305,6 +305,7 @@ export default function CategoryManagement() {
       );
     } finally {
       setBusyCategoryId("");
+      setStatusConfirmCategory(null);
     }
   };
 
@@ -559,6 +560,22 @@ export default function CategoryManagement() {
           initialData={modalMode === "edit" ? editingCategory : { ...emptyForm }}
           onClose={handleCloseModal}
           onSaved={handleSaved}
+        />
+      )}
+
+      {statusConfirmCategory && (
+        <ConfirmModal
+          open={!!statusConfirmCategory}
+          title={statusConfirmCategory.isActive ? "Vô hiệu hóa danh mục?" : "Kích hoạt danh mục?"}
+          description={`Bạn có chắc muốn ${
+            statusConfirmCategory.isActive ? "vô hiệu hóa" : "kích hoạt"
+          } danh mục "${statusConfirmCategory.name}" không?`}
+          tone={statusConfirmCategory.isActive ? "warning" : "primary"}
+          confirmLabel={statusConfirmCategory.isActive ? "Vô hiệu hóa" : "Kích hoạt"}
+          icon={statusConfirmCategory.isActive ? "fa-folder-minus" : "fa-folder-plus"}
+          busy={busyCategoryId === statusConfirmCategory.id}
+          onConfirm={confirmToggleStatusExecute}
+          onClose={() => setStatusConfirmCategory(null)}
         />
       )}
 

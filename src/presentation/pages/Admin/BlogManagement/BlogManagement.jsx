@@ -4,6 +4,7 @@ import { resolveApiError } from "@services/api";
 import styles from "./BlogManagement.module.css";
 import Toast from "../../Expert/ModuleManagement/components/Toast";
 import BlogFormModal from "./BlogFormModal";
+import ConfirmModal from "@presentation/components/ConfirmModal/ConfirmModal";
 import Pagination from "@presentation/components/Pagination/Pagination";
 import {
   getBlogs,
@@ -107,71 +108,76 @@ export default function BlogManagement() {
     }
   }
 
-  async function handleTogglePublish(blog) {
-    const action = blog.isPublished ? unpublishBlog : publishBlog;
-    const confirmMessage = blog.isPublished
-      ? `Bỏ công khai bài viết "${blog.title}"?`
-      : `Công khai bài viết "${blog.title}"?`;
+  const [confirmState, setConfirmState] = useState(null);
 
-    if (!window.confirm(confirmMessage)) return;
-
-    setBusyBlogId(blog.id);
-    try {
-      const res = await action(blog.id);
-      if (res.success) {
-        setBlogs((prev) =>
-          prev.map((b) =>
-            b.id === blog.id ? { ...b, isPublished: !blog.isPublished } : b,
-          ),
-        );
-        showToast(
-          blog.isPublished
-            ? "Đã bỏ công khai bài viết."
-            : "Đã công khai bài viết.",
-        );
-      } else {
-        showToast(res.errorMessage || "Không thể đổi trạng thái.", "error");
-      }
-    } catch (err) {
-      const { errorMessage } = resolveApiError(err);
-      showToast(
-        errorMessage || "Lỗi kết nối máy chủ.",
-        "error",
-      );
-    } finally {
-      setBusyBlogId("");
-    }
+  function handleTogglePublish(blog) {
+    setConfirmState({
+      type: "publish",
+      blog,
+      title: blog.isPublished ? "Bỏ công khai bài viết?" : "Công khai bài viết?",
+      description: blog.isPublished
+        ? `Bạn có chắc muốn bỏ công khai bài viết "${blog.title}"? Bài viết sẽ bị ẩn khỏi trang chính.`
+        : `Bạn có chắc muốn công khai bài viết "${blog.title}"? Độc giả sẽ có thể đọc bài viết này.`,
+      tone: blog.isPublished ? "warning" : "primary",
+      confirmLabel: blog.isPublished ? "Bỏ công khai" : "Công khai",
+      icon: blog.isPublished ? "fa-eye-slash" : "fa-eye",
+    });
   }
 
-  async function handleDelete(blog) {
-    if (
-      !window.confirm(
-        `Xóa bài viết "${blog.title}"? Hành động này không thể hoàn tác.`,
-      )
-    )
-      return;
+  function handleDelete(blog) {
+    setConfirmState({
+      type: "delete",
+      blog,
+      title: "Xóa bài viết?",
+      description: `Bạn có chắc muốn xóa bài viết "${blog.title}"? Hành động này không thể hoàn tác.`,
+      tone: "danger",
+      confirmLabel: "Xóa bài viết",
+      icon: "fa-trash-can",
+    });
+  }
 
+  async function executeConfirmAction() {
+    if (!confirmState) return;
+    const { type, blog } = confirmState;
     setBusyBlogId(blog.id);
+
     try {
-      const res = await deleteBlog(blog.id);
-      if (res.success) {
-        showToast("Đã xóa bài viết.");
-        if (blogs.length === 1 && pageNumber > 1) {
-          setPageNumber((p) => p - 1);
+      if (type === "publish") {
+        const action = blog.isPublished ? unpublishBlog : publishBlog;
+        const res = await action(blog.id);
+        if (res.success) {
+          setBlogs((prev) =>
+            prev.map((b) =>
+              b.id === blog.id ? { ...b, isPublished: !blog.isPublished } : b,
+            ),
+          );
+          showToast(
+            blog.isPublished
+              ? "Đã bỏ công khai bài viết."
+              : "Đã công khai bài viết.",
+          );
         } else {
-          fetchBlogs();
+          showToast(res.errorMessage || "Không thể đổi trạng thái.", "error");
         }
-      } else {
-        showToast(res.errorMessage || "Không thể xóa bài viết.", "error");
+      } else if (type === "delete") {
+        const res = await deleteBlog(blog.id);
+        if (res.success) {
+          showToast("Đã xóa bài viết.");
+          if (blogs.length === 1 && pageNumber > 1) {
+            setPageNumber((p) => p - 1);
+          } else {
+            fetchBlogs();
+          }
+        } else {
+          showToast(res.errorMessage || "Không thể xóa bài viết.", "error");
+        }
       }
     } catch (err) {
       const { errorMessage } = resolveApiError(err);
-      showToast(
-        errorMessage || "Lỗi kết nối máy chủ.",
-        "error",
-      );
+      showToast(errorMessage || "Lỗi kết nối máy chủ.", "error");
     } finally {
       setBusyBlogId("");
+      setConfirmState(null);
     }
   }
 
@@ -383,6 +389,20 @@ export default function BlogManagement() {
             fetchBlogs();
             showToast(message);
           }}
+        />
+      )}
+
+      {confirmState && (
+        <ConfirmModal
+          open={!!confirmState}
+          title={confirmState.title}
+          description={confirmState.description}
+          tone={confirmState.tone}
+          icon={confirmState.icon}
+          confirmLabel={confirmState.confirmLabel}
+          busy={busyBlogId === confirmState.blog.id}
+          onConfirm={executeConfirmAction}
+          onClose={() => setConfirmState(null)}
         />
       )}
 

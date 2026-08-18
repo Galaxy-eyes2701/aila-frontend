@@ -113,13 +113,13 @@ export default function LearningView() {
 
         setCurrentMaterial({ ...detailData, isCompleted });
       } else {
-        alert(res.data.errorMessage || "Không thể tải chi tiết nội dung học liệu.");
+        setError(res.data.errorMessage || "Không thể tải chi tiết nội dung học liệu.");
       }
     } catch (err) {
       const apiErrorMsg =
         err.response?.data?.errorMessage ||
         resolveApiError(err).errorMessage;
-      alert(apiErrorMsg || "Lỗi đường truyền mạng khi tải bài học.");
+      setError(apiErrorMsg || "Lỗi đường truyền mạng khi tải bài học.");
     } finally {
       setContentLoading(false);
     }

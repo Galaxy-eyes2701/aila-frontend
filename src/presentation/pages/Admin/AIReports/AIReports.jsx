@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { resolveApiError } from '@services/api';
 import styles from './AIReports.module.css';
 import Toast from '../../Expert/ModuleManagement/components/Toast';
+import ConfirmModal from "@presentation/components/ConfirmModal/ConfirmModal";
 import {
   getAIResourceConsumptionReport,
   getAIConsumptionTrend,
@@ -275,17 +276,32 @@ export default function AIReports() {
     showToast(msg);
   };
 
-  const handleDelete = async (config) => {
-    if (!window.confirm(`Xóa cấu hình giá "${config.serviceName}"?`)) return;
+  const [deleteConfirmConfig, setDeleteConfirmConfig] = useState(null);
+
+  const handleDelete = (config) => {
+    setDeleteConfirmConfig(config);
+  };
+
+  const confirmDeleteExecute = async () => {
+    if (!deleteConfirmConfig) return;
+    const config = deleteConfirmConfig;
+
     setBusyId(config.id);
     try {
       const res = await deleteAIPricingConfig(config.id);
-      if (res.success) { setPricingConfigs(prev => prev.filter(c => c.id !== config.id)); showToast('Đã xóa cấu hình giá.'); }
-      else showToast(res.errorMessage || 'Không thể xóa.', 'error');
+      if (res.success) {
+        setPricingConfigs(prev => prev.filter(c => c.id !== config.id));
+        showToast('Đã xóa cấu hình giá.');
+      } else {
+        showToast(res.errorMessage || 'Không thể xóa.', 'error');
+      }
     } catch (err) {
       const { errorMessage } = resolveApiError(err);
       showToast(errorMessage || 'Lỗi kết nối máy chủ.', 'error');
-    } finally { setBusyId(''); }
+    } finally {
+      setBusyId('');
+      setDeleteConfirmConfig(null);
+    }
   };
 
   /* ────────────────────────────── RENDER ────────────────────────────── */
@@ -647,6 +663,19 @@ export default function AIReports() {
           initialData={modalMode === 'edit' ? editingConfig : { ...emptyForm }}
           onClose={() => { setModalMode(null); setEditingConfig(null); }}
           onSaved={handleSaved}
+        />
+      )}
+
+      {deleteConfirmConfig && (
+        <ConfirmModal
+          open={!!deleteConfirmConfig}
+          title="Xóa cấu hình giá AI?"
+          description={`Bạn có chắc muốn xóa cấu hình giá "${deleteConfirmConfig.serviceName}"? Hành động này không thể hoàn tác.`}
+          tone="danger"
+          confirmLabel="Xóa cấu hình"
+          busy={busyId === deleteConfirmConfig.id}
+          onConfirm={confirmDeleteExecute}
+          onClose={() => setDeleteConfirmConfig(null)}
         />
       )}
 

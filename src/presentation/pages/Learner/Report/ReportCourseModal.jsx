@@ -121,8 +121,10 @@ export default function ReportCourseModal({
           });
           break;
         case "COURSE_NOT_FOUND":
-          alert(err.errorMessage || "Khóa học không tồn tại.");
-          onClose();
+          setBanner({
+            type: "error",
+            message: err.errorMessage || "Khóa học không tồn tại.",
+          });
           break;
         case "MATERIAL_NOT_FOUND":
           setBanner({

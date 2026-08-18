@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import styles from "./UserManagement.module.css";
 import Toast from "../../Expert/ModuleManagement/components/Toast";
 import CreateExpertModal from "./CreateExpertModal";
+import ConfirmModal from "@presentation/components/ConfirmModal/ConfirmModal";
 import Pagination from "@presentation/components/Pagination/Pagination";
 import { getUsers, updateUserStatus } from "@services/userApi";
 import { resolveApiError } from "@services/api";
@@ -27,6 +28,7 @@ export default function UserManagement() {
   const [loading, setLoading] = useState(true);
   const [pageError, setPageError] = useState("");
   const [toast, setToast] = useState(null);
+  const [confirmModal, setConfirmModal] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [searchInput, setSearchInput] = useState("");
@@ -81,16 +83,26 @@ export default function UserManagement() {
     setSearchKeyword(searchInput);
   }
 
-  async function handleToggleStatus(user) {
+  function handleToggleStatus(user) {
     const nextActive = !user.isActive;
-    const confirmMessage = nextActive
-      ? `Kích hoạt lại tài khoản "${user.fullName}"?`
-      : `Vô hiệu hóa tài khoản "${user.fullName}"? Người dùng sẽ không thể đăng nhập.`;
+    setConfirmModal({
+      user,
+      nextActive,
+      title: nextActive ? "Kích hoạt lại tài khoản?" : "Vô hiệu hóa tài khoản?",
+      description: nextActive
+        ? `Bạn có chắc muốn kích hoạt lại tài khoản "${user.fullName}" (${user.email})?`
+        : `Bạn có chắc muốn vô hiệu hóa tài khoản "${user.fullName}" (${user.email})? Người dùng sẽ không thể đăng nhập vào hệ thống.`,
+      tone: nextActive ? "primary" : "danger",
+      confirmLabel: nextActive ? "Kích hoạt" : "Vô hiệu hóa",
+      icon: nextActive ? "fa-user-check" : "fa-user-slash",
+    });
+  }
 
-    if (!window.confirm(confirmMessage)) return;
+  async function executeToggleStatus() {
+    if (!confirmModal) return;
+    const { user, nextActive } = confirmModal;
 
     setBusyUserId(user.id);
-
     try {
       const res = await updateUserStatus(user.id, nextActive);
 
@@ -110,12 +122,11 @@ export default function UserManagement() {
         );
       }
     } catch (err) {
-      showToast(
-        err.response?.data?.errorMessage ?? "Lỗi kết nối máy chủ.",
-        "error",
-      );
+      const { errorMessage } = resolveApiError(err);
+      showToast(errorMessage || "Lỗi kết nối máy chủ.", "error");
     } finally {
       setBusyUserId("");
+      setConfirmModal(null);
     }
   }
 
@@ -342,6 +353,20 @@ export default function UserManagement() {
           showToast("Đã tạo tài khoản Chuyên gia mới.");
         }}
       />
+
+      {confirmModal && (
+        <ConfirmModal
+          open={!!confirmModal}
+          title={confirmModal.title}
+          description={confirmModal.description}
+          tone={confirmModal.tone}
+          icon={confirmModal.icon}
+          confirmLabel={confirmModal.confirmLabel}
+          busy={busyUserId === confirmModal.user.id}
+          onConfirm={executeToggleStatus}
+          onClose={() => setConfirmModal(null)}
+        />
+      )}
 
       {toast && <Toast toast={toast} onClose={() => setToast(null)} />}
     </div>

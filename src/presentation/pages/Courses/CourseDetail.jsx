@@ -5,6 +5,7 @@ import useAuth from '@state/hooks/useAuth';
 import LoginModal from '@presentation/components/AuthModals/LoginModal';
 import RegisterModal from '@presentation/components/AuthModals/RegisterModal';
 import ReportCourseModal from '../Learner/Report/ReportCourseModal';
+import ConfirmModal from '@presentation/components/ConfirmModal/ConfirmModal';
 import styles from './CourseDetail.module.css';
 
 const LEVEL_LABELS = {
@@ -89,6 +90,7 @@ export default function CourseDetail() {
   // Báo cáo khóa học
   const [showReport, setShowReport] = useState(false);
   const [reportToast, setReportToast] = useState(false);
+  const [enrollErrorModal, setEnrollErrorModal] = useState(null);
 
   useEffect(() => {
     if (!reportToast) return undefined;
@@ -155,10 +157,16 @@ export default function CourseDetail() {
       const msg = err.response?.data?.errorMessage;
       if (status === 401) { setAuthModal('login'); return; }
       if (status === 403) {
-        alert('Chức năng này chỉ dành cho học viên. Vui lòng đăng nhập bằng tài khoản học viên.');
+        setEnrollErrorModal({
+          title: "Hạn chế quyền truy cập",
+          description: "Chức năng này chỉ dành cho học viên. Vui lòng đăng nhập bằng tài khoản học viên.",
+        });
         return;
       }
-      alert(msg ?? 'Đăng ký thất bại. Vui lòng thử lại.');
+      setEnrollErrorModal({
+        title: "Đăng ký thất bại",
+        description: msg ?? "Đăng ký thất bại. Vui lòng thử lại sau.",
+      });
     } finally {
       setEnrolling(false);
     }
@@ -455,6 +463,20 @@ export default function CourseDetail() {
             setShowReport(false);
             setReportToast(true);
           }}
+        />
+      )}
+
+      {enrollErrorModal && (
+        <ConfirmModal
+          open={!!enrollErrorModal}
+          title={enrollErrorModal.title}
+          description={enrollErrorModal.description}
+          tone="warning"
+          confirmLabel="Đã hiểu"
+          cancelLabel="Đóng"
+          icon="fa-circle-exclamation"
+          onConfirm={() => setEnrollErrorModal(null)}
+          onClose={() => setEnrollErrorModal(null)}
         />
       )}
 

@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { resolveApiError } from "@services/api";
+import ConfirmModal from "@presentation/components/ConfirmModal/ConfirmModal";
 import {
   getAccountResourceLimitOverride,
   deleteAccountResourceLimitOverride,
@@ -15,6 +16,7 @@ export default function OverrideDetailModal({
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
+  const [showConfirmDelete, setShowConfirmDelete] = useState(false);
 
   async function loadDetail() {
     try {
@@ -41,15 +43,7 @@ export default function OverrideDetailModal({
     }
   }
 
-  async function handleDelete() {
-    const confirmDelete = window.confirm(
-      "Bạn có chắc muốn xóa cấu hình riêng của tài khoản này? Hệ thống sẽ quay về áp dụng hạn mức mặc định.",
-    );
-
-    if (!confirmDelete) {
-      return;
-    }
-
+  async function executeDelete() {
     try {
       setLoading(true);
       setErrorMessage("");
@@ -63,6 +57,7 @@ export default function OverrideDetailModal({
         return;
       }
 
+      setShowConfirmDelete(false);
       onSuccess();
     } catch (error) {
       const { errorMessage } = resolveApiError(error);
@@ -180,7 +175,7 @@ export default function OverrideDetailModal({
 
               <button
                 type="button"
-                onClick={handleDelete}
+                onClick={() => setShowConfirmDelete(true)}
                 disabled={loading}
                 className={styles.deleteButton}
               >
@@ -190,6 +185,19 @@ export default function OverrideDetailModal({
           )}
         </div>
       </div>
+
+      {showConfirmDelete && (
+        <ConfirmModal
+          open={showConfirmDelete}
+          title="Xóa cấu hình riêng?"
+          description="Bạn có chắc muốn xóa cấu hình riêng của tài khoản này? Hệ thống sẽ quay về áp dụng hạn mức mặc định."
+          tone="danger"
+          confirmLabel="Xóa cấu hình"
+          busy={loading}
+          onConfirm={executeDelete}
+          onClose={() => setShowConfirmDelete(false)}
+        />
+      )}
     </div>
   );
 }

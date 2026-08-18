@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { resolveApiError } from "@services/api";
 import styles from "./TagManagement.module.css";
 import Toast from "../../Expert/ModuleManagement/components/Toast";
+import ConfirmModal from "@presentation/components/ConfirmModal/ConfirmModal";
 import Pagination from "@presentation/components/Pagination/Pagination";
 import {
   createSystemTag,
@@ -389,22 +390,31 @@ export default function TagManagement() {
     fetchPendingRequests();
   };
 
-  const handleDeleteTag = async (tagId) => {
-    if (!window.confirm("Bạn có chắc muốn xóa tag này không?")) return;
+  const [deleteConfirmTag, setDeleteConfirmTag] = useState(null);
+
+  const handleDeleteTag = (tag) => {
+    setDeleteConfirmTag(tag);
+  };
+
+  const confirmDeleteTagExecute = async () => {
+    if (!deleteConfirmTag) return;
+    const tagId = deleteConfirmTag.id;
 
     setBusyTagId(tagId);
     try {
       const res = await deleteSystemTag(tagId);
       if (res.success) {
-        setTags((prev) => prev.filter((tag) => tag.id !== tagId));
+        setTags((prev) => prev.filter((t) => t.id !== tagId));
+        showToast("Đã xóa tag hệ thống.");
       } else {
-        alert(res.errorMessage || "Không thể xóa tag.");
+        showToast(res.errorMessage || "Không thể xóa tag.", "error");
       }
     } catch (err) {
       const { errorMessage } = resolveApiError(err);
-      alert(errorMessage || "Lỗi kết nối máy chủ.");
+      showToast(errorMessage || "Lỗi kết nối máy chủ.", "error");
     } finally {
       setBusyTagId("");
+      setDeleteConfirmTag(null);
     }
   };
 
@@ -649,7 +659,7 @@ export default function TagManagement() {
                         </button>
                         <button
                           className={`${styles.secondaryButton} ${styles.dangerButton}`}
-                          onClick={() => handleDeleteTag(tag.id)}
+                          onClick={() => handleDeleteTag(tag)}
                           disabled={busyTagId === tag.id}
                         >
                           <i className="fas fa-trash" /> Xóa
@@ -697,6 +707,19 @@ export default function TagManagement() {
             setSelectedRequest(null);
           }}
           onSubmit={handleReviewSubmit}
+        />
+      )}
+
+      {deleteConfirmTag && (
+        <ConfirmModal
+          open={!!deleteConfirmTag}
+          title="Xóa tag hệ thống?"
+          description={`Bạn có chắc muốn xóa tag "${deleteConfirmTag.name}"? Hành động này không thể hoàn tác.`}
+          tone="danger"
+          confirmLabel="Xóa tag"
+          busy={busyTagId === deleteConfirmTag.id}
+          onConfirm={confirmDeleteTagExecute}
+          onClose={() => setDeleteConfirmTag(null)}
         />
       )}
 

@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Underline from "@tiptap/extension-underline";
@@ -8,6 +8,7 @@ import Highlight from "@tiptap/extension-highlight";
 import Link from "@tiptap/extension-link";
 import Image from "@tiptap/extension-image";
 import Placeholder from "@tiptap/extension-placeholder";
+import ConfirmModal from "@presentation/components/ConfirmModal/ConfirmModal";
 import styles from "./RichTextEditor.module.css";
 
 const TEXT_COLORS = ["#111827", "#dc2626", "#2563eb", "#16a34a", "#ca8a04", "#7c3aed"];
@@ -74,6 +75,8 @@ export default function RichTextEditor({
     editor.chain().focus().setImage({ src: url }).run();
   }
 
+  const [uploadError, setUploadError] = useState(false);
+
   async function handleFileSelected(e) {
     const file = e.target.files?.[0];
     e.target.value = ""; // cho phép chọn lại cùng 1 file lần sau
@@ -83,7 +86,7 @@ export default function RichTextEditor({
       const url = await onImageUpload(file);
       if (url) editor.chain().focus().setImage({ src: url }).run();
     } catch (err) {
-      window.alert("Không thể tải ảnh lên. Vui lòng thử lại.");
+      setUploadError(true);
     }
   }
 
@@ -233,6 +236,20 @@ export default function RichTextEditor({
       </div>
 
       <EditorContent editor={editor} className={styles.editorContent} />
+
+      {uploadError && (
+        <ConfirmModal
+          open={uploadError}
+          title="Tải ảnh thất bại"
+          description="Không thể tải ảnh lên tập tin. Vui lòng kiểm tra dung lượng và định dạng ảnh rồi thử lại."
+          tone="danger"
+          confirmLabel="Đã hiểu"
+          cancelLabel="Đóng"
+          icon="fa-circle-exclamation"
+          onConfirm={() => setUploadError(false)}
+          onClose={() => setUploadError(false)}
+        />
+      )}
     </div>
   );
 }

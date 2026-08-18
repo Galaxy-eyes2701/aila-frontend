@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import ConfirmModal from "@presentation/components/ConfirmModal/ConfirmModal";
 import {
   getPracticeMaterialDetail,
   listAttempts,
@@ -49,9 +50,11 @@ export default function AIPracticePanel({
       .finally(() => setLoadingAttempts(false));
   }, [enrollmentId, materialId]);
 
+  const [startError, setStartError] = useState(false);
+
   function handleStart() {
     if (!enrollmentId) {
-      alert("Không thể xác định thông tin ghi danh. Vui lòng tải lại trang.");
+      setStartError(true);
       return;
     }
     navigate(
@@ -194,6 +197,20 @@ export default function AIPracticePanel({
         <p className={styles.aiPracticeLoading} style={{ marginTop: 8 }}>
           <i className="fas fa-spinner fa-spin" /> Đang tải lịch sử...
         </p>
+      )}
+
+      {startError && (
+        <ConfirmModal
+          open={startError}
+          title="Không thể bắt đầu thực hành"
+          description="Không thể xác định thông tin ghi danh. Vui lòng tải lại trang hoặc kiểm tra trạng thái đăng ký khóa học."
+          tone="warning"
+          confirmLabel="Đã hiểu"
+          cancelLabel="Đóng"
+          icon="fa-circle-exclamation"
+          onConfirm={() => setStartError(false)}
+          onClose={() => setStartError(false)}
+        />
       )}
     </div>
   );
