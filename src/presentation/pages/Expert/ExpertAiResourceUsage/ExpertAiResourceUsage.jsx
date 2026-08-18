@@ -82,7 +82,7 @@ export default function ExpertAiResourceUsage() {
                 Quản lý <em>Tài nguyên AI Token</em>
               </h1>
               <p>
-                Theo dõi định ngạch AI Token được cấp, lượng tiêu thụ và số dư còn lại của tài khoản
+                Theo dõi hạn mức AI Token được cấp, lượng tiêu thụ và số dư còn lại của tài khoản
                 Chuyên gia.
               </p>
             </div>
@@ -156,7 +156,7 @@ export default function ExpertAiResourceUsage() {
               <div className={styles.metricsGrid}>
                 <div className={styles.metricBox}>
                   <span className={styles.metricLabel}>
-                    <i className="fas fa-shield-halved" /> Định Ngạch Được Cấp
+                    <i className="fas fa-shield-halved" /> Hạn Mức Được Cấp
                   </span>
                   <span className={styles.metricValue}>{formatNumber(data.allocatedTokens)}</span>
                   <span className={styles.metricSub}>AI Tokens</span>
@@ -204,7 +204,7 @@ export default function ExpertAiResourceUsage() {
                   <div className={styles.infoItemText}>
                     <h4>Hiển thị tài nguyên minh bạch</h4>
                     <p>
-                      Hệ thống hiển thị chính xác định ngạch được cấp, lượng AI Token đã sử dụng và
+                      Hệ thống hiển thị chính xác hạn mức được cấp, lượng AI Token đã sử dụng và
                       số dư khả dụng của Chuyên gia.
                     </p>
                   </div>
@@ -215,9 +215,9 @@ export default function ExpertAiResourceUsage() {
                     <i className="fas fa-sliders" aria-hidden="true" />
                   </div>
                   <div className={styles.infoItemText}>
-                    <h4>Xác định định ngạch</h4>
+                    <h4>Xác định hạn mức</h4>
                     <p>
-                      Định ngạch được xác định từ cấu hình riêng của tài khoản Chuyên gia;
+                      Hạn mức được xác định từ cấu hình riêng của tài khoản Chuyên gia;
                       nếu không có sẽ áp dụng chính sách toàn cục.
                     </p>
                   </div>
@@ -230,7 +230,7 @@ export default function ExpertAiResourceUsage() {
                   <div className={styles.infoItemText}>
                     <h4>Cấu hình bởi Quản trị viên</h4>
                     <p>
-                      Tài nguyên AI Token dành cho Chuyên gia không tự động gia hạn. Định ngạch bổ sung
+                      Tài nguyên AI Token dành cho Chuyên gia không tự động gia hạn. Hạn mức bổ sung
                       được cấp trực tiếp qua cấu hình của Admin.
                     </p>
                   </div>
