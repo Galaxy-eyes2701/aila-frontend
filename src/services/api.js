@@ -68,24 +68,75 @@ function translateErrorMessage(message) {
   return message; // không khớp mẫu nào -> giữ nguyên, không mất thông tin
 }
 export function resolveApiError(err) {
+  if (!err) return { status: 0, errorCode: null, errorMessage: null };
+
   const status = err?.response?.status ?? 0;
   const data = err?.response?.data;
 
-  const hasEnvelope =
-    data &&
-    typeof data === "object" &&
-    ("success" in data || "Success" in data);
-
-  if (hasEnvelope) {
-    const rawMessage = data.errorMessage ?? data.ErrorMessage ?? null;
+  if (!data) {
     return {
       status,
-      errorCode: data.errorCode ?? data.ErrorCode ?? null,
-      errorMessage: translateErrorMessage(rawMessage),
+      errorCode: null,
+      errorMessage: err.message || "Không thể kết nối đến máy chủ.",
     };
   }
 
-  return { status, errorCode: null, errorMessage: null };
+  if (typeof data === "string") {
+    return {
+      status,
+      errorCode: null,
+      errorMessage: translateErrorMessage(data),
+    };
+  }
+
+  if (typeof data === "object") {
+    // 1. Check Envelope or direct error fields
+    const rawMessage =
+      data.errorMessage ??
+      data.ErrorMessage ??
+      data.message ??
+      data.Message ??
+      data.detail ??
+      data.title ??
+      data.error ??
+      null;
+
+    const errorCode = data.errorCode ?? data.ErrorCode ?? null;
+
+    if (rawMessage) {
+      return {
+        status,
+        errorCode,
+        errorMessage: translateErrorMessage(rawMessage),
+      };
+    }
+
+    // 2. Check FluentValidation / ProblemDetails errors object
+    if (data.errors && typeof data.errors === "object") {
+      const errorMessages = [];
+      for (const key of Object.keys(data.errors)) {
+        const fieldErrors = data.errors[key];
+        if (Array.isArray(fieldErrors)) {
+          fieldErrors.forEach((msg) => errorMessages.push(translateErrorMessage(msg)));
+        } else if (typeof fieldErrors === "string") {
+          errorMessages.push(translateErrorMessage(fieldErrors));
+        }
+      }
+      if (errorMessages.length > 0) {
+        return {
+          status,
+          errorCode: errorCode || "VALIDATION_ERROR",
+          errorMessage: errorMessages.join("; "),
+        };
+      }
+    }
+  }
+
+  return {
+    status,
+    errorCode: null,
+    errorMessage: err.message || "Lỗi xử lý yêu cầu.",
+  };
 }
 
 export function normalizeApiResponse(payload) {

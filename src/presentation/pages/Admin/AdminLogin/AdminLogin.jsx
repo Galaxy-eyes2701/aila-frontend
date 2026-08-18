@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import api from '@services/api';
+import api, { resolveApiError } from '@services/api';
 import styles from './AdminLogin.module.css';
 
 export default function AdminLogin() {
@@ -21,6 +21,8 @@ export default function AdminLogin() {
       return;
     }
     setLoading(true);
+    setError('');
+
     try {
       const normalizedEmail = form.email.trim().toLowerCase();
       const res = await api.post('/auth/admin/login', {
@@ -28,22 +30,24 @@ export default function AdminLogin() {
         username: normalizedEmail,
         password: form.password,
       }, { skipAuth: true });
-      if (res.data.success) {
-        const data = res.data.data;
-        localStorage.setItem('accessToken', data.accessToken);
+
+      const payload = res.data;
+      if (payload?.success || payload?.Success) {
+        const data = payload.data || payload.Data;
+        localStorage.setItem('accessToken', data.accessToken || data.AccessToken);
         localStorage.setItem('adminLoggedIn', 'true');
         localStorage.setItem('role', 'Admin');
         navigate('/admin/reports');
       } else {
-        setError(res.data.errorMessage || 'Đăng nhập thất bại.');
+        const msg = payload?.errorMessage || payload?.ErrorMessage || payload?.message;
+        setError(msg || 'Đăng nhập Admin thất bại.');
       }
     } catch (err) {
-      const apiError =
-        err?.response?.data?.errorMessage ||
-        err?.response?.data?.message ||
-        err?.response?.data?.title ||
-        'Email hoặc mật khẩu không đúng.';
-      setError(apiError);
+      const apiErr = resolveApiError(err);
+      const errorMsg =
+        apiErr.errorMessage ||
+        'Đã xảy ra lỗi khi đăng nhập Admin. Vui lòng thử lại.';
+      setError(errorMsg);
     } finally {
       setLoading(false);
     }
