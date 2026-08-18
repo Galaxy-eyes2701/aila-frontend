@@ -1,7 +1,7 @@
 /* ── Layout ── */
 .page {
   min-height: 100vh;
-  background: var(--bg, #f7f3eb);
+  background: #f7f3eb;
 }
 
 .container {

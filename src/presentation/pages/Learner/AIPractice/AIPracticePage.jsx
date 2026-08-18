@@ -112,6 +112,14 @@ export default function AIPracticePage() {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, sending]);
 
+  // Auto-resize prompt textarea when prompt content changes
+  useEffect(() => {
+    if (inputRef.current) {
+      inputRef.current.style.height = "auto";
+      inputRef.current.style.height = Math.min(inputRef.current.scrollHeight, 220) + "px";
+    }
+  }, [prompt]);
+
   // Abandon on unmount if still in progress (AF-07)
   useEffect(() => {
     return () => {
@@ -343,25 +351,91 @@ export default function AIPracticePage() {
         <Link to={`/learning/${courseId}`} className={styles.backBtn}>
           <i className="fas fa-arrow-left" /> Về khóa học
         </Link>
-        <h1 className={styles.pageTitle}>
-          <i className="fas fa-robot" style={{ marginRight: 8 }} />
-          {material?.title ?? "Thực hành AI"}
-        </h1>
-        <p className={styles.pageSubtitle}>Luyện tập kỹ năng đặt prompt với AI</p>
 
-        {/* Scenario card */}
+        <div className={styles.headerGroup}>
+          <div className={styles.headerBadge}>
+            <i className="fas fa-robot" /> PHÂN KHÚC THỰC HÀNH AI
+          </div>
+          <h1 className={styles.pageTitle}>
+            {material?.title ?? "Thực hành AI"}
+          </h1>
+          <p className={styles.pageSubtitle}>
+            Luyện tập kỹ năng tương tác và viết prompt hiệu quả cùng AI
+          </p>
+        </div>
+
+        {/* Scenario & Task Card */}
         {material && (
           <div className={styles.scenarioCard}>
-            <p className={styles.scenarioLabel}>Tình huống</p>
-            <p className={styles.scenarioText}>{material.scenario}</p>
-            <div className={styles.scenarioMeta}>
-              <span className={styles.metaChip}>
-                <i className="fas fa-bullseye" /> {material.taskDescription}
-              </span>
-              <span className={styles.metaChip}>
-                <i className="fas fa-comment-dots" /> Tối đa {maxTurns} lượt
-              </span>
+            <div className={styles.scenarioHeader}>
+              <div className={styles.scenarioIconBox}>
+                <i className="fas fa-graduation-cap" />
+              </div>
+              <div className={styles.scenarioHeaderText}>
+                <h2 className={styles.scenarioTitle}>Tình huống & Yêu cầu thực hành</h2>
+                <div className={styles.scenarioTags}>
+                  <span className={styles.metaBadge}>
+                    <i className="fas fa-comment-dots" /> Tối đa {maxTurns} lượt tương tác
+                  </span>
+                  {material.difficulty && (
+                    <span className={styles.metaBadge}>
+                      <i className="fas fa-signal" /> {
+                        material.difficulty === 1 || material.difficulty === "Easy" ? "Độ khó: Dễ" :
+                        material.difficulty === 2 || material.difficulty === "Medium" ? "Độ khó: Trung bình" :
+                        "Độ khó: Nâng cao"
+                      }
+                    </span>
+                  )}
+                </div>
+              </div>
             </div>
+
+            <div className={styles.scenarioBody}>
+              {material.scenario && (
+                <div className={styles.scenarioSection}>
+                  <div className={styles.sectionHeading}>
+                    <i className="fas fa-book-open" /> Bối cảnh tình huống:
+                  </div>
+                  <p className={styles.scenarioText}>{material.scenario}</p>
+                </div>
+              )}
+
+              {material.taskDescription && (
+                <div className={styles.taskCard}>
+                  <div className={styles.taskCardHeader}>
+                    <i className="fas fa-bullseye" /> Nhiệm vụ của bạn:
+                  </div>
+                  <div className={styles.taskCardBody}>
+                    {material.taskDescription}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* If in starting phase, show start action directly inside the scenario card container */}
+            {phase === "starting" && (
+              <div className={styles.startActionArea}>
+                {startError && (
+                  <div className={styles.errorBox} style={{ width: "100%", marginBottom: 12 }}>
+                    <i className="fas fa-circle-exclamation" /> {startError}
+                  </div>
+                )}
+                <button
+                  className={styles.startPracticeBtn}
+                  onClick={handleStart}
+                  disabled={starting}
+                >
+                  {starting ? (
+                    <><i className="fas fa-spinner fa-spin" /> Đang chuẩn bị phiên...</>
+                  ) : (
+                    <><i className="fas fa-play" /> Bắt đầu thực hành</>
+                  )}
+                </button>
+                <p className={styles.startHintText}>
+                  <i className="fas fa-shield-halved" /> Hệ thống sẽ kiểm tra hạn mức AI Token trước khi bắt đầu.
+                </p>
+              </div>
+            )}
           </div>
         )}
 
@@ -408,35 +482,26 @@ export default function AIPracticePage() {
           </div>
         )}
 
-        {/* ── Phase: starting ── */}
-        {phase === "starting" && (
-          <div className={styles.startScreen}>
-            {startError && (
-              <div className={styles.errorBox} style={{ width: "100%", marginBottom: 8 }}>
-                <i className="fas fa-circle-exclamation" />{startError}
-              </div>
-            )}
-            <button
-              className={styles.finishBtn}
-              style={{ background: "#2563eb" }}
-              onClick={handleStart}
-              disabled={starting}
-            >
-              {starting
-                ? <><i className="fas fa-spinner fa-spin" /> Đang chuẩn bị...</>
-                : <><i className="fas fa-play" /> Bắt đầu thực hành</>}
-            </button>
-            <p>Hệ thống sẽ kiểm tra hạn mức AI Token trước khi bắt đầu.</p>
-          </div>
-        )}
-
         {/* ── Phase: chat ── */}
         {(phase === "chat" || phase === "finishing") && (
           <>
-            <p className={`${styles.turnBar} ${nearLimit || atLimit ? styles.turnWarn : ""}`}>
-              <i className="fas fa-comments" /> {validTurns}/{maxTurns} lượt
-              {atLimit && " — Đã hết lượt"}
-            </p>
+            <div className={styles.turnBarContainer}>
+              <div className={styles.turnBarInfo}>
+                <span className={styles.turnBarLabel}>
+                  <i className="fas fa-comments" /> Tiến trình tương tác:
+                </span>
+                <span className={`${styles.turnCountBadge} ${nearLimit || atLimit ? styles.turnWarnBadge : ""}`}>
+                  {validTurns}/{maxTurns} lượt
+                  {atLimit && " (Đã hết lượt)"}
+                </span>
+              </div>
+              <div className={styles.turnProgressTrack}>
+                <div
+                  className={`${styles.turnProgressFill} ${nearLimit || atLimit ? styles.turnProgressWarn : ""}`}
+                  style={{ width: `${Math.min(100, (validTurns / (maxTurns || 1)) * 100)}%` }}
+                />
+              </div>
+            </div>
 
             <div className={styles.chatArea}>
               <div className={styles.chatMessages}>
@@ -475,11 +540,9 @@ export default function AIPracticePage() {
                   onChange={(e) => {
                     setPrompt(e.target.value);
                     setBanner(null);
-                    e.target.style.height = "auto";
-                    e.target.style.height = Math.min(e.target.scrollHeight, 200) + "px";
                   }}
                   onKeyDown={handleKeyDown}
-                  placeholder={atLimit ? "Đã hết lượt" : "Nhập tin nhắn... (Enter gửi, Shift+Enter xuống dòng)"}
+                  placeholder={atLimit ? "Đã hết lượt tương tác" : "Nhập prompt của bạn... (Enter gửi, Shift+Enter xuống dòng)"}
                   disabled={!canSend}
                 />
                 <button className={styles.sendBtn} onClick={handleSend} disabled={!canSend || !prompt.trim()}>

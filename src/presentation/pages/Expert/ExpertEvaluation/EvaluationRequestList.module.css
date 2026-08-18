@@ -1,7 +1,7 @@
 .page {
   min-height: 100vh;
-  background: var(--bg, #f7f3eb);
-  padding: 36px 0 72px;
+  background: #f7f3eb;
+  padding: 32px 0 64px;
 }
 
 .container {
