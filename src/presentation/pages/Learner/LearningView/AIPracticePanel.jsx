@@ -105,24 +105,36 @@ export default function AIPracticePanel({
         )}
       </div>
 
-      {/* Scenario summary */}
+      {/* Scenario & Task summary */}
       {material && (
         <div className={styles.aiPracticeBody}>
-          <p className={styles.aiPracticeScenarioLabel}>Tình huống</p>
-          <p className={styles.aiPracticeScenario}>{material.scenario}</p>
+          <div className={styles.aiPracticeScenarioBox}>
+            <p className={styles.aiPracticeScenarioLabel}>
+              <i className="fas fa-book-open" style={{ marginRight: 5 }} /> Bối cảnh tình huống
+            </p>
+            <p className={styles.aiPracticeScenario}>{material.scenario}</p>
+          </div>
+
+          {material.taskDescription && (
+            <div className={styles.aiPracticeTaskCard}>
+              <div className={styles.aiPracticeTaskHeader}>
+                <i className="fas fa-bullseye" /> Nhiệm vụ & Mục tiêu của bạn:
+              </div>
+              <div className={styles.aiPracticeTaskBody}>
+                {material.taskDescription}
+              </div>
+            </div>
+          )}
 
           <div className={styles.aiPracticeMeta}>
             <span className={styles.aiPracticeMetaChip}>
-              <i className="fas fa-bullseye" /> {material.taskDescription}
-            </span>
-            <span className={styles.aiPracticeMetaChip}>
-              <i className="fas fa-comment-dots" /> Tối đa {material.maxPromptAttempts} lượt
+              <i className="fas fa-comment-dots" /> Tối đa {material.maxPromptAttempts} lượt tương tác
             </span>
             <span className={styles.aiPracticeMetaChip}>
               <i className="fas fa-signal" /> {
-                material.difficulty === 1 || material.difficulty === "Easy"   ? "Dễ" :
-                material.difficulty === 2 || material.difficulty === "Medium" ? "Trung bình" :
-                "Khó"
+                material.difficulty === 1 || material.difficulty === "Easy"   ? "Độ khó: Dễ" :
+                material.difficulty === 2 || material.difficulty === "Medium" ? "Độ khó: Trung bình" :
+                "Độ khó: Nâng cao"
               }
             </span>
           </div>

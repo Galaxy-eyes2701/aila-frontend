@@ -277,7 +277,7 @@ export default function SubscriptionResourceUsage() {
                   <div className={styles.infoItemText}>
                     <h4>Xác định theo gói đăng ký</h4>
                     <p>
-                      Định ngạch tài nguyên được tự động cập nhật theo gói đăng ký đang hoạt động của
+                      Hạn mức tài nguyên được tự động cập nhật theo gói đăng ký đang hoạt động của
                       bạn hoặc hạn mức mặc định nền tảng.
                     </p>
                   </div>

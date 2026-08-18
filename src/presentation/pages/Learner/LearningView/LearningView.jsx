@@ -32,6 +32,7 @@ export default function LearningView() {
   const [loading, setLoading] = useState(true);
   const [contentLoading, setContentLoading] = useState(false);
   const [error, setError] = useState("");
+  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
 
   // 1. Khởi tạo và tải dữ liệu lộ trình tổng quan của khóa học
   useEffect(() => {
@@ -250,6 +251,7 @@ export default function LearningView() {
       <LearningHeader
         courseId={courseId}
         progress={learningViewData?.progress}
+        onToggleSidebar={() => setIsMobileSidebarOpen(prev => !prev)}
       />
 
       <div className={styles.mainContainer}>
@@ -258,6 +260,8 @@ export default function LearningView() {
           modules={learningViewData?.modules}
           currentMaterialId={currentMaterial?.id}
           onSelectMaterial={(id) => fetchMaterialDetail(id)}
+          isOpenMobile={isMobileSidebarOpen}
+          onCloseMobile={() => setIsMobileSidebarOpen(false)}
         />
 
         {/* Khu vực phân tách định dạng hiển thị học liệu */}

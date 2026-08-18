@@ -173,3 +173,18 @@
   transition: all var(--transition);
 }
 .closeFooterBtn:hover { border-color: var(--primary); color: var(--primary); }
+
+/* ── Responsive ───────────────────────────────────── */
+@media (max-width: 540px) {
+  .modal {
+    max-width: calc(100vw - 24px);
+  }
+  .detailRow {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+  .detailLabel {
+    min-width: unset;
+  }
+}
