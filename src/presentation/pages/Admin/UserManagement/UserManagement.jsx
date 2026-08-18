@@ -5,6 +5,7 @@ import Toast from "../../Expert/ModuleManagement/components/Toast";
 import CreateExpertModal from "./CreateExpertModal";
 import Pagination from "@presentation/components/Pagination/Pagination";
 import { getUsers, updateUserStatus } from "@services/userApi";
+import { resolveApiError } from "@services/api";
 
 const ROLE_LABEL = {
   Admin: { text: "Quản trị viên", cls: "roleAdmin" },
@@ -57,7 +58,8 @@ export default function UserManagement() {
         setPageError(res.errorMessage || "Không thể tải danh sách người dùng.");
       }
     } catch (err) {
-      setPageError(err.response?.data?.errorMessage ?? "Lỗi kết nối máy chủ.");
+      const { errorMessage } = resolveApiError(err);
+      setPageError(errorMessage || "Lỗi kết nối máy chủ.");
     } finally {
       setLoading(false);
     }

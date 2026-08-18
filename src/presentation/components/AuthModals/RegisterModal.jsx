@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import api from '@services/api';
+import api, { resolveApiError } from '@services/api';
 import useAuth from '@state/hooks/useAuth';
 import styles from './AuthModals.module.css';
 
@@ -29,8 +29,10 @@ export default function RegisterModal({ onClose, onSwitchToLogin, onRegisterSucc
         password: form.password,
       }, { skipAuth: true });
 
-      if (!registerRes.data.success) {
-        setError(registerRes.data.errorMessage || 'Đăng ký thất bại.');
+      const regPayload = registerRes.data;
+      if (!regPayload?.success && !regPayload?.Success) {
+        const msg = regPayload?.errorMessage || regPayload?.ErrorMessage || regPayload?.message;
+        setError(msg || 'Đăng ký thất bại.');
         return;
       }
 
@@ -39,8 +41,9 @@ export default function RegisterModal({ onClose, onSwitchToLogin, onRegisterSucc
         password: form.password,
       }, { skipAuth: true });
 
-      if (loginRes.data.success) {
-        const d = loginRes.data.data;
+      const logPayload = loginRes.data;
+      if (logPayload?.success || logPayload?.Success) {
+        const d = logPayload.data || logPayload.Data;
         login(d.accessToken, {
           userId: d.userId,
           fullName: d.fullName,
@@ -49,11 +52,12 @@ export default function RegisterModal({ onClose, onSwitchToLogin, onRegisterSucc
         });
         onRegisterSuccess?.(d);
       } else {
-        setError(loginRes.data.errorMessage || 'Đăng ký thành công nhưng đăng nhập tự động thất bại.');
+        const msg = logPayload?.errorMessage || logPayload?.ErrorMessage || logPayload?.message;
+        setError(msg || 'Đăng ký thành công nhưng đăng nhập tự động thất bại.');
       }
     } catch (err) {
-      const msg = err.response?.data?.errorMessage;
-      setError(msg || 'Email đã được sử dụng hoặc có lỗi xảy ra.');
+      const apiErr = resolveApiError(err);
+      setError(apiErr.errorMessage || 'Email đã được sử dụng hoặc có lỗi xảy ra.');
     } finally {
       setLoading(false);
     }

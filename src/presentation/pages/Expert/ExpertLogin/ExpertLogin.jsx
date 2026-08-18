@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import api from '@services/api';
+import api, { resolveApiError } from '@services/api';
 import useAuth from '@state/hooks/useAuth';
 import ResetPasswordFlow from '@presentation/components/AuthModals/ResetPassword/ResetPasswordFlow';
 import { RESET_SUCCESS_MESSAGE } from '@presentation/components/AuthModals/ResetPassword/constants';
@@ -59,8 +59,9 @@ export default function ExpertLogin() {
         password: form.password,
       }, { skipAuth: true });
 
-      if (res.data.success) {
-        const data = res.data.data;
+      const payload = res.data;
+      if (payload?.success || payload?.Success) {
+        const data = payload.data || payload.Data;
         login(data.accessToken, {
           userId:   data.userId,
           fullName: data.fullName,
@@ -69,11 +70,12 @@ export default function ExpertLogin() {
         });
         navigate('/expert');
       } else {
-        setError(res.data.errorMessage || 'Đăng nhập thất bại.');
+        const msg = payload?.errorMessage || payload?.ErrorMessage || payload?.message;
+        setError(msg || 'Đăng nhập thất bại.');
       }
     } catch (err) {
-      const apiMsg = err.response?.data?.errorMessage || err.response?.data?.message;
-      setError(apiMsg || 'Email hoặc mật khẩu không đúng. Vui lòng thử lại.');
+      const apiErr = resolveApiError(err);
+      setError(apiErr.errorMessage || 'Email hoặc mật khẩu không đúng. Vui lòng thử lại.');
     } finally {
       setLoading(false);
     }

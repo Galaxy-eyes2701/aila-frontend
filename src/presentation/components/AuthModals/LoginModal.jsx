@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import api from '@services/api';
+import api, { resolveApiError } from '@services/api';
 import useAuth from '@state/hooks/useAuth';
 import styles from './AuthModals.module.css';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -38,8 +38,9 @@ export default function LoginModal({ onClose, onSwitchToRegister, onLoginSuccess
         email:    form.email.trim().toLowerCase(),
         password: form.password,
       }, { skipAuth: true });
-      if (res.data.success) {
-        const d = res.data.data;
+      const payload = res.data;
+      if (payload?.success || payload?.Success) {
+        const d = payload.data || payload.Data;
         login(d.accessToken, { userId: d.userId, fullName: d.fullName, email: d.email, role: d.role });
         onLoginSuccess?.(d);
 
@@ -48,11 +49,12 @@ export default function LoginModal({ onClose, onSwitchToRegister, onLoginSuccess
           navigate(from, { replace: true });
         }
       } else {
-        setError(res.data.errorMessage || 'Đăng nhập thất bại.');
+        const msg = payload?.errorMessage || payload?.ErrorMessage || payload?.message;
+        setError(msg || 'Đăng nhập thất bại.');
       }
     } catch (err) {
-      const apiMsg = err.response?.data?.errorMessage || err.response?.data?.message;
-      setError(apiMsg || 'Email hoặc mật khẩu không đúng.');
+      const apiErr = resolveApiError(err);
+      setError(apiErr.errorMessage || 'Email hoặc mật khẩu không đúng.');
     } finally {
       setLoading(false);
     }
