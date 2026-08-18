@@ -487,32 +487,203 @@
 
 /* ── TAG FILTER ──────────────────────────────────────────────────────── */
 .tagFilterSection {
-  margin-bottom: 16px;
+  margin-bottom: 20px;
 }
 
-.tagFilterLabel {
-  font-size: 0.78rem;
-  font-weight: 700;
-  color: #6a6f73;
-  margin-bottom: 8px;
+.tagFilterBar {
   display: flex;
   align-items: center;
-  gap: 5px;
+  gap: 12px;
+  flex-wrap: wrap;
+  position: relative;
 }
 
-.tagFilterLabelRow {
+.tagDropdownWrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.tagDropdownTrigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border: 1.5px solid #d1d7dc;
+  border-radius: 10px;
+  background: #fff;
+  font-size: 0.84rem;
+  font-weight: 700;
+  color: #374151;
+  cursor: pointer;
+  transition: all 0.18s ease;
+  font-family: inherit;
+  box-shadow: 0 2px 8px rgba(0,0,0,.04);
+}
+
+.tagDropdownTrigger:hover {
+  border-color: #0056d2;
+  color: #0056d2;
+  background: #f0f7ff;
+  box-shadow: 0 4px 12px rgba(0,86,210,.1);
+}
+
+.tagDropdownTriggerActive {
+  border-color: #0056d2;
+  color: #0056d2;
+  background: #e8f1ff;
+}
+
+.tagBadgeCount {
+  background: #0056d2;
+  color: #fff;
+  font-size: 0.7rem;
+  font-weight: 800;
+  padding: 1px 7px;
+  border-radius: 999px;
+  min-width: 18px;
+  text-align: center;
+}
+
+/* Popover Panel */
+.tagPopover {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  z-index: 100;
+  width: 340px;
+  max-width: 90vw;
+  background: #ffffff;
+  border: 1px solid #c5d9f7;
+  border-radius: 14px;
+  box-shadow: 0 12px 36px rgba(0, 56, 140, 0.18);
+  padding: 12px;
+  animation: popoverFadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes popoverFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-6px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.tagPopoverHeader {
+  margin-bottom: 10px;
+}
+
+.tagSearchBox {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.tagSearchBox i {
+  position: absolute;
+  left: 10px;
+  color: #9ca3af;
+  font-size: 0.8rem;
+  pointer-events: none;
+}
+
+.tagSearchBox input {
+  width: 100%;
+  padding: 7px 30px 7px 30px;
+  border: 1.5px solid #d1d7dc;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  outline: none;
+  font-family: inherit;
+  transition: border-color 0.15s;
+}
+
+.tagSearchBox input:focus {
+  border-color: #0056d2;
+}
+
+.clearSearchBtn {
+  position: absolute;
+  right: 8px;
+  background: none;
+  border: none;
+  color: #9ca3af;
+  font-size: 0.75rem;
+  cursor: pointer;
+  padding: 4px;
+}
+
+.clearSearchBtn:hover {
+  color: #374151;
+}
+
+.tagPopoverBody {
+  max-height: 200px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.tagPopoverBody::-webkit-scrollbar {
+  width: 5px;
+}
+
+.tagPopoverBody::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+
+.tagGrid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.noTagsFound {
+  text-align: center;
+  padding: 16px;
+  font-size: 0.8rem;
+  color: #6b7280;
+}
+
+.tagPopoverFooter {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 8px;
-  flex-wrap: wrap;
-  gap: 8px;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid #f1f5f9;
 }
 
-.tagFilterPills {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 7px;
+.deselectAllBtn {
+  background: none;
+  border: none;
+  color: #ef4444;
+  font-size: 0.75rem;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 0;
+}
+
+.deselectAllBtn:hover {
+  text-decoration: underline;
+}
+
+.closePopoverBtn {
+  background: #0056d2;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 4px 12px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  cursor: pointer;
+  margin-left: auto;
+}
+
+.closePopoverBtn:hover {
+  background: #003d99;
 }
 
 .tagPill {
@@ -549,6 +720,50 @@
   background: #003d99;
   border-color: #003d99;
   color: #fff;
+}
+
+/* Active Chips outside */
+.activeTagsRow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.activeTagsLabel {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #6b7280;
+}
+
+.activeTagChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  background: #0056d2;
+  color: #ffffff;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  box-shadow: 0 2px 6px rgba(0, 86, 210, 0.2);
+}
+
+.activeTagChip button {
+  background: transparent;
+  border: none;
+  color: #ffffff;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  font-size: 0.7rem;
+  opacity: 0.85;
+  transition: opacity 0.15s;
+}
+
+.activeTagChip button:hover {
+  opacity: 1;
 }
 
 /* ── FILTER ROW ──────────────────────────────────────────────────────── */

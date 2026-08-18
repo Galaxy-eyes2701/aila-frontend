@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import api from '@services/api';
 import useAuth from '@state/hooks/useAuth';
@@ -134,6 +134,23 @@ export default function CourseList() {
   const [categoryId, setCategoryId] = useState(searchParams.get('categoryId') || '');
   const [level, setLevel] = useState(searchParams.get('level') || 'all');
   const [selectedTags, setSelectedTags] = useState([]); // array of tag ids
+  const [isTagMenuOpen, setIsTagMenuOpen] = useState(false);
+  const [tagSearch, setTagSearch] = useState('');
+  const tagDropdownRef = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (tagDropdownRef.current && !tagDropdownRef.current.contains(event.target)) {
+        setIsTagMenuOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const filteredTags = tags.filter(tag =>
+    tag.name.toLowerCase().includes(tagSearch.trim().toLowerCase())
+  );
 
   // Recommendations
   const [recCourses, setRecCourses] = useState([]);
@@ -307,15 +324,119 @@ export default function CourseList() {
             ))}
           </div>
 
-          {/* Sub-filters: Tag multi-select */}
+          {/* Sub-filters: Tag Dropdown & Active Chips */}
           {tags.length > 0 && (
             <div className={styles.tagFilterSection}>
-              <div className={styles.tagFilterLabelRow}>
-                <div className={styles.tagFilterLabel}>
-                  <i className="fas fa-tag" /> Lọc theo tag
+              <div className={styles.tagFilterBar}>
+                {/* Dropdown Container */}
+                <div className={styles.tagDropdownWrapper} ref={tagDropdownRef}>
+                  <button
+                    type="button"
+                    className={`${styles.tagDropdownTrigger} ${selectedTags.length > 0 ? styles.tagDropdownTriggerActive : ''}`}
+                    onClick={() => setIsTagMenuOpen(prev => !prev)}
+                  >
+                    <i className="fas fa-tags" />
+                    <span>Lọc theo tag</span>
+                    {selectedTags.length > 0 && (
+                      <span className={styles.tagBadgeCount}>{selectedTags.length}</span>
+                    )}
+                    <i className={`fas fa-chevron-${isTagMenuOpen ? 'up' : 'down'}`} style={{ marginLeft: 4, fontSize: '0.75rem' }} />
+                  </button>
+
+                  {/* Popover Menu */}
+                  {isTagMenuOpen && (
+                    <div className={styles.tagPopover}>
+                      <div className={styles.tagPopoverHeader}>
+                        <div className={styles.tagSearchBox}>
+                          <i className="fas fa-search" />
+                          <input
+                            type="text"
+                            placeholder="Tìm tag..."
+                            value={tagSearch}
+                            onChange={e => setTagSearch(e.target.value)}
+                            autoFocus
+                          />
+                          {tagSearch && (
+                            <button
+                              type="button"
+                              className={styles.clearSearchBtn}
+                              onClick={() => setTagSearch('')}
+                              title="Xóa tìm kiếm"
+                            >
+                              <i className="fas fa-times" />
+                            </button>
+                          )}
+                        </div>
+                      </div>
+
+                      <div className={styles.tagPopoverBody}>
+                        {filteredTags.length === 0 ? (
+                          <div className={styles.noTagsFound}>Không tìm thấy tag phù hợp</div>
+                        ) : (
+                          <div className={styles.tagGrid}>
+                            {filteredTags.map(tag => {
+                              const isSelected = selectedTags.includes(tag.id);
+                              return (
+                                <button
+                                  key={tag.id}
+                                  type="button"
+                                  className={`${styles.tagPill} ${isSelected ? styles.tagPillActive : ''}`}
+                                  onClick={() => toggleTag(tag.id)}
+                                >
+                                  {tag.name}
+                                  {isSelected && <i className="fas fa-check" style={{ marginLeft: 4, fontSize: '0.65rem' }} />}
+                                </button>
+                              );
+                            })}
+                          </div>
+                        )}
+                      </div>
+
+                      <div className={styles.tagPopoverFooter}>
+                        {selectedTags.length > 0 && (
+                          <button
+                            type="button"
+                            className={styles.deselectAllBtn}
+                            onClick={() => setSelectedTags([])}
+                          >
+                            Bỏ chọn tất cả ({selectedTags.length})
+                          </button>
+                        )}
+                        <button
+                          type="button"
+                          className={styles.closePopoverBtn}
+                          onClick={() => setIsTagMenuOpen(false)}
+                        >
+                          Đóng
+                        </button>
+                      </div>
+                    </div>
+                  )}
                 </div>
+
+                {/* Active Selected Tags Display (outside dropdown) */}
+                {selectedTags.length > 0 && (
+                  <div className={styles.activeTagsRow}>
+                    <span className={styles.activeTagsLabel}>Đã chọn:</span>
+                    {selectedTags.map(tagId => {
+                      const tagObj = tags.find(t => t.id === tagId);
+                      if (!tagObj) return null;
+                      return (
+                        <span key={tagId} className={styles.activeTagChip}>
+                          {tagObj.name}
+                          <button type="button" onClick={() => toggleTag(tagId)} title="Bỏ chọn">
+                            <i className="fas fa-times" />
+                          </button>
+                        </span>
+                      );
+                    })}
+                  </div>
+                )}
+
+                {/* Clear All Filters Button */}
                 {(keyword || categoryId || level !== 'all' || selectedTags.length > 0) && (
                   <button
+                    type="button"
                     className={styles.clearBtn}
                     onClick={() => {
                       setKeyword(''); setInputVal('');
@@ -325,21 +446,6 @@ export default function CourseList() {
                     <i className="fas fa-times" /> Xóa bộ lọc
                   </button>
                 )}
-              </div>
-              <div className={styles.tagFilterPills}>
-                {tags.map(tag => (
-                  <button
-                    key={tag.id}
-                    className={`${styles.tagPill} ${selectedTags.includes(tag.id) ? styles.tagPillActive : ''}`}
-                    onClick={() => toggleTag(tag.id)}
-                    aria-pressed={selectedTags.includes(tag.id)}
-                  >
-                    {tag.name}
-                    {selectedTags.includes(tag.id) && (
-                      <i className="fas fa-times" style={{ marginLeft: 4, fontSize: '0.6rem' }} />
-                    )}
-                  </button>
-                ))}
               </div>
             </div>
           )}
