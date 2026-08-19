@@ -13,7 +13,7 @@ const BANNER_SLIDES = [
   { img: 'https://gaditi.com/wp-content/uploads/2026/03/ai-cho-lap-trinh-vien.jpg', title: 'AI cho Lập trình viên', desc: 'Sử dụng Copilot và LLM để tăng tốc viết code, debug và tài liệu.' },
 ];
 
-const LEVEL_MAP = { Beginner: 'Cơ bản', Intermediate: 'Trung cấp', Advanced: 'Nâng cao' };
+const LEVEL_MAP = { Beginner: 'Mới bắt đầu', Intermediate: 'Cơ bản', Advanced: 'Nâng cao' };
 
 /* ── Skeleton helpers ──────────────────────────────────────────────────── */
 function CourseSkeleton() {

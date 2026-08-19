@@ -95,7 +95,7 @@ function CourseCard({ course, onClick }) {
         <div className={styles.ccardMeta}>
           <LevelBadge level={course.level} />
           <span className={styles.lvTxt}>
-            {{ Beginner: 'Mới bắt đầu', Intermediate: 'cơ bản', Advanced: 'Nâng cao' }[course.level] ?? course.level}
+            {{ Beginner: 'Mới bắt đầu', Intermediate: 'Cơ bản', Advanced: 'Nâng cao' }[course.level] ?? course.level}
           </span>
         </div>
         {course.tags?.length > 0 && (

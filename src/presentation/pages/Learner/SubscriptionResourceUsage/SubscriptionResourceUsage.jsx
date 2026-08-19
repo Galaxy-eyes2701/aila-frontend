@@ -229,7 +229,7 @@ export default function SubscriptionResourceUsage() {
                 <Link to="/subscription-plans" className={styles.upgradeBtn}
                   style={{ background: "transparent", border: "1.5px solid var(--primary)", color: "var(--primary)" }}>
                   <i className="fas fa-arrow-up-right-dots" aria-hidden="true" />
-                  {data.hasActiveSubscription ? "Gia hạn / Nâng cấp" : "Khám phá gói"}
+                  {data.hasActiveSubscription ? "Nâng cấp" : "Khám phá gói"}
                 </Link>
               </div>
             </div>

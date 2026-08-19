@@ -19,8 +19,8 @@ function statusConfig(status) {
   if (status === "Active")
     return { label: "Đang hoạt động", cls: styles.statusActive, icon: "fa-circle-check" };
   if (status === "Expired")
-    return { label: "Đã hết hạn",     cls: styles.statusExpired, icon: "fa-circle-xmark" };
-  return  { label: "Chưa có gói",     cls: styles.statusNone,    icon: "fa-circle"       };
+    return { label: "Đã hết hạn", cls: styles.statusExpired, icon: "fa-circle-xmark" };
+  return { label: "Chưa có gói", cls: styles.statusNone, icon: "fa-circle" };
 }
 
 /**
@@ -28,9 +28,9 @@ function statusConfig(status) {
  * Route: /profile/subscription
  */
 export default function CurrentSubscription() {
-  const [data,    setData]    = useState(null);
+  const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [error,   setError]   = useState("");
+  const [error, setError] = useState("");
 
   const fetchData = useCallback(async () => {
     setLoading(true);
@@ -52,14 +52,14 @@ export default function CurrentSubscription() {
 
   useEffect(() => { fetchData(); }, [fetchData]);
 
-  const sub    = data;
+  const sub = data;
   const active = sub?.hasActiveSubscription;
 
   // Tính phần trăm thời gian còn lại
   let remainPct = 0;
   if (active && sub.activatedAt && sub.expiredAt) {
-    const total   = new Date(sub.expiredAt) - new Date(sub.activatedAt);
-    const elapsed = Date.now()              - new Date(sub.activatedAt).getTime();
+    const total = new Date(sub.expiredAt) - new Date(sub.activatedAt);
+    const elapsed = Date.now() - new Date(sub.activatedAt).getTime();
     remainPct = Math.max(0, Math.min(100, Math.round((1 - elapsed / total) * 100)));
   }
 
@@ -104,7 +104,7 @@ export default function CurrentSubscription() {
           <div className={styles.subCard}>
             <div className={styles.skeleton} style={{ height: 28, width: "40%", marginBottom: 24 }} />
             <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 16 }}>
-              {[1,2,3].map(i => (
+              {[1, 2, 3].map(i => (
                 <div key={i} className={styles.skeleton} style={{ height: 72, borderRadius: 12 }} />
               ))}
             </div>
@@ -134,7 +134,7 @@ export default function CurrentSubscription() {
                   {/* Action buttons — UC-18 Step 4 */}
                   <div className={styles.actions}>
                     <Link to="/subscription-plans" className={styles.btnPrimary}>
-                      <i className="fas fa-arrow-up-right-dots" /> Gia hạn / Nâng cấp
+                      <i className="fas fa-arrow-up-right-dots" />  Nâng cấp
                     </Link>
                     <Link to="/profile/subscription-usage" className={styles.btnOutline}>
                       <i className="fas fa-chart-pie" /> Xem tài nguyên
@@ -154,9 +154,8 @@ export default function CurrentSubscription() {
                   </div>
                   <div className={styles.infoItem}>
                     <div className={styles.infoLabel}>Còn lại</div>
-                    <div className={`${styles.infoValue} ${
-                      sub.remainingDays <= 7 ? styles.infoValueWarn : styles.infoValueAccent
-                    }`}>
+                    <div className={`${styles.infoValue} ${sub.remainingDays <= 7 ? styles.infoValueWarn : styles.infoValueAccent
+                      }`}>
                       {sub.remainingDays} ngày
                     </div>
                   </div>
