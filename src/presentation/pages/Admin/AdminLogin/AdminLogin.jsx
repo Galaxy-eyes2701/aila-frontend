@@ -1,10 +1,12 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api, { resolveApiError } from '@services/api';
+import useAuth from '@state/hooks/useAuth';
 import styles from './AdminLogin.module.css';
 
 export default function AdminLogin() {
   const navigate = useNavigate();
+  const { login } = useAuth();
   const [form, setForm]       = useState({ email: '', password: '' });
   const [error, setError]     = useState('');
   const [loading, setLoading] = useState(false);
@@ -34,9 +36,14 @@ export default function AdminLogin() {
       const payload = res.data;
       if (payload?.success || payload?.Success) {
         const data = payload.data || payload.Data;
-        localStorage.setItem('accessToken', data.accessToken || data.AccessToken);
+        const token = data.accessToken || data.AccessToken;
+        login(token, {
+          userId: data.userId || data.UserId,
+          fullName: data.fullName || data.FullName || 'Admin',
+          email: data.email || data.Email || normalizedEmail,
+          role: 'Admin',
+        });
         localStorage.setItem('adminLoggedIn', 'true');
-        localStorage.setItem('role', 'Admin');
         navigate('/admin/reports');
       } else {
         const msg = payload?.errorMessage || payload?.ErrorMessage || payload?.message;
