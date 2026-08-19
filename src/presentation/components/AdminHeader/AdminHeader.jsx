@@ -74,7 +74,12 @@ export default function AdminHeader() {
   }, []);
 
   useEffect(() => {
-    if (!user) {
+    const token = localStorage.getItem("accessToken");
+    const isAdmin =
+      (user && user.role === "Admin") ||
+      localStorage.getItem("adminLoggedIn") === "true";
+
+    if (!token || !isAdmin) {
       setUnreadCount(0);
       setRecentNotifications([]);
       return;
