@@ -88,7 +88,7 @@ export default function AdminHeader() {
           setRecentNotifications(all.slice(0, 3));
           setUnreadCount(all.filter((n) => !n.isRead).length);
         }
-      } catch {}
+      } catch { }
     };
 
     fetchNotifications();
@@ -110,7 +110,7 @@ export default function AdminHeader() {
       try {
         await api.patch(`/notifications/${n.id}/read`);
         window.dispatchEvent(new CustomEvent("notifications-updated"));
-      } catch {}
+      } catch { }
     }
 
     const targetUrl = n.redirectUrl || n.redicturl || n.redirect_url || n.targetUrl;
@@ -146,7 +146,7 @@ export default function AdminHeader() {
     <header className={styles.navbar}>
       <div className={styles.navContent}>
         <Link to="/admin/reports" className={styles.logo}>
-          Bình dân <span>Học AI</span>
+          Bình Dân <span>Học AI</span>
           <span className={styles.adminBadge}>ADMIN</span>
         </Link>
 
