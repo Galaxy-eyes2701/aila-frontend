@@ -11,7 +11,7 @@ const LEVELS = [
   { value: 'Advanced', label: 'Nâng cao', sub: 'Chuyên sâu', num: 'CẤP ĐỘ 3' },
 ];
 
-const LEVEL_MAP = { Beginner: 'Mới bắt đầu', Intermediate: 'Trung cấp', Advanced: 'Nâng cao' };
+const LEVEL_MAP = { Beginner: 'Mới bắt đầu', Intermediate: 'Cơ bản', Advanced: 'Nâng cao' };
 
 function RecommendCard({ course, onClick }) {
   const fallback = 'https://images.unsplash.com/photo-1677442135703-1787eea5ce01?w=480&q=75';
