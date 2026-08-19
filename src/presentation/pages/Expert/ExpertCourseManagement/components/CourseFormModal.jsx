@@ -6,9 +6,9 @@ import ConfirmModal from '@presentation/components/ConfirmModal/ConfirmModal';
 
 const FALLBACK_THUMB = 'https://images.unsplash.com/photo-1677442135703-1787eea5ce01?w=480&q=75';
 const LEVELS = [
-  { value: 'Beginner',     label: 'Mới bắt đầu'      },
-  { value: 'Intermediate', label: 'Trình độ cơ bản'  },
-  { value: 'Advanced',     label: 'Nâng cao'          },
+  { value: 'Beginner', label: 'Mới bắt đầu' },
+  { value: 'Intermediate', label: 'Cơ bản' },
+  { value: 'Advanced', label: 'Nâng cao' },
 ];
 const CODE_PATTERN = /^[a-z0-9]+(-[a-z0-9]+)*$/;
 
@@ -16,55 +16,55 @@ export default function CourseFormModal({ mode, initialData, categories, onClose
   const isEdit = mode === 'edit';
 
   const [form, setForm] = useState({
-    name:         initialData?.name         ?? '',
-    categoryId:   initialData?.categoryId   ?? '',
-    level:        initialData?.level        ?? 'Beginner',
-    description:  initialData?.description  ?? '',
+    name: initialData?.name ?? '',
+    categoryId: initialData?.categoryId ?? '',
+    level: initialData?.level ?? 'Beginner',
+    description: initialData?.description ?? '',
     thumbnailUrl: initialData?.thumbnailUrl ?? '',
     durationHours: initialData?.durationHours ?? '',
-    tagIds:       initialData?.tagIds       ?? [],
+    tagIds: initialData?.tagIds ?? [],
   });
-  const [saving,      setSaving]      = useState(false);
-  const [formError,   setFormError]   = useState('');
+  const [saving, setSaving] = useState(false);
+  const [formError, setFormError] = useState('');
   const [fieldErrors, setFieldErrors] = useState({});
 
-  const [tags,        setTags]        = useState([]);
+  const [tags, setTags] = useState([]);
   const [tagsLoading, setTagsLoading] = useState(true);
-  const [showNewTag,   setShowNewTag]   = useState(false);
-  const [newTagName,   setNewTagName]   = useState('');
-  const [newTagCode,   setNewTagCode]   = useState('');
+  const [showNewTag, setShowNewTag] = useState(false);
+  const [newTagName, setNewTagName] = useState('');
+  const [newTagCode, setNewTagCode] = useState('');
   const [newTagSaving, setNewTagSaving] = useState(false);
   const [newTagErrors, setNewTagErrors] = useState({});
-  const [newTagError,  setNewTagError]  = useState('');
-  const [verifyTag,    setVerifyTag]    = useState(null);
-  const [verifyNote,   setVerifyNote]   = useState('');
+  const [newTagError, setNewTagError] = useState('');
+  const [verifyTag, setVerifyTag] = useState(null);
+  const [verifyNote, setVerifyNote] = useState('');
   const [verifySaving, setVerifySaving] = useState(false);
-  const [verifyError,  setVerifyError]  = useState('');
-  const [codeChecking,  setCodeChecking]  = useState(false);
+  const [verifyError, setVerifyError] = useState('');
+  const [codeChecking, setCodeChecking] = useState(false);
   const [codeDuplicate, setCodeDuplicate] = useState(false);
-  const codeDuplicateRef  = useRef(false);
+  const codeDuplicateRef = useRef(false);
   const checkCodeTimerRef = useRef(null);
   const [duplicateTagCandidate, setDuplicateTagCandidate] = useState(null);
 
   useEffect(() => {
     setTagsLoading(true);
-    
+
     // Always get public and personal tags
     const baseRequests = [
       api.get('/tags'),       // Public tags
       api.get('/tags/me')     // Personal tags
     ];
-    
+
     Promise.all(baseRequests)
       .then(([pubRes, myRes]) => {
         const pub = pubRes.data.success ? (pubRes.data.data ?? []) : [];
-        const my  = myRes.data.success  ? (myRes.data.data  ?? []) : [];
-        
+        const my = myRes.data.success ? (myRes.data.data ?? []) : [];
+
         const pubNorm = pub.map(t => ({ ...t, isPublished: true }));
-        const merged  = [...pubNorm];
-        
+        const merged = [...pubNorm];
+
         // Add personal tags if not already in merged
-        my.forEach(t => { 
+        my.forEach(t => {
           if (!merged.find(p => p.id === t.id)) {
             // Mark personal tags to identify them later
             merged.push({ ...t, isPersonalTag: true });
@@ -76,32 +76,32 @@ export default function CourseFormModal({ mode, initialData, categories, onClose
             }
           }
         });
-        
+
         // If editing a course, get course details to extract tags
         if (isEdit && initialData?.id) {
           api.get(`/courses/${initialData.id}`)
             .then((courseRes) => {
               if (courseRes.data.success && courseRes.data.data?.tags) {
                 const courseTagsData = courseRes.data.data.tags;
-                
+
                 // Add course tags if not already in merged
-                courseTagsData.forEach(t => { 
+                courseTagsData.forEach(t => {
                   if (!merged.find(p => p.id === t.id)) {
                     // For tags from course details, use the properties directly from the response
                     // System tags (createdById = null) are always published
                     const isSystemTag = t.createdById === null;
-                    
-                    merged.push({ 
-                      ...t, 
+
+                    merged.push({
+                      ...t,
                       isFromCourse: true,
                       // Use isPublished from the course detail response, or mark system tags as published
                       isPublished: t.isPublished || isSystemTag,
                       createdById: t.createdById
-                    }); 
+                    });
                   }
                 });
               }
-              
+
               setTags(merged);
               setTagsLoading(false);
             })
@@ -134,11 +134,11 @@ export default function CourseFormModal({ mode, initialData, categories, onClose
   const validate = () => {
     const errs = {};
     const name = form.name.trim();
-    if (!name)                  errs.name = 'Tên khóa học không được để trống.';
-    else if (name.length < 3)   errs.name = 'Tên khóa học phải có ít nhất 3 ký tự.';
+    if (!name) errs.name = 'Tên khóa học không được để trống.';
+    else if (name.length < 3) errs.name = 'Tên khóa học phải có ít nhất 3 ký tự.';
     else if (name.length > 150) errs.name = 'Tên khóa học không được vượt quá 150 ký tự.';
-    if (!form.categoryId)       errs.categoryId = 'Vui lòng chọn danh mục.';
-    
+    if (!form.categoryId) errs.categoryId = 'Vui lòng chọn danh mục.';
+
     // Validate duration
     const duration = parseFloat(form.durationHours);
     if (form.durationHours && (isNaN(duration) || duration < 0)) {
@@ -146,7 +146,7 @@ export default function CourseFormModal({ mode, initialData, categories, onClose
     } else if (duration > 1000) {
       errs.durationHours = 'Thời lượng không được vượt quá 1000 giờ.';
     }
-    
+
     if (form.thumbnailUrl.trim() && !isValidUrl(form.thumbnailUrl.trim()))
       errs.thumbnailUrl = 'URL ảnh bìa không hợp lệ. Phải bắt đầu bằng https://.';
     if (form.description.length > 5000)
@@ -215,10 +215,10 @@ export default function CourseFormModal({ mode, initialData, categories, onClose
   const validateNewTag = () => {
     const errs = {};
     const n = newTagName.trim(), c = newTagCode.trim();
-    if (!n)                errs.name = 'Tên tag không được để trống.';
+    if (!n) errs.name = 'Tên tag không được để trống.';
     else if (n.length < 2) errs.name = 'Tên tag phải có ít nhất 2 ký tự.';
     else if (n.length > 50) errs.name = 'Tên tag tối đa 50 ký tự.';
-    if (!c)                errs.code = 'Code tag không được để trống.';
+    if (!c) errs.code = 'Code tag không được để trống.';
     else if (c.length < 2) errs.code = 'Code tag phải có ít nhất 2 ký tự.';
     else if (c.length > 50) errs.code = 'Code tag tối đa 50 ký tự.';
     else if (!CODE_PATTERN.test(c))
@@ -229,7 +229,7 @@ export default function CourseFormModal({ mode, initialData, categories, onClose
   const handleCreateTag = async () => {
     const errs = validateNewTag();
     if (Object.keys(errs).length > 0) { setNewTagErrors(errs); return; }
-    
+
     // Check for duplicate when creating tag
     setNewTagSaving(true); setNewTagError('');
     try {
@@ -273,14 +273,14 @@ export default function CourseFormModal({ mode, initialData, categories, onClose
 
   const handleTagClick = tag => {
     if (tag.isPublished) { toggleTag(tag.id); return; }
-    
+
     // Allow deselecting unpublished tags that are already selected
     const isSelected = form.tagIds.includes(tag.id);
-    if (isSelected) { 
-      toggleTag(tag.id); 
-      return; 
+    if (isSelected) {
+      toggleTag(tag.id);
+      return;
     }
-    
+
     // For unselected unpublished tags, show verification modal
     if (duplicateTagCandidate?.id === tag.id) return;
     if (tag.publishRequest?.status === 'Pending') return;
@@ -403,16 +403,16 @@ export default function CourseFormModal({ mode, initialData, categories, onClose
             {/* Duration */}
             <div className={styles.formGroup}>
               <label className={styles.formLabel}><i className="fas fa-clock" /> Thời lượng khóa học (giờ)</label>
-              <input 
+              <input
                 name="durationHours"
                 type="number"
                 step="0.5"
                 min="0"
                 max="1000"
                 className={`${styles.formInput} ${fieldErrors.durationHours ? styles.inputError : ''}`}
-                value={form.durationHours} 
-                onChange={handleChange} 
-                placeholder="VD: 15.5" 
+                value={form.durationHours}
+                onChange={handleChange}
+                placeholder="VD: 15.5"
                 style={{ maxWidth: '200px' }}
               />
               {fieldErrors.durationHours && <span className={styles.fieldError}><i className="fas fa-exclamation-circle" /> {fieldErrors.durationHours}</span>}
@@ -504,33 +504,33 @@ export default function CourseFormModal({ mode, initialData, categories, onClose
               ) : tags.length > 0 ? (
                 <div className={styles.tagPicker}>
                   {tags.map(tag => {
-                    const status      = tag.publishRequest?.status;
-                    const isPending   = !tag.isPublished && status === 'Pending';
-                    const isRejected  = !tag.isPublished && status === 'Rejected';
+                    const status = tag.publishRequest?.status;
+                    const isPending = !tag.isPublished && status === 'Pending';
+                    const isRejected = !tag.isPublished && status === 'Rejected';
                     const isUnpubNone = !tag.isPublished && !status;
-                    const isSelected  = form.tagIds.includes(tag.id);
+                    const isSelected = form.tagIds.includes(tag.id);
                     const isDuplicate = duplicateTagCandidate?.id === tag.id;
                     let cls = styles.tagBtn;
-                    if (isSelected)    cls += ` ${styles.tagBtnActive}`;
-                    if (isDuplicate)   cls += ` ${styles.tagBtnDuplicate}`;
-                    else if (isPending)   cls += ` ${styles.tagBtnPending}`;
-                    else if (isRejected)  cls += ` ${styles.tagBtnRejected}`;
+                    if (isSelected) cls += ` ${styles.tagBtnActive}`;
+                    if (isDuplicate) cls += ` ${styles.tagBtnDuplicate}`;
+                    else if (isPending) cls += ` ${styles.tagBtnPending}`;
+                    else if (isRejected) cls += ` ${styles.tagBtnRejected}`;
                     else if (isUnpubNone) cls += ` ${styles.tagBtnUnpub}`;
                     else if (tag.isFromCourse && !tag.isPublished) cls += ` ${styles.tagBtnFromCourse}`;
                     const titleText = isDuplicate ? 'Tag trùng code với ô nhập — nhấn "Dùng tag này" để thêm'
                       : isPending ? 'Đang chờ duyệt — không thể chọn'
-                      : isRejected ? (isSelected ? 'Bị từ chối — nhấn để bỏ chọn hoặc gửi lại yêu cầu' : 'Bị từ chối — nhấn để gửi lại yêu cầu')
-                      : isUnpubNone ? (isSelected ? 'Chưa duyệt — nhấn để bỏ chọn hoặc gửi yêu cầu xét duyệt' : 'Chưa duyệt — nhấn để gửi yêu cầu xét duyệt') 
-                      : tag.isFromCourse ? 'Tag từ khóa học (có thể chọn/bỏ chọn)'
-                      : undefined;
+                        : isRejected ? (isSelected ? 'Bị từ chối — nhấn để bỏ chọn hoặc gửi lại yêu cầu' : 'Bị từ chối — nhấn để gửi lại yêu cầu')
+                          : isUnpubNone ? (isSelected ? 'Chưa duyệt — nhấn để bỏ chọn hoặc gửi yêu cầu xét duyệt' : 'Chưa duyệt — nhấn để gửi yêu cầu xét duyệt')
+                            : tag.isFromCourse ? 'Tag từ khóa học (có thể chọn/bỏ chọn)'
+                              : undefined;
                     return (
                       <div key={tag.id} className={styles.tagBtnWrap}>
                         <button type="button" className={cls} onClick={() => handleTagClick(tag)}
                           title={titleText} aria-disabled={isPending || (isDuplicate && !isSelected)}>
                           {tag.name}
-                          {isDuplicate  && <span className={styles.tagStatusIcon}><i className="fas fa-link" /></span>}
-                          {!isDuplicate && isPending   && <span className={styles.tagStatusIcon}><i className="fas fa-clock" /></span>}
-                          {!isDuplicate && isRejected  && <span className={styles.tagStatusIcon}><i className="fas fa-times-circle" /></span>}
+                          {isDuplicate && <span className={styles.tagStatusIcon}><i className="fas fa-link" /></span>}
+                          {!isDuplicate && isPending && <span className={styles.tagStatusIcon}><i className="fas fa-clock" /></span>}
+                          {!isDuplicate && isRejected && <span className={styles.tagStatusIcon}><i className="fas fa-times-circle" /></span>}
                           {!isDuplicate && isUnpubNone && <span className={styles.tagStatusIcon}><i className="fas fa-exclamation-circle" /></span>}
                           {!isDuplicate && tag.isFromCourse && !tag.isPublished && (
                             <span className={styles.tagStatusIcon} title="Tag từ khóa học">
@@ -594,7 +594,7 @@ export default function CourseFormModal({ mode, initialData, categories, onClose
                 <i className="fas fa-info-circle" />
                 Sau khi được admin duyệt, tag sẽ xuất hiện công khai và có thể gắn vào khóa học.
               </div>
-              
+
               {/* Show if tag is already selected */}
               {form.tagIds.includes(verifyTag.id) && (
                 <div className={styles.infoBoxBlue} style={{ background: '#fef3c7', borderColor: '#f59e0b', color: '#92400e' }}>
@@ -616,12 +616,12 @@ export default function CourseFormModal({ mode, initialData, categories, onClose
             </div>
             <div className={styles.modalFooter}>
               <button className={styles.btnCancel} onClick={() => setVerifyTag(null)}>Hủy</button>
-              
+
               {/* Add to course button - show for unpublished tags that are not selected */}
               {verifyTag && !form.tagIds.includes(verifyTag.id) && !verifyTag.isPublished && (
-                <button 
-                  type="button" 
-                  className={styles.btnAddToCourse} 
+                <button
+                  type="button"
+                  className={styles.btnAddToCourse}
                   onClick={() => {
                     toggleTag(verifyTag.id);
                     setVerifyTag(null);
@@ -630,7 +630,7 @@ export default function CourseFormModal({ mode, initialData, categories, onClose
                   <i className="fas fa-plus" /> Thêm vào khóa học
                 </button>
               )}
-              
+
               <button className={styles.btnSave} onClick={handleSendVerification} disabled={verifySaving}>
                 {verifySaving ? <><span className={styles.spinner} /> Đang gửi...</>
                   : <><i className="fas fa-paper-plane" /> {verifyTag.publishRequest?.status === 'Rejected' ? 'Gửi lại' : 'Gửi yêu cầu'}</>}

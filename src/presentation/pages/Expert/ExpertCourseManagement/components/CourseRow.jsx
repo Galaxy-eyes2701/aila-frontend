@@ -5,14 +5,14 @@ import styles from '../ExpertCourseManagement.module.css';
 const FALLBACK_THUMB = 'https://images.unsplash.com/photo-1677442135703-1787eea5ce01?w=480&q=75';
 
 const LEVEL_LABELS = {
-  Beginner:     'Mới bắt đầu',
-  Intermediate: 'Trình độ cơ bản',
-  Advanced:     'Nâng cao',
+  Beginner: 'Mới bắt đầu',
+  Intermediate: 'Cơ bản',
+  Advanced: 'Nâng cao',
 };
 
 export default function CourseRow({ course, onEdit, onPublish, onUnpublish, onPreview, onReReview, onLockedPublish, isPublishing }) {
   const isPublished = course.isPublished;
-  const isLocked    = !!course.isPublicationLocked;
+  const isLocked = !!course.isPublicationLocked;
 
   const handlePublishToggle = async () => {
     // Không cần setBusy vì isPublishing được quản lý từ parent component

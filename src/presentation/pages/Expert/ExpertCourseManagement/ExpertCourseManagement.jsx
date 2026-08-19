@@ -3,33 +3,33 @@ import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import api, { resolveApiError } from '@services/api';
 import styles from './ExpertCourseManagement.module.css';
 import CoursePreviewModal from '@presentation/components/CoursePreviewModal/CoursePreviewModal';
-import Toast             from './components/Toast';
-import ConfirmModal      from '@presentation/components/ConfirmModal/ConfirmModal';
-import CourseRow         from './components/CourseRow';
-import CourseFormModal   from './components/CourseFormModal';
+import Toast from './components/Toast';
+import ConfirmModal from '@presentation/components/ConfirmModal/ConfirmModal';
+import CourseRow from './components/CourseRow';
+import CourseFormModal from './components/CourseFormModal';
 import CourseReReviewModal from './components/CourseReReviewModal';
 
 export default function ExpertCourseManagement() {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
 
-  const [courses,    setCourses]    = useState([]);
+  const [courses, setCourses] = useState([]);
   const [categories, setCategories] = useState([]);
-  const [loading,    setLoading]    = useState(true);
+  const [loading, setLoading] = useState(true);
   const [publishing, setPublishing] = useState({}); // Track publishing state per course
-  const [total,      setTotal]      = useState(0);
-  const [pageIndex,  setPageIndex]  = useState(0);
+  const [total, setTotal] = useState(0);
+  const [pageIndex, setPageIndex] = useState(0);
   const PAGE_SIZE = 10;
 
-  const [keyword,      setKeyword]      = useState('');
-  const [inputVal,     setInputVal]     = useState('');
+  const [keyword, setKeyword] = useState('');
+  const [inputVal, setInputVal] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
 
-  const [showForm,        setShowForm]        = useState(searchParams.get('action') === 'create');
-  const [editingCourse,   setEditingCourse]   = useState(null);
-  const [confirm,         setConfirm]         = useState(null);
+  const [showForm, setShowForm] = useState(searchParams.get('action') === 'create');
+  const [editingCourse, setEditingCourse] = useState(null);
+  const [confirm, setConfirm] = useState(null);
   const [previewCourseId, setPreviewCourseId] = useState(null);
-  const [reReviewCourse,  setReReviewCourse]  = useState(null);
+  const [reReviewCourse, setReReviewCourse] = useState(null);
 
   const [toast, setToast] = useState(null);
   const showToast = (message, type = 'success') => setToast({ message, type });
@@ -37,7 +37,7 @@ export default function ExpertCourseManagement() {
   useEffect(() => {
     api.get('/categories')
       .then(res => { if (res.data.success) setCategories(res.data.data ?? []); })
-      .catch(() => {});
+      .catch(() => { });
   }, []);
 
   const fetchCourses = useCallback(async (page = 0) => {
@@ -46,7 +46,7 @@ export default function ExpertCourseManagement() {
       const params = { pageIndex: page, pageSize: PAGE_SIZE };
       if (keyword) params.keyword = keyword;
       if (filterStatus === 'published') params.isPublished = true;
-      if (filterStatus === 'draft')     params.isPublished = false;
+      if (filterStatus === 'draft') params.isPublished = false;
       const res = await api.get('/experts/me/courses', { params });
       if (res.data.success) {
         const data = res.data.data;
@@ -98,10 +98,10 @@ export default function ExpertCourseManagement() {
       if (res.data.success) {
         setCourses(prev => prev.map(c => c.id === courseId ? { ...c, isPublished: true } : c));
         showToast('Khóa học đã được xuất bản thành công!', 'success');
-        
+
         // Delay 1 giây trước khi bắt đầu sync AI
         await new Promise(resolve => setTimeout(resolve, 1000));
-        
+
         // Bước 2: Tự động đồng bộ RAG sau khi publish thành công
         try {
           const syncRes = await api.post(`/rag/courses/${courseId}/sync-materials`);
@@ -121,12 +121,12 @@ export default function ExpertCourseManagement() {
             'error'
           );
         }
-      } else { 
-        showToast(res.data.errorMessage || 'Xuất bản thất bại.', 'error'); 
+      } else {
+        showToast(res.data.errorMessage || 'Xuất bản thất bại.', 'error');
       }
-    } catch (err) { 
+    } catch (err) {
       const { errorMessage } = resolveApiError(err);
-      showToast(errorMessage || 'Xuất bản thất bại.', 'error'); 
+      showToast(errorMessage || 'Xuất bản thất bại.', 'error');
     }
     setPublishing(prev => ({ ...prev, [courseId]: false }));
   }, []);
@@ -153,8 +153,8 @@ export default function ExpertCourseManagement() {
   const loadMore = () => { const next = pageIndex + 1; setPageIndex(next); fetchCourses(next); };
 
   const publishedCount = courses.filter(c => c.isPublished).length;
-  const draftCount     = courses.filter(c => !c.isPublished).length;
-  const hasMore        = courses.length < total;
+  const draftCount = courses.filter(c => !c.isPublished).length;
+  const hasMore = courses.length < total;
 
   return (
     <div className={styles.page}>
@@ -206,7 +206,7 @@ export default function ExpertCourseManagement() {
 
         {/* COURSE LIST */}
         {loading && courses.length === 0 ? (
-          <div className={styles.loadingWrap}>{[1,2,3].map(i => <div key={i} className={styles.skRow} />)}</div>
+          <div className={styles.loadingWrap}>{[1, 2, 3].map(i => <div key={i} className={styles.skRow} />)}</div>
         ) : courses.length === 0 ? (
           <div className={styles.emptyState}>
             <div className={styles.emptyIcon}><i className="fas fa-book-open" /></div>
