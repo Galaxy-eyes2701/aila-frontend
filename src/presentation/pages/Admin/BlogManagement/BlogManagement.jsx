@@ -9,7 +9,6 @@ import Pagination from "@presentation/components/Pagination/Pagination";
 import {
   getBlogs,
   getBlogDetail,
-  deleteBlog,
   publishBlog,
   unpublishBlog,
 } from "@services/blogApi";
@@ -124,18 +123,6 @@ export default function BlogManagement() {
     });
   }
 
-  function handleDelete(blog) {
-    setConfirmState({
-      type: "delete",
-      blog,
-      title: "Xóa bài viết?",
-      description: `Bạn có chắc muốn xóa bài viết "${blog.title}"? Hành động này không thể hoàn tác.`,
-      tone: "danger",
-      confirmLabel: "Xóa bài viết",
-      icon: "fa-trash-can",
-    });
-  }
-
   async function executeConfirmAction() {
     if (!confirmState) return;
     const { type, blog } = confirmState;
@@ -158,18 +145,6 @@ export default function BlogManagement() {
           );
         } else {
           showToast(res.errorMessage || "Không thể đổi trạng thái.", "error");
-        }
-      } else if (type === "delete") {
-        const res = await deleteBlog(blog.id);
-        if (res.success) {
-          showToast("Đã xóa bài viết.");
-          if (blogs.length === 1 && pageNumber > 1) {
-            setPageNumber((p) => p - 1);
-          } else {
-            fetchBlogs();
-          }
-        } else {
-          showToast(res.errorMessage || "Không thể xóa bài viết.", "error");
         }
       }
     } catch (err) {
@@ -346,14 +321,6 @@ export default function BlogManagement() {
                             }`}
                           />
                           {blog.isPublished ? "Bỏ công khai" : "Công khai"}
-                        </button>
-
-                        <button
-                          className={styles.dangerButton}
-                          disabled={busyBlogId === blog.id}
-                          onClick={() => handleDelete(blog)}
-                        >
-                          <i className="fas fa-trash" />
                         </button>
                       </div>
                     </td>
