@@ -252,16 +252,17 @@ export default function CourseFormModal({ mode, initialData, categories, onClose
   };
 
   const handleTagClick = tag => {
-    if (tag.isPublished) { toggleTag(tag.id); return; }
-
-    // Allow deselecting unpublished tags that are already selected
-    const isSelected = form.tagIds.includes(tag.id);
-    if (isSelected) {
-      toggleTag(tag.id);
-      return;
+    if (duplicateTagCandidate?.id === tag.id) {
+      if (!form.tagIds.includes(tag.id)) {
+        handleConfirmUseDuplicateTag();
+        return;
+      }
     }
+    toggleTag(tag.id);
+  };
 
-    // For unselected unpublished tags, show verification modal
+  const handleOpenVerifyModal = (tag, e) => {
+    if (e) e.stopPropagation();
     if (duplicateTagCandidate?.id === tag.id) return;
     if (tag.publishRequest?.status === 'Pending') return;
     setVerifyTag(tag); setVerifyNote(''); setVerifyError('');
@@ -502,20 +503,40 @@ export default function CourseFormModal({ mode, initialData, categories, onClose
                     else if (isUnpubNone) cls += ` ${styles.tagBtnUnpub}`;
                     else if (tag.isFromCourse && !tag.isPublished) cls += ` ${styles.tagBtnFromCourse}`;
                     const titleText = isDuplicate ? 'Tag trùng code với ô nhập — nhấn "Dùng tag này" để thêm'
-                      : isPending ? 'Đang chờ duyệt — không thể chọn'
-                        : isRejected ? (isSelected ? 'Bị từ chối — nhấn để bỏ chọn hoặc gửi lại yêu cầu' : 'Bị từ chối — nhấn để gửi lại yêu cầu')
-                          : isUnpubNone ? (isSelected ? 'Chưa duyệt — nhấn để bỏ chọn hoặc gửi yêu cầu xét duyệt' : 'Chưa duyệt — nhấn để gửi yêu cầu xét duyệt')
-                            : tag.isFromCourse ? 'Tag từ khóa học (có thể chọn/bỏ chọn)'
-                              : undefined;
+                      : isPending ? 'Đang chờ admin duyệt (nhấn để chọn / bỏ chọn)'
+                        : isRejected ? 'Bị từ chối (nhấn biểu tượng X để gửi lại yêu cầu, nhấn tên tag để chọn/bỏ chọn)'
+                          : isUnpubNone ? 'Chưa duyệt (nhấn biểu tượng ! để gửi yêu cầu xét duyệt, nhấn tên tag để chọn/bỏ chọn)'
+                            : tag.isFromCourse ? 'Tag từ khóa học (nhấn để chọn/bỏ chọn)'
+                              : 'Nhấn để chọn / bỏ chọn tag';
                     return (
                       <div key={tag.id} className={styles.tagBtnWrap}>
                         <button type="button" className={cls} onClick={() => handleTagClick(tag)}
-                          title={titleText} aria-disabled={isPending || (isDuplicate && !isSelected)}>
+                          title={titleText} aria-disabled={isDuplicate && !isSelected}>
                           {tag.name}
                           {isDuplicate && <span className={styles.tagStatusIcon}><i className="fas fa-link" /></span>}
-                          {!isDuplicate && isPending && <span className={styles.tagStatusIcon}><i className="fas fa-clock" /></span>}
-                          {!isDuplicate && isRejected && <span className={styles.tagStatusIcon}><i className="fas fa-times-circle" /></span>}
-                          {!isDuplicate && isUnpubNone && <span className={styles.tagStatusIcon}><i className="fas fa-exclamation-circle" /></span>}
+                          {!isDuplicate && isPending && (
+                            <span className={styles.tagStatusIcon} title="Đang chờ admin xét duyệt">
+                              <i className="fas fa-clock" />
+                            </span>
+                          )}
+                          {!isDuplicate && isRejected && (
+                            <span
+                              className={`${styles.tagStatusIcon} ${styles.tagStatusIconClickable}`}
+                              onClick={(e) => handleOpenVerifyModal(tag, e)}
+                              title="Nhấn vào biểu tượng này để gửi lại yêu cầu xét duyệt cho Admin"
+                            >
+                              <i className="fas fa-times-circle" />
+                            </span>
+                          )}
+                          {!isDuplicate && isUnpubNone && (
+                            <span
+                              className={`${styles.tagStatusIcon} ${styles.tagStatusIconClickable}`}
+                              onClick={(e) => handleOpenVerifyModal(tag, e)}
+                              title="Nhấn vào biểu tượng này để gửi yêu cầu xét duyệt cho Admin"
+                            >
+                              <i className="fas fa-exclamation-circle" />
+                            </span>
+                          )}
                         </button>
                         {!isDuplicate && isPending && (
                           <button type="button" className={styles.tagActionBtn}
