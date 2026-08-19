@@ -64,7 +64,7 @@ function RecommendCard({ course, onClick }) {
 function LevelBadge({ level }) {
   const map = {
     Beginner: { label: 'Mới bắt đầu', cls: styles.lvBegin },
-    Intermediate: { label: 'cơ bản', cls: styles.lvInter },
+    Intermediate: { label: 'Cơ bản', cls: styles.lvInter },
     Advanced: { label: 'Nâng cao', cls: styles.lvAdv },
   };
   const info = map[level] ?? { label: level, cls: '' };
