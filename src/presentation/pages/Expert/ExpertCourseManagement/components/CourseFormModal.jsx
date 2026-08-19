@@ -49,36 +49,16 @@ export default function CourseFormModal({ mode, initialData, categories, onClose
   useEffect(() => {
     setTagsLoading(true);
 
-    // Always get public and personal tags
-    const baseRequests = [
-      api.get('/tags'),       // Public tags
-      api.get('/tags/me')     // Personal tags
-    ];
-
-    Promise.all(baseRequests)
-      .then(([pubRes, myRes]) => {
+    // Only get public tags (removed personal tags)
+    api.get('/tags')
+      .then((pubRes) => {
         const pub = pubRes.data.success ? (pubRes.data.data ?? []) : [];
-        const my = myRes.data.success ? (myRes.data.data ?? []) : [];
-
         const pubNorm = pub.map(t => ({ ...t, isPublished: true }));
         const merged = [...pubNorm];
 
-        // Add personal tags if not already in merged
-        my.forEach(t => {
-          if (!merged.find(p => p.id === t.id)) {
-            // Mark personal tags to identify them later
-            merged.push({ ...t, isPersonalTag: true });
-          } else {
-            // If tag already exists in merged, mark it as personal
-            const existingTag = merged.find(p => p.id === t.id);
-            if (existingTag) {
-              existingTag.isPersonalTag = true;
-            }
-          }
-        });
-
-        // If editing a course, get course details to extract tags
-        if (isEdit && initialData?.id) {
+        // Get course details to extract tags (for both create and edit mode)
+        // In create mode, initialData might have tagIds from a duplicated course or other source
+        if (initialData?.id) {
           api.get(`/courses/${initialData.id}`)
             .then((courseRes) => {
               if (courseRes.data.success && courseRes.data.data?.tags) {
@@ -118,7 +98,7 @@ export default function CourseFormModal({ mode, initialData, categories, onClose
       .catch(() => {
         setTagsLoading(false);
       });
-  }, [isEdit, initialData?.id]);
+  }, [initialData?.id]);
 
   const clearFieldError = field => setFieldErrors(prev => ({ ...prev, [field]: '' }));
 
@@ -330,7 +310,11 @@ export default function CourseFormModal({ mode, initialData, categories, onClose
 
   const handleSubmit = async e => {
     e.preventDefault();
-    if (!validateForm()) return;
+    const errs = validate();
+    if (Object.keys(errs).length > 0) {
+      setFieldErrors(errs);
+      return;
+    }
     if (codeDuplicateRef.current) {
       setFieldErrors(prev => ({ ...prev, newTagCode: 'Code tag đã tồn tại. Hãy đổi code khác hoặc bấm "Dùng tag này".' }));
       return;
@@ -532,11 +516,6 @@ export default function CourseFormModal({ mode, initialData, categories, onClose
                           {!isDuplicate && isPending && <span className={styles.tagStatusIcon}><i className="fas fa-clock" /></span>}
                           {!isDuplicate && isRejected && <span className={styles.tagStatusIcon}><i className="fas fa-times-circle" /></span>}
                           {!isDuplicate && isUnpubNone && <span className={styles.tagStatusIcon}><i className="fas fa-exclamation-circle" /></span>}
-                          {!isDuplicate && tag.isFromCourse && !tag.isPublished && (
-                            <span className={styles.tagStatusIcon} title="Tag từ khóa học">
-                              <i className="fas fa-graduation-cap" />
-                            </span>
-                          )}
                         </button>
                         {!isDuplicate && isPending && (
                           <button type="button" className={styles.tagActionBtn}
@@ -616,20 +595,6 @@ export default function CourseFormModal({ mode, initialData, categories, onClose
             </div>
             <div className={styles.modalFooter}>
               <button className={styles.btnCancel} onClick={() => setVerifyTag(null)}>Hủy</button>
-
-              {/* Add to course button - show for unpublished tags that are not selected */}
-              {verifyTag && !form.tagIds.includes(verifyTag.id) && !verifyTag.isPublished && (
-                <button
-                  type="button"
-                  className={styles.btnAddToCourse}
-                  onClick={() => {
-                    toggleTag(verifyTag.id);
-                    setVerifyTag(null);
-                  }}
-                >
-                  <i className="fas fa-plus" /> Thêm vào khóa học
-                </button>
-              )}
 
               <button className={styles.btnSave} onClick={handleSendVerification} disabled={verifySaving}>
                 {verifySaving ? <><span className={styles.spinner} /> Đang gửi...</>
