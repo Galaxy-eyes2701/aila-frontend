@@ -4,7 +4,7 @@ import styles from "./OnboardingModal.module.css";
 
 /* ── Dữ liệu tĩnh cho Step 1 & 2 (khớp enum backend) ─────────────────────── */
 const LEARNER_TYPES = [
-  { value: "Student", label: "Sinh viên", icon: "🎓" },
+  { value: "Student", label: "Học sinh, Sinh viên", icon: "🎓" },
   { value: "OfficeWorker", label: "Nhân viên văn phòng", icon: "💼" },
   { value: "Freelancer", label: "Freelancer", icon: "🧑‍💻" },
   { value: "BusinessOwner", label: "Chủ doanh nghiệp", icon: "🏢" },
