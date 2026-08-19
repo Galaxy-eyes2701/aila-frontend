@@ -592,7 +592,7 @@ export default function CourseFormModal({ mode, initialData, categories, onClose
               )}
               <div className={styles.infoBoxBlue}>
                 <i className="fas fa-info-circle" />
-                Sau khi được admin duyệt, tag sẽ được công khai và có thể gắn vào khóa học.
+                Sau khi được admin duyệt, tag sẽ được công khai.
               </div>
 
               {/* Show if tag is already selected */}
