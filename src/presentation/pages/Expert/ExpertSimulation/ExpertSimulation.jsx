@@ -287,11 +287,20 @@ export default function ExpertSimulation() {
             <p className={styles.scenarioText}>{material.scenario}</p>
             <div className={styles.scenarioMeta}>
               <span className={styles.metaTag}>
-                <i className="fas fa-bullseye" /> {material.learnerTask}
-              </span>
-              <span className={styles.metaTag}>
                 <i className="fas fa-comment-dots" /> Tối đa {maxTurns} lượt
               </span>
+            </div>
+          </div>
+        )}
+
+        {/* ── Task card ── */}
+        {material && material.learnerTask && (
+          <div className={styles.taskCard}>
+            <div className={styles.taskCardHeader}>
+              <i className="fas fa-bullseye" />Nhiệm vụ của học viên:
+            </div>
+            <div className={styles.taskCardBody}>
+              {material.learnerTask}
             </div>
           </div>
         )}
@@ -405,7 +414,7 @@ export default function ExpertSimulation() {
                     setBanner(null);
                     // auto-grow
                     e.target.style.height = "auto";
-                    e.target.style.height = Math.min(e.target.scrollHeight, 120) + "px";
+                    e.target.style.height = Math.min(e.target.scrollHeight, 220) + "px";
                   }}
                   onKeyDown={handleKeyDown}
                   placeholder={atLimit ? "Đã đạt số lượt tối đa" : "Nhập tin nhắn... (Enter để gửi, Shift+Enter xuống dòng)"}
