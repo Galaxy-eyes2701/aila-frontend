@@ -129,8 +129,15 @@ export default function ModuleManagement() {
   const handleSubmit = async (event) => {
     event.preventDefault();
     const title = form.title.trim();
+    const description = form.description.trim();
+
     if (!title) {
       setFormError("Tiêu đề học phần không được để trống.");
+      return;
+    }
+
+    if (!description) {
+      setFormError("Mô tả học phần không được để trống.");
       return;
     }
 
@@ -139,7 +146,7 @@ export default function ModuleManagement() {
     const mode = modal.mode;
     const payload = {
       title,
-      description: form.description.trim() || null,
+      description,
       orderIndex:
         mode === "create" ? modules.length + 1 : modal.module.orderIndex,
     };
