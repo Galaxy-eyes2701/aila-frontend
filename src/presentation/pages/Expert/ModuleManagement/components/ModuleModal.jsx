@@ -44,7 +44,7 @@ export default function ModuleModal({
           </label>
 
           <label className={styles.formGroup}>
-            <span>Mô tả *</span>
+            <span>Mô tả</span>
             <textarea
               name="description"
               value={form.description}
