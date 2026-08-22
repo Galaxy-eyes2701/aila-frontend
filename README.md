@@ -10,7 +10,7 @@ Giao diện web của nền tảng học AI **AILA – Bình Dân Học AI**, x�
 
 | Nhóm | Nội dung sử dụng được |
 |---|---|
-| Khách vãng lai | Trang chủ, danh sách và chi tiết khóa học, bài viết blog, hồ sơ chuyên gia, bảng giá gói đăng ký |
+| Khách | Trang chủ, danh sách và chi tiết khóa học, bài viết blog, hồ sơ chuyên gia, bảng giá gói đăng ký |
 | Đăng nhập | Cửa sổ đăng nhập và đăng ký, đăng nhập bằng Google, quên mật khẩu qua ba bước, khảo sát ban đầu sau khi đăng ký |
 | Người học | Màn hình học tập, làm bài trắc nghiệm và xem kết quả, luyện tập với AI, trợ lý hỏi đáp trong khóa học, hồ sơ học tập, mua và theo dõi gói đăng ký, báo cáo khóa học, gửi bài nhờ chuyên gia đánh giá |
 | Chuyên gia | Trang tổng quan, quản lý khóa học, học phần và học liệu, nhập câu hỏi từ file, chạy thử bài luyện tập AI, chấm bài đánh giá, xem thống kê tài nguyên AI đã dùng |
@@ -23,7 +23,7 @@ Giao diện web của nền tảng học AI **AILA – Bình Dân Học AI**, x�
 | Hạng mục | Công nghệ |
 |---|---|
 | Thư viện giao diện | React 19 |
-| Ngôn ngữ | JavaScript (JSX), không dùng TypeScript |
+| Ngôn ngữ | JavaScript (JSX)|
 | Công cụ build | Vite |
 | Điều hướng | React Router |
 | Gọi API | Axios |
