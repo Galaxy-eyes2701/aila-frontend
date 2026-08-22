@@ -4,12 +4,12 @@ import api from '@services/api';
 import styles from './PublicExpertProfile.module.css';
 
 import { DEFAULT_AVATAR } from '@infrastructure/constants/defaultAvatar';
-const FALLBACK_THUMB  = 'https://images.unsplash.com/photo-1677442135703-1787eea5ce01?w=480&q=75';
+const FALLBACK_THUMB = 'https://images.unsplash.com/photo-1677442135703-1787eea5ce01?w=480&q=75';
 
 const LEVEL_LABELS = {
-  Beginner:     'Mới bắt đầu',
-  Intermediate: 'Trung cấp',
-  Advanced:     'Nâng cao',
+  Beginner: 'Mới bắt đầu',
+  Intermediate: 'Cơ bản',
+  Advanced: 'Nâng cao',
 };
 
 function ExpertCourseCard({ course, onClick }) {
@@ -48,10 +48,10 @@ export default function PublicExpertProfile() {
   const { expertId } = useParams();
   const navigate = useNavigate();
 
-  const [profile,  setProfile]  = useState(null);
-  const [loading,  setLoading]  = useState(true);
+  const [profile, setProfile] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
-  const [error,    setError]    = useState('');
+  const [error, setError] = useState('');
 
   useEffect(() => {
     setLoading(true);
