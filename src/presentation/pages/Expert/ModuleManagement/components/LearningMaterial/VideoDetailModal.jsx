@@ -49,11 +49,21 @@ export default function VideoDetailModal({
     }
   }
 
+  function isContentEmpty(html) {
+    if (!html) return true;
+    return html.replace(/<[^>]*>/g, "").replace(/&nbsp;/gi, " ").trim().length === 0;
+  }
+
   async function handleSubmit(e) {
     e.preventDefault();
 
     if (!videoUrl.trim()) {
-      setError("Video URL không được để trống.");
+      setError("URL của video không được để trống.");
+      return;
+    }
+
+    if (isContentEmpty(content)) {
+      setError("Tóm tắt video không được để trống.");
       return;
     }
 
@@ -114,7 +124,7 @@ export default function VideoDetailModal({
             </div>
 
             <div className={styles.formGroup}>
-              <label>Đường dẫn Video</label>
+              <label>Đường dẫn Video *</label>
 
               <input
                 value={videoUrl}
@@ -135,7 +145,7 @@ export default function VideoDetailModal({
             </div>
 
             <div className={styles.formGroup}>
-              <label>Mô tả</label>
+              <label>Tóm tắt / Mô tả video *</label>
 
               <RichTextEditor
                 value={content}

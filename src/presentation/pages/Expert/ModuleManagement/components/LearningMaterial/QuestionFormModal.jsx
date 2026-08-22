@@ -120,18 +120,20 @@ export default function QuestionFormModal({
   function validate() {
     if (!content.trim()) return "Nội dung câu hỏi không được để trống.";
 
+    if (!questionType) return "Vui lòng chọn loại câu hỏi.";
+
     if (options.length < 2) return "Cần ít nhất 2 đáp án.";
 
     if (options.some((o) => !o.content.trim()))
-      return "Đáp án không được để trống.";
+      return "Nội dung các đáp án không được để trống.";
 
     const correctCount = options.filter((o) => o.isCorrect).length;
 
     if (questionType === "SingleChoice" && correctCount !== 1)
-      return "Câu hỏi một đáp án phải có đúng một đáp án đúng.";
+      return "Câu hỏi một đáp án phải chọn đúng 1 đáp án đúng.";
 
     if (questionType === "MultipleChoice" && correctCount === 0)
-      return "Câu hỏi nhiều đáp án phải có ít nhất một đáp án đúng.";
+      return "Câu hỏi nhiều đáp án phải chọn ít nhất 1 đáp án đúng.";
 
     return "";
   }
@@ -271,7 +273,7 @@ export default function QuestionFormModal({
         ) : (
           <form onSubmit={handleSubmit}>
             <div className={styles.formGroup}>
-              <label>Nội dung câu hỏi</label>
+              <label>Nội dung câu hỏi *</label>
               <textarea
                 rows={3}
                 value={content}
@@ -281,7 +283,7 @@ export default function QuestionFormModal({
             </div>
 
             <div className={styles.formGroup}>
-              <label>Loại câu hỏi</label>
+              <label>Loại câu hỏi *</label>
               <div className={quizStyles.typeToggle}>
                 <div
                   className={`${quizStyles.typeOption} ${
@@ -308,7 +310,7 @@ export default function QuestionFormModal({
             </div>
 
             <div className={styles.formGroup}>
-              <label>Đáp án</label>
+              <label>Danh sách đáp án *</label>
 
               <div className={quizStyles.answerList}>
                 {options.map((opt, index) => (

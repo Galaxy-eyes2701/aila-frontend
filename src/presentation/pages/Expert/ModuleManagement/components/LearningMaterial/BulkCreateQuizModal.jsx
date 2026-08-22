@@ -120,8 +120,14 @@ export default function BulkCreateQuizModal({
   }
 
   function validate() {
+    if (timeLimitMinutes === "" || timeLimitMinutes === null || timeLimitMinutes === undefined || String(timeLimitMinutes).trim() === "")
+      return "Thời gian làm bài không được để trống.";
+
     if (Number(timeLimitMinutes) <= 0)
       return "Thời gian làm bài phải lớn hơn 0 phút.";
+
+    if (passingScore === "" || passingScore === null || passingScore === undefined || String(passingScore).trim() === "")
+      return "Điểm đạt không được để trống.";
 
     if (Number(passingScore) < 0 || Number(passingScore) > 100)
       return "Điểm đạt phải nằm trong khoảng từ 0 đến 100.";
@@ -135,17 +141,18 @@ export default function BulkCreateQuizModal({
       if (!q.content.trim()) return `${label}: nội dung không được để trống.`;
       if (q.content.trim().length > 2000)
         return `${label}: nội dung không được vượt quá 2000 ký tự.`;
+      if (!q.questionType) return `${label}: loại câu hỏi không được để trống.`;
       if (q.answers.length < 2) return `${label}: cần ít nhất 2 đáp án.`;
       if (q.answers.some((a) => !a.content.trim()))
-        return `${label}: đáp án không được để trống.`;
+        return `${label}: nội dung các đáp án không được để trống.`;
       if (q.answers.some((a) => a.content.trim().length > 1000))
         return `${label}: đáp án không được vượt quá 1000 ký tự.`;
 
       const correctCount = q.answers.filter((a) => a.isCorrect).length;
       if (q.questionType === "SingleChoice" && correctCount !== 1)
-        return `${label}: câu hỏi một đáp án phải có đúng một đáp án đúng.`;
+        return `${label}: câu hỏi một đáp án phải chọn đúng 1 đáp án đúng.`;
       if (q.questionType === "MultipleChoice" && correctCount === 0)
-        return `${label}: câu hỏi nhiều đáp án phải có ít nhất một đáp án đúng.`;
+        return `${label}: câu hỏi nhiều đáp án phải chọn ít nhất 1 đáp án đúng.`;
     }
 
     return "";
@@ -211,7 +218,7 @@ export default function BulkCreateQuizModal({
         <form onSubmit={handleSubmit}>
           <div className={quizStyles.settingsGrid}>
             <div className={styles.formGroup}>
-              <label>Thời gian làm bài (phút)</label>
+              <label>Thời gian làm bài (phút) *</label>
               <input
                 type="number"
                 min="1"
@@ -220,7 +227,7 @@ export default function BulkCreateQuizModal({
               />
             </div>
             <div className={styles.formGroup}>
-              <label>Điểm đạt (%)</label>
+              <label>Điểm đạt (%) *</label>
               <input
                 type="number"
                 min="0"

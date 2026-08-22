@@ -51,14 +51,14 @@ export default function DocumentDetailModal({
 
   function isContentEmpty(html) {
     if (!html) return true;
-    return html.replace(/<[^>]*>/g, "").trim().length === 0;
+    return html.replace(/<[^>]*>/g, "").replace(/&nbsp;/gi, " ").trim().length === 0;
   }
 
   async function handleSubmit(e) {
     e.preventDefault();
 
     if (isContentEmpty(content)) {
-      setError("Nội dung không được để trống.");
+      setError("Nội dung tài liệu không được để trống.");
       return;
     }
 
@@ -111,7 +111,7 @@ export default function DocumentDetailModal({
             </div>
 
             <div className={styles.formGroup}>
-              <label>Nội dung</label>
+              <label>Nội dung *</label>
 
               <RichTextEditor
                 value={content}

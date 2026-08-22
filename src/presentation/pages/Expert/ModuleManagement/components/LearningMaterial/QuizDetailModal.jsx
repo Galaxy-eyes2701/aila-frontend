@@ -87,8 +87,18 @@ export default function QuizDetailModal({
   async function handleSaveSettings(e) {
     e.preventDefault();
 
+    if (timeLimitMinutes === "" || timeLimitMinutes === null || timeLimitMinutes === undefined || String(timeLimitMinutes).trim() === "") {
+      setError("Thời gian làm bài không được để trống.");
+      return;
+    }
+
     if (Number(timeLimitMinutes) <= 0) {
       setError("Thời gian làm bài phải lớn hơn 0 phút.");
+      return;
+    }
+
+    if (passingScore === "" || passingScore === null || passingScore === undefined || String(passingScore).trim() === "") {
+      setError("Điểm đạt không được để trống.");
       return;
     }
 
@@ -210,7 +220,7 @@ export default function QuizDetailModal({
             <form onSubmit={handleSaveSettings}>
               <div className={quizStyles.settingsGrid}>
                 <div className={styles.formGroup}>
-                  <label>Thời gian làm bài (phút)</label>
+                  <label>Thời gian làm bài (phút) *</label>
                   <input
                     type="number"
                     min="1"
@@ -220,7 +230,7 @@ export default function QuizDetailModal({
                 </div>
 
                 <div className={styles.formGroup}>
-                  <label>Điểm đạt (%)</label>
+                  <label>Điểm đạt (%) *</label>
                   <input
                     type="number"
                     min="0"
