@@ -6,6 +6,11 @@ export const getVideoDetail = async (materialId) => {
     return normalizeApiResponse(response.data);
 };
 
+export const createVideoMaterial = async (payload) => {
+    const response = await api.post("/video-materials", payload);
+    return normalizeApiResponse(response.data);
+};
+
 export const updateVideoDetail = async (materialId, payload) => {
     const response = await api.put(`/video-materials/${materialId}`, payload);
     return normalizeApiResponse(response.data);

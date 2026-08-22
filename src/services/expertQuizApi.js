@@ -6,6 +6,11 @@ export const getQuizDetail = async (materialId) => {
   return normalizeApiResponse(response.data);
 };
 
+export const createQuizMaterial = async (payload) => {
+  const response = await api.post("/quiz-materials", payload);
+  return normalizeApiResponse(response.data);
+};
+
 export const updateQuizDetail = async (materialId, payload) => {
   const response = await api.put(`/quiz-materials/${materialId}`, payload);
   return normalizeApiResponse(response.data);

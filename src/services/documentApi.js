@@ -6,6 +6,11 @@ export const getDocumentDetail = async (materialId) => {
   return normalizeApiResponse(response.data);
 };
 
+export const createDocumentMaterial = async (payload) => {
+  const response = await api.post("/document-materials", payload);
+  return normalizeApiResponse(response.data);
+};
+
 export const updateDocumentDetail = async (materialId, payload) => {
   const response = await api.put(`/document-materials/${materialId}`, payload);
   return normalizeApiResponse(response.data);

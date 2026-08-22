@@ -420,13 +420,16 @@ export default function ModuleManagement() {
             setMaterialModal(false);
             setSelectedModule(null);
           }}
-          onCreated={(material) => {
+          onCreated={(material, materialType) => {
             setMaterialModal(false);
             setSelectedModule(null);
-            setMaterialDetailModal({
-              type: getMaterialModalType(material),
-              material,
-            });
+            if (materialType === "Quiz") {
+              const matId = material?.materialId || material?.id;
+              setMaterialDetailModal({
+                type: "Quiz",
+                material: { id: matId, title: material?.title },
+              });
+            }
             fetchModules();
           }}
           onCreateAiPractice={({ title }) => {
