@@ -129,8 +129,17 @@ export default function CourseFormModal({ mode, initialData, categories, onClose
 
     if (form.thumbnailUrl.trim() && !isValidUrl(form.thumbnailUrl.trim()))
       errs.thumbnailUrl = 'URL ảnh bìa không hợp lệ. Phải bắt đầu bằng https://.';
-    if (form.description.length > 5000)
+
+    const descText = form.description
+      .replace(/<[^>]*>/g, '')
+      .replace(/&nbsp;/gi, ' ')
+      .trim();
+
+    if (!descText) {
+      errs.description = 'Mô tả khóa học không được để trống.';
+    } else if (form.description.length > 5000) {
       errs.description = `Mô tả không được vượt quá 5000 ký tự.`;
+    }
     return errs;
   };
 
@@ -420,7 +429,7 @@ export default function CourseFormModal({ mode, initialData, categories, onClose
 
             {/* Description */}
             <div className={styles.formGroup}>
-              <label className={styles.formLabel}><i className="fas fa-align-left" /> Mô tả khóa học</label>
+              <label className={styles.formLabel}><i className="fas fa-align-left" /> Mô tả khóa học *</label>
               <RichTextEditor
                 value={form.description}
                 onChange={(content) => {
